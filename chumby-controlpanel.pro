@@ -9,8 +9,18 @@ QT       += core gui
 TARGET = chumby-controlpanel
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -fPIC -frtti
+QMAKE_LFLAGS += -rdynamic
 
 SOURCES += main.cpp\
-        controlpanel.cpp
+        controlpanel.cpp \
+    pluginmanager.cpp \
+    dllmanager.cpp \
+    plugin.cpp
 
-HEADERS  += controlpanel.h
+HEADERS  += controlpanel.h \
+    pluginmanager.h \
+    plugin.h \
+    dllmanager.h
+
+LIBS += -ldl
