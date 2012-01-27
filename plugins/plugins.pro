@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 TEMPLATE = subdirs
-CONFIG += rtti
 
-SUBDIRS += controlpanel \
-	plugins
+SUBDIRS += simpletestplugin \
+	complextestplugin \
+	dispvaluesplugin \
+	netconfigplugin

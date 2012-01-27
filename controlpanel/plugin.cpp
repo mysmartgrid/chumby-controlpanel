@@ -8,13 +8,13 @@
 // class has been created or destroyed
 //
 
-Plugin::Plugin()
+namespace Msg
 {
-   std::cout << "PlugIn Created" << std::endl;
-}
+    Plugin::Plugin()
+    {
+    }
 
-Plugin::~Plugin()
-{
-   std::cout << "PlugIn Destroyed" << std::endl;
+    Plugin::~Plugin()
+    {
+    }
 }
-
