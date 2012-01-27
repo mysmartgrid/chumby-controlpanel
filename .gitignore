@@ -1,0 +1,8 @@
+#ignore plugins
+plugins/**/*
+
+#ignore object files generated while building
+*.o
+
+#ignore build folder
+build/*
