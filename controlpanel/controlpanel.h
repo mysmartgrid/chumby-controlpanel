@@ -4,8 +4,9 @@
 #include <QtGui/QDialog>
 #include <QtGui/QListWidget>
 #include <QtGui/QPushButton>
+#include <QtGui/QLabel>
 
-#include <QtGui/QHBoxLayout>
+#include <QtGui/QVBoxLayout>
 #include <QtGui/QStackedWidget>
 
 #include <QKeyEvent>
@@ -32,6 +33,8 @@ namespace Msg
         void keyPressEvent(QKeyEvent *event);
 
     private:
+        QVBoxLayout* layout;
+        QHBoxLayout* header;
         QListWidget* list;
         QPushButton* button;
         QStackedWidget* stack;

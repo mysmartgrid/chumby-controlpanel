@@ -9,4 +9,5 @@ TEMPLATE = subdirs
 SUBDIRS += simpletestplugin \
 	complextestplugin \
 	dispvaluesplugin \
-	netconfigplugin
+	netconfigplugin \
+	chumbykbddriver

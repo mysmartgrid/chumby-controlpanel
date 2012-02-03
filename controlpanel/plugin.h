@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QtGui/QWidget>
 #include <QtCore/QObject>
+#include <QtGui/QIcon>
 
 namespace Msg
 {
@@ -26,6 +27,10 @@ namespace Msg
 
             int getPluginVersion() const {
                 return m_pluginVersion;
+            }
+
+            virtual QIcon* getIcon() {
+                return new QIcon(":/icon/resources/plugin.png");
             }
 
             virtual std::string init() = 0;

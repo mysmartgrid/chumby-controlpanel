@@ -3,6 +3,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QDirIterator>
 
+#include <QDebug>
+
 namespace Msg
 {
     Controlpanel::Controlpanel(QWidget *parent)
@@ -11,23 +13,21 @@ namespace Msg
         this->grabKeyboard();
         plugins = QMap< QString, QPair<DLLFactory<PluginFactory>*, Plugin*> >();
         this->getPlugins();
+        layout = new QVBoxLayout( this );
+        header = new QHBoxLayout();
+        layout->addLayout( header );
+        header->addWidget( new QLabel(), 10 );
         list = new QListWidget();
+        layout->addWidget( list );
+        list->setGridSize(QSize(110, 65));
+        list->setViewMode(QListWidget::IconMode);
+        list->setMovement(QListWidget::Static);
         for ( QMap<QString, QPair<DLLFactory<PluginFactory>*, Plugin*> >::iterator i = plugins.begin(); i != plugins.end(); i++ )
         {
-            list->addItem(new QListWidgetItem(i.key()));
+            list->addItem(new QListWidgetItem(*(i.value().second->getIcon()), i.key()));
         }
-        button = new QPushButton("foobar", this);
+        connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
-        QHBoxLayout* mainlayout = new QHBoxLayout( this );
-        mainlayout->addWidget(list);
-        mainlayout->addWidget(button);
-
-        QVBoxLayout* foobar = new QVBoxLayout();
-        mainlayout->addLayout(foobar);
-        stack = new QStackedWidget();
-        foobar->addWidget(stack);
-
-        connect(button, SIGNAL(clicked()), this, SLOT(startPlugin()));
     }
 
     Controlpanel::~Controlpanel()
@@ -109,7 +109,22 @@ namespace Msg
 
     void Controlpanel::keyPressEvent(QKeyEvent *event)
     {
-        std::cout << "key pressed: " << event->key() << "(" << event->text().toStdString() << ")" << std::endl;
-        this->stopPlugin();
+        qDebug() << "key pressed: "
+                 << event->key()
+                 << "("
+                 << event->text()
+                 << ")";
+        switch ( event->key() )
+        {
+            case 28:
+                this->stopPlugin();
+                break;
+            case 8:
+                // volume
+                std::cout << "adjusting volume" << std::endl;
+                this->setMasterVolume(100);
+                break;
+        }
+    }
     }
 }

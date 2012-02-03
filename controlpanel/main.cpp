@@ -17,6 +17,8 @@ class myApplication : public QApplication
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setOverrideCursor( QCursor( Qt::BlankCursor ) );
+
     Msg::Controlpanel w;
     w.showFullScreen();
 

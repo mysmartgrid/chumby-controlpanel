@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>resources/plugin.png</file>
+        <file>resources/wifi-medium.png</file>
+        <file>resources/wifi-disconnected.png</file>
+        <file>resources/wifi-high.png</file>
+        <file>resources/wifi-low.png</file>
+    </qresource>
+</RCC>
