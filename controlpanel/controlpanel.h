@@ -27,6 +27,7 @@ namespace Msg
     public slots:
         void startPlugin();
         void stopPlugin();
+        void updateClock();
 
     protected:
         void getPlugins();
@@ -35,6 +36,7 @@ namespace Msg
     private:
         QVBoxLayout* layout;
         QHBoxLayout* header;
+        QLabel* clock;
         QListWidget* list;
         QPushButton* button;
         QStackedWidget* stack;

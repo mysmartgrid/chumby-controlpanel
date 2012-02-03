@@ -3,6 +3,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QDirIterator>
 
+#include <QtCore/QTimer>
+#include <QtCore/QTime>
+
 #include <QDebug>
 
 namespace Msg
@@ -17,6 +20,12 @@ namespace Msg
         header = new QHBoxLayout();
         layout->addLayout( header );
         header->addWidget( new QLabel(), 10 );
+        clock = new QLabel();
+        header->addWidget( clock );
+        QTimer* timer = new QTimer( this );
+        this->updateClock();
+        connect( timer, SIGNAL( timeout() ), this, SLOT( updateClock() ) );
+        timer->start( 1000 );
         list = new QListWidget();
         layout->addWidget( list );
         list->setGridSize(QSize(110, 65));
@@ -105,6 +114,15 @@ namespace Msg
                 }
             }
         }
+    }
+
+    void Controlpanel::updateClock()
+    {
+        QTime time = QTime::currentTime();
+        QString text = time.toString("hh:mm");
+        if ((time.second() % 2) == 0)
+                 text[2] = ' ';
+        clock->setText( text );
     }
 
     void Controlpanel::keyPressEvent(QKeyEvent *event)
