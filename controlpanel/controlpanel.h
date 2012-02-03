@@ -32,6 +32,7 @@ namespace Msg
     protected:
         void getPlugins();
         void keyPressEvent(QKeyEvent *event);
+        void setMasterVolume(long int volume);
 
     private:
         QVBoxLayout* layout;

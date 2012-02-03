@@ -19,7 +19,7 @@ HEADERS  += controlpanel.h \
     plugin.h \
     dllmanager.h
 
-LIBS += -ldl -liw
+LIBS += -ldl -liw -lasound
 
 RESOURCES += \
     controlpanel.qrc
