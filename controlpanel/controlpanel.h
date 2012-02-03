@@ -37,10 +37,13 @@ namespace Msg
         QVBoxLayout* layout;
         QHBoxLayout* header;
         QLabel* clock;
+        QLabel* wifi;
         QListWidget* list;
         QPushButton* button;
         QStackedWidget* stack;
         QMap< QString, QPair<DLLFactory<PluginFactory>*, Plugin*> > plugins;
+
+        int sock_iwconfig;
     };
 }
 

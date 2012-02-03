@@ -19,4 +19,7 @@ HEADERS  += controlpanel.h \
     plugin.h \
     dllmanager.h
 
-LIBS += -ldl
+LIBS += -ldl -liw
+
+RESOURCES += \
+    controlpanel.qrc

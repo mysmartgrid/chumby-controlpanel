@@ -8,6 +8,9 @@
 
 #include <QDebug>
 
+#include <iwlib.h>
+
+
 namespace Msg
 {
     Controlpanel::Controlpanel(QWidget *parent)
@@ -22,10 +25,12 @@ namespace Msg
         header->addWidget( new QLabel(), 10 );
         clock = new QLabel();
         header->addWidget( clock );
+        wifi = new QLabel();
         QTimer* timer = new QTimer( this );
         this->updateClock();
         connect( timer, SIGNAL( timeout() ), this, SLOT( updateClock() ) );
         timer->start( 1000 );
+        header->addWidget(wifi);
         list = new QListWidget();
         layout->addWidget( list );
         list->setGridSize(QSize(110, 65));
@@ -37,6 +42,7 @@ namespace Msg
         }
         connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
+        sock_iwconfig = ::iw_sockets_open();
     }
 
     Controlpanel::~Controlpanel()
@@ -123,6 +129,25 @@ namespace Msg
         if ((time.second() % 2) == 0)
                  text[2] = ' ';
         clock->setText( text );
+
+
+        iwstats stats;
+        QIcon wicon;
+        if (iw_get_stats(sock_iwconfig, "wlan0", &stats, NULL, 0) >= 0 )
+        {
+            unsigned int quality = stats.qual.qual;
+            qDebug() << "Stats: " << quality;
+            if ( quality >= 60 )
+                wicon = QIcon(":/icon/resources/wifi-high.png");
+            else if ( quality >= 40 )
+                wicon = QIcon(":/icon/resources/wifi-medium.png");
+            else
+                wicon = QIcon(":/icon/resources/wifi-low.png");
+        } else {
+            qDebug() << "retrieving iw stats failed!";
+            wicon = QIcon(":/icon/resources/wifi-disconnected.png");
+        }
+        wifi->setPixmap( wicon.pixmap(15) );
     }
 
     void Controlpanel::keyPressEvent(QKeyEvent *event)
