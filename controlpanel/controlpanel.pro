@@ -13,11 +13,13 @@ QMAKE_CXXFLAGS += -fPIC
 SOURCES += main.cpp\
     controlpanel.cpp \
     dllmanager.cpp \
-    plugin.cpp
+    plugin.cpp \
+    musiccontrol.cpp
 
 HEADERS  += controlpanel.h \
     plugin.h \
-    dllmanager.h
+    dllmanager.h \
+    musiccontrol.h
 
 LIBS += -ldl -liw -lasound
 

@@ -13,6 +13,7 @@
 
 #include "dllmanager.h"
 #include "plugin.h"
+#include "musiccontrol.h"
 
 namespace Msg
 {
@@ -32,7 +33,6 @@ namespace Msg
     protected:
         void getPlugins();
         void keyPressEvent(QKeyEvent *event);
-        void setMasterVolume(long int volume);
 
     private:
         QVBoxLayout* layout;
@@ -45,6 +45,8 @@ namespace Msg
         QMap< QString, QPair<DLLFactory<PluginFactory>*, Plugin*> > plugins;
 
         int sock_iwconfig;
+
+        MusicControl mc;
     };
 }
 
