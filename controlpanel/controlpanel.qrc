@@ -1,9 +1,17 @@
 <RCC>
     <qresource prefix="/icon">
         <file>resources/plugin.png</file>
-        <file>resources/wifi-medium.png</file>
-        <file>resources/wifi-disconnected.png</file>
-        <file>resources/wifi-high.png</file>
-        <file>resources/wifi-low.png</file>
+    </qresource>
+    <qresource prefix="/icon/green">
+        <file alias="wifi-disconnected">resources/wifi-disconnected-green.png</file>
+        <file alias="wifi-high">resources/wifi-high-green.png</file>
+        <file alias="wifi-low">resources/wifi-low-green.png</file>
+        <file alias="wifi-medium">resources/wifi-medium-green.png</file>
+    </qresource>
+    <qresource prefix="/icon/blue">
+        <file alias="wifi-disconnected">resources/wifi-disconnected.png</file>
+        <file alias="wifi-high">resources/wifi-high.png</file>
+        <file alias="wifi-low">resources/wifi-low.png</file>
+        <file alias="wifi-medium">resources/wifi-medium.png</file>
     </qresource>
 </RCC>

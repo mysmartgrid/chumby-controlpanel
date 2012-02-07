@@ -139,14 +139,14 @@ namespace Msg
             unsigned int quality = stats.qual.qual;
             qDebug() << "Stats: " << quality;
             if ( quality >= 60 )
-                wicon = QIcon(":/icon/resources/wifi-high.png");
+                wicon = QIcon(":/icon/green/wifi-high");
             else if ( quality >= 40 )
-                wicon = QIcon(":/icon/resources/wifi-medium.png");
+                wicon = QIcon(":/icon/green/wifi-medium");
             else
-                wicon = QIcon(":/icon/resources/wifi-low.png");
+                wicon = QIcon(":/icon/green/wifi-low");
         } else {
             qDebug() << "retrieving iw stats failed!";
-            wicon = QIcon(":/icon/resources/wifi-disconnected.png");
+            wicon = QIcon(":/icon/green/wifi-disconnected");
         }
         wifi->setPixmap( wicon.pixmap(15) );
     }
