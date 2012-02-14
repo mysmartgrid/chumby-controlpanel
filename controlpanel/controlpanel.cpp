@@ -33,7 +33,7 @@ namespace Msg
         header->addWidget(wifi);
         list = new QListWidget();
         layout->addWidget( list );
-        list->setGridSize(QSize(110, 65));
+        list->setGridSize(QSize(92, 65));
         list->setViewMode(QListWidget::IconMode);
         list->setMovement(QListWidget::Static);
         for ( QMap<QString, QPair<DLLFactory<PluginFactory>*, Plugin*> >::iterator i = plugins.begin(); i != plugins.end(); i++ )
