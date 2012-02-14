@@ -46,7 +46,7 @@ namespace Msg
 
         int sock_iwconfig;
 
-        MusicControl mc;
+        MusicControl mc; //implicit construction here
     };
 }
 

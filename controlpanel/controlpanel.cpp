@@ -43,7 +43,7 @@ namespace Msg
         connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
         sock_iwconfig = ::iw_sockets_open();
-        mc = MusicControl();
+        //mc = MusicControl();
     }
 
     Controlpanel::~Controlpanel()
