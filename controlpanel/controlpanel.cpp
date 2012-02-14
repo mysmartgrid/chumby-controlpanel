@@ -64,9 +64,9 @@ namespace Msg
         QWidget* test = currentPlugin->getWidget();
         connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
         test->raise();
-        this->hide();
         test->showFullScreen();
         test->show();
+        this->hide();
     }
 
     void Controlpanel::stopPlugin()
