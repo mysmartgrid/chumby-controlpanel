@@ -44,6 +44,8 @@ namespace Msg
 
         sock_iwconfig = ::iw_sockets_open();
         //mc = MusicControl();
+
+        currentPlugin = NULL;
     }
 
     Controlpanel::~Controlpanel()
@@ -54,10 +56,14 @@ namespace Msg
     void Controlpanel::startPlugin()
     {
         QString key = list->selectedItems().first()->text();
-        std::cout << plugins.value(key).second->init() << std::endl;
-        //stack->addWidget(plugins.value(key).second->getWidget());
-        QWidget* test = plugins.value(key).second->getWidget();
-        connect( plugins.value(key).second, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
+        if ( currentPlugin != plugins.value(key).second )
+        {
+            currentPlugin = plugins.value(key).second;
+            std::cout << currentPlugin->init() << std::endl;
+        }
+        QWidget* test = currentPlugin->getWidget();
+        connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
+        test->raise();
         this->hide();
         test->showFullScreen();
         test->show();
