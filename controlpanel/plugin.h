@@ -8,7 +8,7 @@
 
 namespace Msg
 {
-    #define m_pluginVersion 0;
+    #define m_pluginVersion 1
     //
     // PlugIn is an abstract class.
     //
@@ -25,15 +25,14 @@ namespace Msg
 
             virtual ~Plugin() = 0;
 
-            int getPluginVersion() const {
-                return m_pluginVersion;
-            }
-
             virtual QIcon* getIcon() {
                 return new QIcon(":/icon/resources/plugin.png");
             }
 
-            virtual std::string init() = 0;
+            virtual std::string getName() = 0;
+
+            virtual void init() {
+            };
 
             virtual QWidget* getWidget() = 0;
 
