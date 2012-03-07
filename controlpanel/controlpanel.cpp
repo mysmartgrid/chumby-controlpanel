@@ -10,14 +10,13 @@
 
 #include <iwlib.h>
 
-
 namespace Msg
 {
     Controlpanel::Controlpanel(QWidget *parent)
         : QDialog(parent)
     {
         this->grabKeyboard();
-        plugins = QMap< QString, QPair<DLLFactory<PluginFactory>*, Plugin*> >();
+        plugins = QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >();
         this->getPlugins();
         layout = new QVBoxLayout( this );
         header = new QHBoxLayout();
@@ -36,9 +35,9 @@ namespace Msg
         list->setGridSize(QSize(92, 65));
         list->setViewMode(QListWidget::IconMode);
         list->setMovement(QListWidget::Static);
-        for ( QMap<QString, QPair<DLLFactory<PluginFactory>*, Plugin*> >::iterator i = plugins.begin(); i != plugins.end(); i++ )
+        for ( QMap<QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >::iterator i = plugins.begin(); i != plugins.end(); i++ )
         {
-            list->addItem(new QListWidgetItem(*(i.value().second->getIcon()), i.key()));
+            list->addItem(new QListWidgetItem(*(i.value().first), i.key()));
         }
         connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
@@ -56,11 +55,18 @@ namespace Msg
     void Controlpanel::startPlugin()
     {
         QString key = list->selectedItems().first()->text();
-        if ( currentPlugin != plugins.value(key).second )
+        if ( currentPlugin != NULL && currentPlugin->getName().compare(key.toStdString()) != 0 )
         {
-            currentPlugin = plugins.value(key).second;
-            std::cout << currentPlugin->init() << std::endl;
+            qDebug() << QString::fromStdString(currentPlugin->getName()) << " != " << key;
+            delete currentPlugin;
+            currentPlugin = NULL;
         }
+        if ( currentPlugin == NULL )
+        {
+            currentPlugin = plugins.value(key).second->factory->CreatePlugin();
+            currentPlugin->init();
+        }
+        qDebug() << QString::fromStdString(currentPlugin->getName()) << " == " << key;
         QWidget* test = currentPlugin->getWidget();
         connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
         test->raise();
@@ -71,7 +77,6 @@ namespace Msg
 
     void Controlpanel::stopPlugin()
     {
-        std::cout << "Widget stopped" << std::endl;
         this->show();
     }
 
@@ -106,12 +111,7 @@ namespace Msg
 
                     Plugin *c=dll->factory->CreatePlugin();
 
-                    // tell it to show itself
-
-                    //c->Show();
-                    std::cout << c->init() << std::endl;
-
-                    plugins.insert(QString::fromStdString(c->init()), QPair<DLLFactory<PluginFactory>*, Plugin*>(dll, c));
+                    plugins.insert(QString::fromStdString(c->getName()), QPair< QIcon*, DLLFactory<PluginFactory>* >(c->getIcon(), dll));
                 }
                 else
                 {
@@ -151,7 +151,7 @@ namespace Msg
             else
                 wicon = QIcon(":/icon/green/wifi-low");
         } else {
-            qDebug() << "retrieving iw stats failed!";
+            //qDebug() << "retrieving iw stats failed!";
             wicon = QIcon(":/icon/green/wifi-disconnected");
         }
         wifi->setPixmap( wicon.pixmap(15) );

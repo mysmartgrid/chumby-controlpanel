@@ -42,7 +42,7 @@ namespace Msg
         QListWidget* list;
         QPushButton* button;
         QStackedWidget* stack;
-        QMap< QString, QPair<DLLFactory<PluginFactory>*, Plugin*> > plugins;
+        QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>* > > plugins;
         Plugin* currentPlugin;
 
         int sock_iwconfig;
