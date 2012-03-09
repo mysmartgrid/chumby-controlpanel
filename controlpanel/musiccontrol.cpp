@@ -4,6 +4,12 @@
 
 namespace Msg
 {
+    MusicControl* MusicControl::instance = 0;
+//    snd_pcm_t* MusicControl::playback = 0;
+//    snd_pcm_t* MusicControl::capture = 0;
+//    pthread_t MusicControl::playback_thread = 0;
+//    volatile int MusicControl::playback_thread_running = 0;
+
     MusicControl::MusicControl()
     {
         qDebug() << "Initializing music control!";
@@ -41,6 +47,21 @@ namespace Msg
     MusicControl::~MusicControl()
     {
         snd_mixer_close(handle);
+    }
+
+    MusicControl& MusicControl::getInstance()
+    {
+        if ( !instance )
+            instance = new MusicControl();
+
+        return *instance;
+    }
+
+    void MusicControl::destroy()
+    {
+        if ( instance )
+            delete instance;
+        instance = 0;
     }
 
     void MusicControl::setMasterVolume(long int volume)

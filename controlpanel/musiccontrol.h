@@ -54,8 +54,9 @@ namespace Msg
     class MusicControl
     {
     public:
-        MusicControl();
-        ~MusicControl();
+        static MusicControl& getInstance();
+        static void destroy();
+
         void setMasterVolume(long int volume);
         long int getMasterVolume();
         void setMasterMute(int value);
@@ -70,6 +71,11 @@ namespace Msg
         static void *playback_run(void *params);
 
     private:
+        MusicControl();
+        MusicControl(const MusicControl&) {}
+        ~MusicControl();
+        static MusicControl* instance;
+
         snd_mixer_t *handle;
         snd_mixer_selem_id_t *sid;
         snd_mixer_elem_t* elem;

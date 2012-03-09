@@ -45,6 +45,8 @@ namespace Msg
         //mc = MusicControl();
 
         currentPlugin = NULL;
+
+        mc = &MusicControl::getInstance();
     }
 
     Controlpanel::~Controlpanel()
@@ -172,10 +174,10 @@ namespace Msg
             case 8:
                 // volume
                 std::cout << "adjusting volume" << std::endl;
-                mc.increaseMasterVolume();
+                mc->increaseMasterVolume();
                 break;
             case 9:
-                mc.lowerMasterVolume();
+                mc->lowerMasterVolume();
                 break;
         }
     }
