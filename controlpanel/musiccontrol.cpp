@@ -34,6 +34,8 @@ namespace Msg
 
         if ( playback == NULL )
             qDebug() << "MC says: playback is null";
+
+        thread = 0;
     }
 
     MusicControl::~MusicControl()
@@ -114,6 +116,19 @@ namespace Msg
             thread = new PlaybackThread(capture, playback);
 
         setMasterMute(1);
+        qDebug() << "Calling pthread";
+        thread->start();
+//        MusicControl::playback_thread_running = 1;
+//        pthread_create(&MusicControl::playback_thread, NULL, &playback_run, NULL);
+    }
+
+    void MusicControl::stop() {
+        thread->stop();
+//        MusicControl::playback_thread_running = 0;
+        setMasterMute(0);
+        thread->wait();
+        delete thread;
+        thread = 0;
     }
 
     int MusicControl::alsa_open(snd_pcm_t **pcm_handle, int stream_type) {
@@ -291,6 +306,75 @@ namespace Msg
             qDebug() << "Setting right input failed:" << snd_strerror(res) << "(" << res << ")";
         }
 
+    }
+
+    PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
+    {
+        this->capture = in;
+        this->playback = out;
+    }
+
+    void PlaybackThread::stop()
+    {
+        this->thread_running = false;
+    }
+
+    void PlaybackThread::run() {
+        this->thread_running = true;
+        qDebug() << "I'm a playback thread!";
+        if ( playback == NULL )
+        {
+            qDebug() << "ERROR/pthread: playback null";
+        }
+        if ( capture == NULL )
+        {
+            qDebug() << "ERROR/pthread: capture null";
+        }
+        qDebug() << "Starting playback!";
+        snd_pcm_uframes_t data[4096];
+        while (thread_running) {
+            int bytes_read = snd_pcm_readi(capture, data, sizeof(data)/sizeof(data[0]));
+            // If we didn't get enough data, wait, then try again.
+            if(bytes_read == -EAGAIN) {
+                fprintf(stderr, "Read error, trying again: %s\n",
+                        snd_strerror(bytes_read));
+                continue;
+            }
+
+            else if(bytes_read == -EPIPE) {
+                fprintf(stderr, "Read error: (Over/Under)run\n");
+                if(snd_pcm_prepare(capture) < 0) {
+                    this->thread_running = false;
+                    break;
+                }
+                continue;
+            }
+
+            // Or if we had a different error, bail.
+            else if(bytes_read < 0) {
+                fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
+                this->thread_running = false;
+                break;
+            }
+
+            int bytes_written = snd_pcm_writei(playback, data, bytes_read);
+
+            if(bytes_written == -EPIPE) {
+                fprintf(stderr, "Write error: (Over/Under)run\n");
+                if(snd_pcm_prepare(playback) < 0) {
+                    this->thread_running = false;
+                    break;
+                }
+                continue;
+            }
+
+            else if(bytes_written <= 0) {
+                fprintf(stderr, "Write error (%d): %s\n",
+                        bytes_written, snd_strerror(bytes_written));
+                this->thread_running = false;
+                break;
+            }
+        }
     }
 
     VolumeWidget::VolumeWidget(int min = 0, int max = 100)

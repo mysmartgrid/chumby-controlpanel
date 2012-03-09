@@ -7,6 +7,7 @@
 #include <QtGui/QIcon>
 #include <QtGui/QProgressBar>
 #include <QtCore/QTimer>
+#include <QtCore/QThread>
 
 #include <alsa/asoundlib.h>
 
@@ -29,6 +30,25 @@ namespace Msg
         QHBoxLayout* layout;
         QProgressBar* bar;
         QTimer* timer;
+    };
+
+    class PlaybackThread : public QThread
+    {
+        Q_OBJECT
+
+    public:
+        PlaybackThread(snd_pcm_t* in, snd_pcm_t* out);
+
+    public slots:
+        void stop();
+
+    protected:
+        void run();
+
+    private:
+        bool thread_running;
+        snd_pcm_t* playback;
+        snd_pcm_t* capture;
     };
 
     class MusicControl
@@ -59,6 +79,8 @@ namespace Msg
 
         snd_pcm_t* capture;
         snd_pcm_t *playback;
+
+        PlaybackThread* thread;
     };
 }
 
