@@ -10,6 +10,11 @@
 
 #include <alsa/asoundlib.h>
 
+#define INPUT_MIC   0
+#define INPUT_LINE1 1
+#define INPUT_HP    2
+#define INPUT_LINE2 3
+
 namespace Msg
 {
     class VolumeWidget : public QWidget
@@ -37,6 +42,13 @@ namespace Msg
         void increaseMasterVolume();
         void lowerMasterVolume();
 
+        int alsa_open(snd_pcm_t **pcm_handle, int stream_type);
+        void alsa_close();
+        void alsa_select_input(int input);
+        void play(snd_pcm_t* source);
+        void stop();
+        static void *playback_run(void *params);
+
     private:
         snd_mixer_t *handle;
         snd_mixer_selem_id_t *sid;
@@ -44,6 +56,9 @@ namespace Msg
         long min, max;
 
         VolumeWidget* vol;
+
+        snd_pcm_t* capture;
+        snd_pcm_t *playback;
     };
 }
 
