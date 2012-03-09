@@ -27,6 +27,8 @@ namespace Msg
         elem = snd_mixer_find_selem(handle, sid);
 
         snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
+        if ( min < 128 )
+            min = 128;
 
         vol = new VolumeWidget(min, max);
         QPalette p(vol->palette());
