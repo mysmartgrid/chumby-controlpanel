@@ -14,6 +14,7 @@
 #include "dllmanager.h"
 #include "plugin.h"
 #include "musiccontrol.h"
+#include "alarmdaemon.h"
 
 namespace Msg
 {
@@ -48,6 +49,7 @@ namespace Msg
         int sock_iwconfig;
 
         MusicControl* mc;
+        AlarmDaemon* alarm;
     };
 }
 

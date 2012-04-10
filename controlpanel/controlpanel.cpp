@@ -47,6 +47,7 @@ namespace Msg
         currentPlugin = NULL;
 
         mc = &MusicControl::getInstance();
+        alarm = new AlarmDaemon();
     }
 
     Controlpanel::~Controlpanel()
@@ -137,6 +138,11 @@ namespace Msg
         QString text = time.toString("hh:mm");
         if ((time.second() % 2) == 0)
                  text[2] = ' ';
+        if (time.second() == 0)
+        {
+            qDebug() << "Checking alarms!";
+            alarm->check();
+        }
         clock->setText( text );
 
 

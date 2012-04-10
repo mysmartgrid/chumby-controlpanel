@@ -14,12 +14,14 @@ SOURCES += main.cpp\
     controlpanel.cpp \
     dllmanager.cpp \
     plugin.cpp \
-    musiccontrol.cpp
+    musiccontrol.cpp \
+    alarmdaemon.cpp
 
 HEADERS  += controlpanel.h \
     plugin.h \
     dllmanager.h \
-    musiccontrol.h
+    musiccontrol.h \
+    alarmdaemon.h
 
 LIBS += -ldl -liw -lasound
 
