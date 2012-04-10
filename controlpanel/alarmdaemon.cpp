@@ -4,10 +4,20 @@
 
 #include <QtCore/QDebug>
 
+AlarmDaemon* AlarmDaemon::instance = 0;
+
+AlarmDaemon& AlarmDaemon::getInstance()
+{
+    if ( !instance )
+        instance = new AlarmDaemon;
+
+    return *instance;
+}
+
 AlarmDaemon::AlarmDaemon()
 {
     alarms = std::list<Alarm*>();
-    Alarm* testalarm = new Alarm();
+    Alarm* testalarm = new Alarm(QString("foobar"));
     testalarm->setTime(13, 12);
     testalarm->setDays(false,true,false,false,false,false,false);
     alarms.push_back(testalarm);
@@ -24,8 +34,19 @@ void AlarmDaemon::check()
     }
 }
 
-Alarm::Alarm()
+void AlarmDaemon::addAlarm(Alarm* new_alarm)
 {
+    this->alarms.push_back(new_alarm);
+}
+
+std::list<Alarm*> AlarmDaemon::getAlarms()
+{
+    return this->alarms;
+}
+
+Alarm::Alarm(QString name)
+{
+    this->name = name;
     this->active = true;
 }
 
@@ -85,4 +106,9 @@ bool Alarm::check(QDateTime current)
         return false;
 
     return true;
+}
+
+QString Alarm::toString()
+{
+    return this->name;
 }

@@ -17,7 +17,7 @@ typedef struct {
 class Alarm
 {
 public:
-    Alarm();
+    Alarm(QString name);
     bool setTime(unsigned int hour, unsigned int minute);
     void setDays(bool monday = false,
                  bool tuesday = false,
@@ -28,9 +28,11 @@ public:
                  bool sunday = false);
     bool check(QDateTime current);
     bool isActive();
+    QString toString();
 
 
 private:
+    QString name;
     QTime time;
     Weekdays weekdays; // bit field encoding repetitions
     bool active;
@@ -39,10 +41,16 @@ private:
 class AlarmDaemon
 {
 public:
-    AlarmDaemon();
+    static AlarmDaemon& getInstance();
     void check();
+    void addAlarm(Alarm *new_alarm);
+    std::list<Alarm*> getAlarms();
 
 private:
+    AlarmDaemon();
+    AlarmDaemon(const AlarmDaemon&) {}
+    ~AlarmDaemon();
+    static AlarmDaemon* instance;
     std::list<Alarm*> alarms;
 };
 

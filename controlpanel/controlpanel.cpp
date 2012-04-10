@@ -47,7 +47,7 @@ namespace Msg
         currentPlugin = NULL;
 
         mc = &MusicControl::getInstance();
-        alarm = new AlarmDaemon();
+        alarm = &AlarmDaemon::getInstance();
     }
 
     Controlpanel::~Controlpanel()
