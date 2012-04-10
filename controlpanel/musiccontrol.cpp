@@ -37,11 +37,13 @@ namespace Msg
         vol->setVolume(getMasterVolume());
         vol->move(60, 180);
 
-        if ( playback == NULL )
-            MusicControl::alsa_open(&playback, SND_PCM_STREAM_PLAYBACK);
+        //if ( playback == NULL )
+        MusicControl::alsa_open(&playback, SND_PCM_STREAM_PLAYBACK);
 
-        if ( playback == NULL )
-            qDebug() << "MC says: playback is null";
+        //if ( playback == NULL )
+        //    qDebug() << "MC says: playback is null";
+
+        capture = 0;
 
         thread = 0;
     }
