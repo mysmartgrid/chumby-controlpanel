@@ -46,6 +46,8 @@ namespace Msg
         capture = 0;
 
         thread = 0;
+
+        audioPlugins = QMap< QString, DLLFactory<PluginFactory>* >();
     }
 
     MusicControl::~MusicControl()
@@ -332,6 +334,36 @@ namespace Msg
         }
 
     }
+
+    void MusicControl::addAudioPlugin(QString name, DLLFactory<PluginFactory> *dll)
+    {
+        audioPlugins.insert(name, dll);
+    }
+
+    QList<QString> MusicControl::getAudioPlugins()
+    {
+        return audioPlugins.keys();
+    }
+
+    AudioPlugin* MusicControl::getAudioPlugin(QString plugin)
+    {
+        return (AudioPlugin*) audioPlugins.find(plugin).value()->factory->CreatePlugin();
+    }
+
+    /*QList<QString> MusicControl::getAudioSources()
+    {
+        QList<QString> sources = QList<QString>();
+        for ( QMap<QString, DLLFactory<PluginFactory>* >::iterator it = audioPlugins.begin(); it != audioPlugins.end(); it++ )
+        {
+            AudioPlugin* plugin = (AudioPlugin*) it.value()->factory->CreatePlugin();
+            if ( plugin )
+            {
+                sources.append(plugin->getSources());
+                delete plugin;
+            }
+        }
+        return sources;
+    }*/
 
     PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
     {

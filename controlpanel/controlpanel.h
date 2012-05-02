@@ -13,6 +13,7 @@
 
 #include "dllmanager.h"
 #include "plugin.h"
+#include "audioplugin.h"
 #include "musiccontrol.h"
 #include "alarmdaemon.h"
 
@@ -34,6 +35,9 @@ namespace Msg
     protected:
         void getPlugins();
         void keyPressEvent(QKeyEvent *event);
+
+    signals:
+        void keyPressed();
 
     private:
         QVBoxLayout* layout;

@@ -48,6 +48,7 @@ namespace Msg
 
         mc = &MusicControl::getInstance();
         alarm = &AlarmDaemon::getInstance();
+        connect(this, SIGNAL(keyPressed()), alarm, SIGNAL(snooze()));
     }
 
     Controlpanel::~Controlpanel()
@@ -74,7 +75,6 @@ namespace Msg
         connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
         test->raise();
         test->showFullScreen();
-        test->show();
         this->hide();
     }
 
@@ -115,6 +115,9 @@ namespace Msg
                     Plugin *c=dll->factory->CreatePlugin();
 
                     plugins.insert(QString::fromStdString(c->getName()), QPair< QIcon*, DLLFactory<PluginFactory>* >(c->getIcon(), dll));
+
+                    if ( c->getType() == AUDIO_PLUGIN )
+                        MusicControl::getInstance().addAudioPlugin(QString::fromStdString(c->getName()), dll);
                 }
                 else
                 {
@@ -175,7 +178,13 @@ namespace Msg
         switch ( event->key() )
         {
             case 28:
-                this->stopPlugin();
+                if ( AlarmDaemon::getInstance().isAlarmActive() )
+                {
+                    qDebug() << "snooze";
+                    emit keyPressed();
+                }
+                else
+                    this->stopPlugin();
                 break;
             case 8:
                 // volume

@@ -9,6 +9,11 @@
 namespace Msg
 {
     #define m_pluginVersion 1
+
+    enum pluginType {
+        GENERIC_PLUGIN = 0,
+        AUDIO_PLUGIN
+    };
     //
     // PlugIn is an abstract class.
     //
@@ -30,6 +35,11 @@ namespace Msg
             }
 
             virtual std::string getName() = 0;
+
+            virtual pluginType getType()
+            {
+                return GENERIC_PLUGIN;
+            }
 
             virtual void init() {
             };

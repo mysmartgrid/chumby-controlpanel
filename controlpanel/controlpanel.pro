@@ -15,13 +15,17 @@ SOURCES += main.cpp\
     dllmanager.cpp \
     plugin.cpp \
     musiccontrol.cpp \
-    alarmdaemon.cpp
+    alarmdaemon.cpp \
+    audioplugin.cpp \
+    alarmwidget.cpp
 
 HEADERS  += controlpanel.h \
     plugin.h \
     dllmanager.h \
     musiccontrol.h \
-    alarmdaemon.h
+    alarmdaemon.h \
+    audioplugin.h \
+    alarmwidget.h
 
 LIBS += -ldl -liw -lasound
 

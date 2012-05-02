@@ -1,4 +1,5 @@
 #include <QtGui/QApplication>
+#include <QtGui/QWSServer>
 #include <QWSEvent>
 #include "controlpanel.h"
 
@@ -16,6 +17,8 @@ class myApplication : public QApplication
 
 int main(int argc, char *argv[])
 {
+    QWSServer::setBackground(QBrush(Qt::white));
+    QWSServer::setCursorVisible(false);
     QApplication a(argc, argv);
     a.setOverrideCursor( QCursor( Qt::BlankCursor ) );
 

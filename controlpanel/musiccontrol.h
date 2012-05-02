@@ -11,6 +11,9 @@
 
 #include <alsa/asoundlib.h>
 
+#include "audioplugin.h"
+#include "dllmanager.h"
+
 #define INPUT_MIC   0
 #define INPUT_LINE1 1
 #define INPUT_HP    2
@@ -70,6 +73,11 @@ namespace Msg
         void stop();
         static void *playback_run(void *params);
 
+        void addAudioPlugin(QString name, DLLFactory<PluginFactory>* dll);
+        QList< QString > getAudioPlugins();
+        AudioPlugin* getAudioPlugin(QString plugin);
+        //QList< QMap< QString, QList< QString > > > getAudioSources();
+
     private:
         MusicControl();
         MusicControl(const MusicControl&) {}
@@ -85,6 +93,8 @@ namespace Msg
 
         snd_pcm_t* capture;
         snd_pcm_t *playback;
+
+        QMap< QString, DLLFactory<PluginFactory>* > audioPlugins;
 
         PlaybackThread* thread;
     };

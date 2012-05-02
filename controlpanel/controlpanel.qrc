@@ -3,6 +3,7 @@
         <file>resources/plugin.png</file>
         <file>resources/vol-down.png</file>
         <file>resources/vol-up.png</file>
+        <file>resources/spinner.gif</file>
     </qresource>
     <qresource prefix="/icon/green">
         <file alias="wifi-disconnected">resources/wifi-disconnected-green.png</file>
