@@ -103,6 +103,7 @@ Alarm::Alarm(QString name, QObject *parent)
 {
     this->name = name;
     this->active = true;
+    widget = NULL;
 }
 
 bool Alarm::setTime(unsigned int hour, unsigned int minute)
@@ -199,11 +200,15 @@ bool Alarm::run()
 
     qDebug() << "Alarm started";
 
-    widget = new AlarmWidget();
-    timer = new QTimer();
-    connect((AlarmWidget*) widget, SIGNAL(dismissed()), this, SLOT(dismiss()));
-    connect((AlarmWidget*) widget, SIGNAL(snoozed()), this, SLOT(snooze()));
-    connect((AlarmWidget*) widget, SIGNAL(resumed()), this, SLOT(run()));
+    if ( !widget )
+    {
+        widget = new AlarmWidget();
+        connect((AlarmWidget*) widget, SIGNAL(dismissed()), this, SLOT(dismiss()));
+        connect((AlarmWidget*) widget, SIGNAL(snoozed()), this, SLOT(snooze()));
+        connect((AlarmWidget*) widget, SIGNAL(resumed()), this, SLOT(run()));
+    }
+    if ( !timer )
+        timer = new QTimer();
     widget->showFullScreen();
 
     AlarmDaemon::getInstance().setAlarmActive(true);
@@ -225,7 +230,6 @@ void Alarm::dismiss()
     AlarmDaemon::getInstance().setAlarmActive(false);
     plugin->stop();
     widget->hide();
-    //delete widget;
 }
 
 QString Alarm::toString()
