@@ -34,6 +34,7 @@ public:
                  bool saturday = false,
                  bool sunday = false);
     void setSource(QString source);
+    void setSnooze(int snooze);
     bool check(QDateTime current);
     bool isActive();
     QString toString();
@@ -51,6 +52,7 @@ private:
     QTime time;
     Weekdays weekdays; // bit field encoding repetitions
     QString source;
+    int snoozeTime;
     bool active;
     Msg::AudioPlugin* plugin;
     QTimer* timer;

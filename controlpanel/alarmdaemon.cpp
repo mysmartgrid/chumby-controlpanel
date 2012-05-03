@@ -134,6 +134,11 @@ void Alarm::setSource(QString source)
     this->source = source;
 }
 
+void Alarm::setSnooze(int snooze)
+{
+    this->snoozeTime = snooze;
+}
+
 bool Alarm::check(QDateTime current)
 {
     if ( !this->isActive() )
@@ -219,7 +224,7 @@ bool Alarm::run()
 void Alarm::snooze()
 {
     qDebug() << "Starting timer...";
-    timer->start(5000);
+    timer->start(snoozeTime * 60 * 1000);
     connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
     connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));
     dismiss();
