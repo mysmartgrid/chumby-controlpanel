@@ -39,22 +39,25 @@ AlarmDaemon::~AlarmDaemon()
 
 void AlarmDaemon::check()
 {
-    QDateTime time = QDateTime::currentDateTime();
-    qDebug() << time.toString();
-    if ( alarms )
+    if ( !isAlarmActive() )
     {
-        for ( std::list<Alarm*>::iterator it = alarms->begin(); it != alarms->end(); it++ )
+        QDateTime time = QDateTime::currentDateTime();
+        qDebug() << time.toString();
+        if ( alarms )
         {
-            if ((*it)->check(time))
+            for ( std::list<Alarm*>::iterator it = alarms->begin(); it != alarms->end(); it++ )
             {
-                qDebug() << "Activating alarm";
-                connect(this, SIGNAL(snooze()), *it, SLOT(snooze()));
-                if ((*it)->run())
+                if ((*it)->check(time))
                 {
-                    qDebug() << "Alarm successfully started";
-                } else {
-                    qDebug() << "Error starting alarm";
-                    //TODO: fallback alarm!
+                    qDebug() << "Activating alarm";
+                    connect(this, SIGNAL(snooze()), *it, SLOT(snooze()));
+                    if ((*it)->run())
+                    {
+                        qDebug() << "Alarm successfully started";
+                    } else {
+                        qDebug() << "Error starting alarm";
+                        //TODO: fallback alarm!
+                    }
                 }
             }
         }
