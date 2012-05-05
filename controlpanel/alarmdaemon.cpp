@@ -31,6 +31,7 @@ AlarmDaemon::AlarmDaemon()
         alarms->push_back(newAlarm);
         settings->endGroup();
     }
+    alarmActive = false;
 }
 
 AlarmDaemon::~AlarmDaemon()
