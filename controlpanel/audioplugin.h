@@ -18,6 +18,7 @@ namespace Msg
 
         virtual bool play(QString source) = 0;
         virtual bool stop() = 0;
+        virtual bool isFinal(QString source) = 0;
 
         //virtual QList<QString> getSources() = 0;
         virtual QList<QString> getSourceList() = 0;
