@@ -229,6 +229,11 @@ bool Alarm::run()
     return true;
 }
 
+void Alarm::setActive(bool active)
+{
+    this->active = active;
+}
+
 void Alarm::snooze()
 {
     qDebug() << "Starting timer...";

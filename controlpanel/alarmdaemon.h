@@ -37,6 +37,7 @@ public:
     void setSnooze(int snooze);
     bool check(QDateTime current);
     bool isActive();
+    void setActive(bool active);
     QString toString();
     QString getTime();
     Weekdays getDays();
