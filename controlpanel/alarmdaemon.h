@@ -67,6 +67,7 @@ public:
     static AlarmDaemon& getInstance();
     void check();
     void addAlarm(Alarm *new_alarm);
+    void removeAlarm(Alarm *alarm);
     std::list<Alarm*> getAlarms();
     void setAlarmActive(bool active);
     bool isAlarmActive();

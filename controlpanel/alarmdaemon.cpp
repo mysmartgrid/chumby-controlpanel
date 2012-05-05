@@ -84,6 +84,13 @@ void AlarmDaemon::addAlarm(Alarm* new_alarm)
     qDebug() << "AlarmDaemon: Alarm" << new_alarm->toString() << "added";
 }
 
+void AlarmDaemon::removeAlarm(Alarm *alarm)
+{
+    settings->beginGroup(alarm->toString());
+    settings->remove("");
+    alarms->remove(alarm);
+}
+
 std::list<Alarm*> AlarmDaemon::getAlarms()
 {
     return *(this->alarms);
