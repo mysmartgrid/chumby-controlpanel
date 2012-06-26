@@ -6,8 +6,10 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += alarmplugin \
+SUBDIRS +=  \
 	dispvaluesplugin \
 	netconfigplugin \
 	radioplugin \
-	chumbykbddriver
+	nightplugin \
+	chumbykbddriver \
+	helloworld
