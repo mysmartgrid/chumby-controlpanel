@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setOverrideCursor( QCursor( Qt::BlankCursor ) );
 
-    QFont font("Arial", 14);
-    QApplication::setFont(font);
+    //QFont font("Arial", 14);
+    //QApplication::setFont(font);
 
     Msg::Controlpanel w;
     w.showFullScreen();
