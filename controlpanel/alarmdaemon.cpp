@@ -280,15 +280,23 @@ void Alarm::setActive(bool active)
 
 void Alarm::snooze()
 {
-    qDebug() << "Starting timer...";
-    timer->start(snoozeTime * 60 * 1000);
-    connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
-    connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));
-    dismiss();
+    if ( snoozeTime > 0 )
+    {
+    	qDebug() << "Starting timer...";
+	timer->start(snoozeTime * 60 * 1000);
+	qDebug() << "1";
+	connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
+	qDebug() << "2";
+	connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));
+	qDebug() << "3";
+	dismiss();
+	qDebug() << "4";
+    }
 }
 
 void Alarm::dismiss()
 {
+    qDebug() << "dismiss";
     AlarmDaemon::getInstance().setAlarmActive(false);
     plugin->stop();
     widget->hide();
