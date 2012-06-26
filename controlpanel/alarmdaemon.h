@@ -35,15 +35,20 @@ public:
                  bool friday = false,
                  bool saturday = false,
                  bool sunday = false);
+    void setDays(Weekdays days);
     void setSource(QString source);
     void setSnooze(int snooze);
+    void setName(QString name);
     bool check(QDateTime current);
     bool isActive();
     void setActive(bool active);
-    QString toString();
+    QString getName();
     QString getTime();
+        int getHour();
+        int getMinute();
     Weekdays getDays();
     QString getSource();
+    int getSnoozeTime();
 
 public slots:
     bool run();
@@ -74,6 +79,7 @@ public:
     std::list<Alarm*> getAlarms();
     void setAlarmActive(bool active);
     bool isAlarmActive();
+    QSettings* getSettings();
 
 signals:
     void alarmAdded(Alarm* newAlarm);

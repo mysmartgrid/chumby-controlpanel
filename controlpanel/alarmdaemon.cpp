@@ -22,12 +22,22 @@ AlarmDaemon::AlarmDaemon()
 {
     alarms = new std::list<Alarm*>();
     settings = new QSettings("/mnt/usb/alarms.conf", QSettings::NativeFormat);
+    settings->setIniCodec("UTF-8");
     QStringList storedAlarms = settings->childGroups();
     for ( QStringList::iterator it = storedAlarms.begin(); it != storedAlarms.end(); it++ )
     {
         settings->beginGroup(*it);
         Alarm* newAlarm = new Alarm(*it);
         newAlarm->setTime(QTime().fromString(settings->value("time").toString(), "hh:mm"));
+        bool monday = settings->value("monday").toBool();
+        bool tuesday = settings->value("tuesday").toBool();
+        bool wednesday = settings->value("wednesday").toBool();
+        bool thursday = settings->value("thursday").toBool();
+        bool friday = settings->value("friday").toBool();
+        bool saturday = settings->value("saturday").toBool();
+        bool sunday = settings->value("sunday").toBool();
+        newAlarm->setDays(monday, tuesday, wednesday, thursday, friday, saturday, sunday);
+        newAlarm->setSource(settings->value("source").toString());
         alarms->push_back(newAlarm);
         settings->endGroup();
     }
@@ -106,6 +116,11 @@ bool AlarmDaemon::isAlarmActive()
     return alarmActive;
 }
 
+QSettings* AlarmDaemon::getSettings()
+{
+    return settings;
+}
+
 Alarm::Alarm(QString name, QObject *parent)
     : QObject(parent)
 {
@@ -159,6 +174,11 @@ void Alarm::setDays(bool monday, bool tuesday, bool wednesday, bool thursday, bo
     this->weekdays.friday = friday;
     this->weekdays.saturday = saturday;
     this->weekdays.sunday = sunday;
+}
+
+void Alarm::setDays(Weekdays days)
+{
+    this->weekdays = days;
 }
 
 void Alarm::setSource(QString source)
@@ -274,9 +294,14 @@ void Alarm::dismiss()
     widget->hide();
 }
 
-QString Alarm::toString()
+QString Alarm::getName()
 {
     return this->name;
+}
+
+void Alarm::setName(QString name)
+{
+    this->name = name;
 }
 
 bool Alarm::isActive()
@@ -289,6 +314,16 @@ QString Alarm::getTime()
     return this->time.toString("hh:mm");
 }
 
+int Alarm::getHour()
+{
+    return this->time.hour();
+}
+
+int Alarm::getMinute()
+{
+    return this->time.minute();
+}
+
 Weekdays Alarm::getDays()
 {
     return this->weekdays;
@@ -297,4 +332,9 @@ Weekdays Alarm::getDays()
 QString Alarm::getSource()
 {
     return this->source;
+}
+
+int Alarm::getSnoozeTime()
+{
+    return this->snoozeTime;
 }
