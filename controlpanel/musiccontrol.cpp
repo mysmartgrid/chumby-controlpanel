@@ -94,11 +94,22 @@ namespace Msg
 
         long int volume = getMasterVolume();
         qDebug() << min << " <= " << volume << " <= " << max;
+				if ( volume < min )
+				{
+					volume = min;
+					snd_mixer_selem_set_playback_volume_all(elem, volume);
+					snd_mixer_selem_set_playback_switch_all(elem, 1);
+				}
         if ( volume <= max - 3 )
         {
             volume += 3;
             snd_mixer_selem_set_playback_volume_all(elem, volume);
         }
+				else
+				{
+					volume = max;
+          snd_mixer_selem_set_playback_volume_all(elem, volume);
+				}
 
         vol->setVolume(volume);
         vol->showWidget();
@@ -114,6 +125,12 @@ namespace Msg
             volume -= 3;
             snd_mixer_selem_set_playback_volume_all(elem, volume);
         }
+				else
+				{
+					volume = 0;
+					snd_mixer_selem_set_playback_volume_all(elem, volume);
+					snd_mixer_selem_set_playback_switch_all(elem, 0);
+				}
 
         vol->setVolume(volume);
         vol->showWidget();
@@ -456,8 +473,11 @@ namespace Msg
 
     void VolumeWidget::setVolume(long int vol)
     {
-        this->volume = vol;
-        bar->setValue(this->volume);
+			this->volume = vol;
+			if ( vol < bar->minimum() )
+				bar->setValue(bar->minimum());
+			else
+				bar->setValue(this->volume);
     }
 
     void VolumeWidget::showWidget()
