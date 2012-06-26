@@ -24,6 +24,8 @@ class Alarm : public QObject
     Q_OBJECT
 public:
     Alarm(QString name, QObject* parent = 0);
+    void save();
+    void remove();
     bool setTime(unsigned int hour, unsigned int minute);
     bool setTime(QTime time);
     void setDays(bool monday = false,

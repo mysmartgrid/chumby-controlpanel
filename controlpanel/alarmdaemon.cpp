@@ -67,7 +67,7 @@ void AlarmDaemon::check()
 
 void AlarmDaemon::addAlarm(Alarm* new_alarm)
 {
-    settings->beginGroup(new_alarm->toString());
+    /*settings->beginGroup(new_alarm->toString());
     settings->setValue("time", new_alarm->getTime());
     Weekdays days = new_alarm->getDays();
     settings->setValue("monday", days.monday);
@@ -78,16 +78,16 @@ void AlarmDaemon::addAlarm(Alarm* new_alarm)
     settings->setValue("saturday", days.saturday);
     settings->setValue("sunday", days.sunday);
     settings->setValue("source", new_alarm->getSource());
-    settings->endGroup();
+    settings->endGroup();*/
+    new_alarm->save();
     this->alarms->push_back(new_alarm);
     emit alarmAdded(new_alarm);
-    qDebug() << "AlarmDaemon: Alarm" << new_alarm->toString() << "added";
+    qDebug() << "AlarmDaemon: Alarm" << new_alarm->getName() << "added";
 }
 
 void AlarmDaemon::removeAlarm(Alarm *alarm)
 {
-    settings->beginGroup(alarm->toString());
-    settings->remove("");
+    alarm->remove();
     alarms->remove(alarm);
 }
 
@@ -112,6 +112,30 @@ Alarm::Alarm(QString name, QObject *parent)
     this->name = name;
     this->active = true;
     widget = NULL;
+}
+
+void Alarm::save()
+{
+    QSettings* settings = AlarmDaemon::getInstance().getSettings();
+    settings->beginGroup(getName());
+    settings->setValue("time", getTime());
+    settings->setValue("monday", weekdays.monday);
+    settings->setValue("tuesday", weekdays.tuesday);
+    settings->setValue("wednesday", weekdays.wednesday);
+    settings->setValue("thursday", weekdays.thursday);
+    settings->setValue("friday", weekdays.friday);
+    settings->setValue("saturday", weekdays.saturday);
+    settings->setValue("sunday", weekdays.sunday);
+    settings->setValue("source", getSource());
+    settings->endGroup();
+}
+
+void Alarm::remove()
+{
+    QSettings* settings = AlarmDaemon::getInstance().getSettings();
+    settings->beginGroup(getName());
+    settings->remove("");
+    settings->endGroup();
 }
 
 bool Alarm::setTime(unsigned int hour, unsigned int minute)
