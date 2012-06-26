@@ -31,3 +31,7 @@ LIBS += -ldl -liw -lasound
 
 RESOURCES += \
     controlpanel.qrc
+
+FORMS += \
+    controlpanel.ui \
+    loadingWidget.ui

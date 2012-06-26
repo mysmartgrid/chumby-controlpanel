@@ -11,6 +11,7 @@
 
 #include <QKeyEvent>
 
+#include "ui_controlpanel.h"
 #include "dllmanager.h"
 #include "plugin.h"
 #include "audioplugin.h"
@@ -19,42 +20,52 @@
 
 namespace Msg
 {
-    class Controlpanel : public QDialog
-    {
-        Q_OBJECT
+class Controlpanel : public QWidget
+{
+	Q_OBJECT
 
-    public:
-        Controlpanel(QWidget *parent = 0);
-        ~Controlpanel();
+public:
+	Controlpanel(QWidget *parent = 0);
+	~Controlpanel();
 
-    public slots:
-        void startPlugin();
-        void stopPlugin();
-        void updateClock();
+public slots:
+	void startPlugin();
+	void stopPlugin();
+	void updateClock();
+	void showWidget();
 
-    protected:
-        void getPlugins();
-        void keyPressEvent(QKeyEvent *event);
+protected:
+	void getPlugins();
+	void keyPressEvent(QKeyEvent *event);
 
-    signals:
-        void keyPressed();
+signals:
+	void keyPressed();
 
-    private:
-        QVBoxLayout* layout;
-        QHBoxLayout* header;
-        QLabel* clock;
-        QLabel* wifi;
-        QListWidget* list;
-        QPushButton* button;
-        QStackedWidget* stack;
-        QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>* > > plugins;
-        Plugin* currentPlugin;
+private:
+	Ui::controlWidget ui;
+	QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>* > > plugins;
+	Plugin* currentPlugin;
+	QWidget* pluginWidget;
 
-        int sock_iwconfig;
+	int sock_iwconfig;
 
-        MusicControl* mc;
-        AlarmDaemon* alarm;
-    };
+	MusicControl* mc;
+	AlarmDaemon* alarm;
+};
+
+class InitThread : public QThread
+{
+	Q_OBJECT
+public:
+	InitThread(Plugin* plugin);
+	void run();
+
+signals:
+	void ready();
+
+private:
+	Plugin* plugin;
+};
 }
 
 #endif // CONTROLPANEL_H
