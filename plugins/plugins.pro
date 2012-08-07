@@ -7,9 +7,9 @@
 TEMPLATE = subdirs
 
 SUBDIRS +=  \
-	dispvaluesplugin \
-	netconfigplugin \
-	radioplugin \
-	nightplugin \
 	chumbykbddriver \
-	helloworld
+	dispvaluesplugin \
+	helloworld \
+	netconfigplugin \
+	nightplugin \
+	radioplugin

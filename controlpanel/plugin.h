@@ -45,6 +45,11 @@ namespace Msg
             };
 
             virtual QWidget* getWidget() = 0;
+						
+						virtual int getVersion()
+						{
+							return m_pluginVersion;
+						}
 
     signals:
             void stopWidget();

@@ -55,8 +55,6 @@ void Controlpanel::startPlugin()
 	QWidget* loadingWidget = new QWidget();
 	Ui::loadingWidget lui;
 	lui.setupUi(loadingWidget);
-	loadingWidget->showFullScreen();
-	qApp->processEvents();
 	QString key = ui.pluginsWidget->selectedItems().first()->text();
 	lui.loadingLabel->setText("Loading " + key);
 	loadingWidget->showFullScreen();
@@ -67,23 +65,26 @@ void Controlpanel::startPlugin()
 		delete pluginWidget;
 		delete currentPlugin;
 		currentPlugin = NULL;
+		pluginWidget = NULL;
 	}
 	if ( currentPlugin == NULL )
 	{
 		currentPlugin = plugins.value(key).second->factory->CreatePlugin();
-		/*InitThread* initThread = new InitThread(currentPlugin);
-		connect(initThread, SIGNAL( ready() ), this, SLOT( showWidget() ));
-		initThread->start();*/
 		currentPlugin->init();
-		showWidget();
+		pluginWidget = NULL;
+		qDebug() << "Plugin version:" << currentPlugin->getVersion();
 	}
+	showWidget();
 	qDebug() << QString::fromStdString(currentPlugin->getName()) << " == " << key;
 }
 
 void Controlpanel::showWidget()
 {
-	pluginWidget = currentPlugin->getWidget();
-	connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
+	if ( pluginWidget == NULL )
+	{
+		pluginWidget = currentPlugin->getWidget();
+		connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
+	}
 	pluginWidget->raise();
 	pluginWidget->showFullScreen();
 	this->hide();
