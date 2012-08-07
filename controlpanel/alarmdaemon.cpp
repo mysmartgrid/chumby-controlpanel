@@ -141,6 +141,7 @@ void Alarm::save()
     settings->setValue("friday", weekdays.friday);
     settings->setValue("saturday", weekdays.saturday);
     settings->setValue("sunday", weekdays.sunday);
+    settings->setValue("snooze", snoozeTime);
     settings->setValue("source", getSource());
     settings->endGroup();
 }
@@ -264,8 +265,6 @@ bool Alarm::run()
         connect((AlarmWidget*) widget, SIGNAL(snoozed()), this, SLOT(snooze()));
         connect((AlarmWidget*) widget, SIGNAL(resumed()), this, SLOT(run()));
     }
-    if ( !timer )
-        timer = new QTimer();
     widget->showFullScreen();
 
     AlarmDaemon::getInstance().setAlarmActive(true);
@@ -280,18 +279,25 @@ void Alarm::setActive(bool active)
 
 void Alarm::snooze()
 {
-    if ( snoozeTime > 0 )
-    {
-    	qDebug() << "Starting timer...";
-	timer->start(snoozeTime * 60 * 1000);
-	qDebug() << "1";
-	connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
-	qDebug() << "2";
-	connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));
-	qDebug() << "3";
-	dismiss();
-	qDebug() << "4";
-    }
+        if ( snoozeTime > 0 )
+        {
+                qDebug() << "Starting timer...";
+                /* QObject::startTimer: QTimer can only be used with threads started with QThread
+                if ( timer )
+                {
+                        delete timer;
+                        timer = NULL;
+                }
+                timer = new QTimer();
+                timer->start(snoozeTime * 60 * 1000);
+                qDebug() << "1";
+                connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
+                qDebug() << "2";
+                connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));*/
+                qDebug() << "3";
+                dismiss();
+                qDebug() << "4";
+        }
 }
 
 void Alarm::dismiss()
