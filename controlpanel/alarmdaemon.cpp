@@ -197,38 +197,45 @@ bool Alarm::check(QDateTime current)
     if ( !this->isActive() )
         return false;
 
-    qDebug() << current.date().dayOfWeek();
-
-    switch (current.date().dayOfWeek())
+    if ( this->weekdays.monday
+                    || this->weekdays.tuesday
+                    || this->weekdays.wednesday
+                    || this->weekdays.thursday
+                    || this->weekdays.friday
+                    || this->weekdays.saturday
+                    || this->weekdays.sunday )
     {
-    case 0: //Sunday
-        if ( ! this->weekdays.sunday )
-            return false;
-        break;
-    case 1: //Monday
-        if ( ! this->weekdays.monday )
-            return false;
-        break;
-    case 2: //Tuesday
-        if ( ! this->weekdays.tuesday )
-            return false;
-        break;
-    case 3: //Wednesday
-        if ( ! this->weekdays.wednesday )
-            return false;
-        break;
-    case 4: //Thursday
-        if ( ! this->weekdays.thursday )
-            return false;
-        break;
-    case 5: //Friday
-        if ( ! this->weekdays.friday )
-            return false;
-        break;
-    case 6: //Saturday
-        if ( ! this->weekdays.saturday )
-            return false;
-        break;
+            switch (current.date().dayOfWeek())
+            {
+            case 0: //Sunday
+                if ( ! this->weekdays.sunday )
+                    return false;
+                break;
+            case 1: //Monday
+                if ( ! this->weekdays.monday )
+                    return false;
+                break;
+            case 2: //Tuesday
+                if ( ! this->weekdays.tuesday )
+                    return false;
+                break;
+            case 3: //Wednesday
+                if ( ! this->weekdays.wednesday )
+                    return false;
+                break;
+            case 4: //Thursday
+                if ( ! this->weekdays.thursday )
+                    return false;
+                break;
+            case 5: //Friday
+                if ( ! this->weekdays.friday )
+                    return false;
+                break;
+            case 6: //Saturday
+                if ( ! this->weekdays.saturday )
+                    return false;
+                break;
+            }
     }
 
     if ( current.time().hour() != this->time.hour() || current.time().minute() != this->time.minute() )
