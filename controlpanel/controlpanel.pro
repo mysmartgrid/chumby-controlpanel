@@ -34,4 +34,5 @@ RESOURCES += \
 
 FORMS += \
     controlpanel.ui \
-    loadingWidget.ui
+    loadingWidget.ui \
+    alarmwidget.ui

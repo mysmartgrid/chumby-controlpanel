@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>alarmWidget</class>
+ <widget class="QWidget" name="alarmWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>320</width>
+    <height>240</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QPushButton" name="snoozeButton">
+     <property name="text">
+      <string>Snooze</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="timeLabel">
+     <property name="font">
+      <font>
+       <pointsize>25</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>00:00:00</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="dismissButton">
+     <property name="text">
+      <string>Dismiss</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

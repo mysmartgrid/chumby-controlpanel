@@ -9,29 +9,21 @@
 #include <QtCore/QDebug>
 
 AlarmWidget::AlarmWidget(QWidget *parent) :
-    QWidget(parent)
+        QWidget(parent),
+        _ui(new Ui::alarmWidget())
 {
-    QVBoxLayout* layout = new QVBoxLayout();
-    QPushButton* snooze = new QPushButton("Snooze");
-    clock = new QLabel("");
-    QPushButton* dismiss = new QPushButton("Dismiss");
-    connect(snooze, SIGNAL(clicked()), this, SIGNAL(snoozed()));
-    layout->addWidget(snooze);
-    layout->addWidget(clock);
-    connect(dismiss, SIGNAL(clicked()), this, SIGNAL(dismissed()));
-    layout->addWidget(dismiss);
-    this->setLayout(layout);
+        _ui->setupUi(this);
 
-    this->updateClock();
-    timer = new QTimer();
-    timer->start(1000);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateClock()));
+        this->updateClock();
+        timer = new QTimer();
+        timer->start(1000);
+        connect(timer, SIGNAL(timeout()), this, SLOT(updateClock()));
 
-//    connect(this, SIGNAL(snoozed()), this, SLOT(hide()));
-//    connect(this, SIGNAL(dismissed()), this, SLOT(hide()));
+        connect( _ui->dismissButton, SIGNAL(clicked()), this, SIGNAL(dismissed()));
+        connect( _ui->snoozeButton, SIGNAL(clicked()), this, SIGNAL(snoozed()));
 }
 
 void AlarmWidget::updateClock()
 {
-    clock->setText(QTime::currentTime().toString("hh:mm:ss"));
+        _ui->timeLabel->setText(QTime::currentTime().toString("hh:mm:ss"));
 }
