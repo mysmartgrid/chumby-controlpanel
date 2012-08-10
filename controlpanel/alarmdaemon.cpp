@@ -37,6 +37,7 @@ AlarmDaemon::AlarmDaemon()
         bool saturday = settings->value("saturday").toBool();
         bool sunday = settings->value("sunday").toBool();
         newAlarm->setDays(monday, tuesday, wednesday, thursday, friday, saturday, sunday);
+        newAlarm->setSnooze(settings->value("snooze").toInt());
         newAlarm->setSource(settings->value("source").toString());
         alarms->push_back(newAlarm);
         settings->endGroup();
@@ -126,6 +127,7 @@ Alarm::Alarm(QString name, QObject *parent)
 {
     this->name = name;
     this->active = true;
+    this->timer = new QTimer();
     widget = NULL;
 }
 
@@ -288,22 +290,18 @@ void Alarm::snooze()
 {
         if ( snoozeTime > 0 )
         {
-                qDebug() << "Starting timer...";
+                qDebug() << "Starting timer with" << snoozeTime << "minutes.";
                 /* QObject::startTimer: QTimer can only be used with threads started with QThread
                 if ( timer )
                 {
                         delete timer;
                         timer = NULL;
                 }
-                timer = new QTimer();
+                timer = new QTimer();*/
                 timer->start(snoozeTime * 60 * 1000);
-                qDebug() << "1";
                 connect(timer, SIGNAL(timeout()), (AlarmWidget*) widget, SIGNAL(resumed()));
-                qDebug() << "2";
-                connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));*/
-                qDebug() << "3";
+                connect(timer, SIGNAL(timeout()), timer, SLOT(stop()));
                 dismiss();
-                qDebug() << "4";
         }
 }
 
