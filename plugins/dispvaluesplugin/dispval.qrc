@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/dispval">
+        <file>resources/msg.ico</file>
+        <file>resources/msg.png</file>
+    </qresource>
+</RCC>

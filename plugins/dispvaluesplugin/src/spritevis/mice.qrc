@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/tacho.png</file>
+        <file>images/tacho2.png</file>
+    </qresource>
+</RCC>

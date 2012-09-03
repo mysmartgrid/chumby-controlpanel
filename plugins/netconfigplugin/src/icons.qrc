@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>ressource/arrow-up.png</file>
+    <file>ressource/arrow-dn.png</file>
+    <file>ressource/open.png</file>
+    <file>ressource/locked.png</file>
+  </qresource>
+</RCC>

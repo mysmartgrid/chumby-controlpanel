@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>ressource/delArrow.png</file>
+    <file>ressource/arrow.png</file>
+  </qresource>
+</RCC>

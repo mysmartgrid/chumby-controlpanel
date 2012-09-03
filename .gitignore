@@ -1,6 +1,3 @@
-#ignore plugins
-plugins/**/*
-
 #ignore object files generated while building
 *.o
 
