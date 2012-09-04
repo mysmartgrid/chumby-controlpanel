@@ -20,8 +20,8 @@ set(CMAKE_SYSTEM_PROCESSOR arm CACHE INTERNAL "processor")
 set(_c_compiler   ${TARGET_TRIPLET}-gcc)
 set(_cxx_compiler ${TARGET_TRIPLET}-g++)
 set(_asm_compiler ${TARGET_TRIPLET}-as)
-#set(QTDIR "${TOOLCHAIN_PREFIX}/usr/qt4")
-set(QTDIR "/mnt/usb")
+set(QTDIR "${TOOLCHAIN_PREFIX}/usr/qt4")
+# set(QTDIR "/mnt/usb")
 set(ENV{QTDIR} ${QTDIR})
 
 #compiler
