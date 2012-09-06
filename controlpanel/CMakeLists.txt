@@ -20,7 +20,7 @@ set(controlpanel_HDRS
   alarmwidget.h
   plugin.h
   audioplugin.h
-  dllmanager.h
+#  dllmanager.h
 #  PlaybackThread.h
   )
 
