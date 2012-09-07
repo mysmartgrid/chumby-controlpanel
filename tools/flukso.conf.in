@@ -1,0 +1,9 @@
+[General]
+ip=192.168.1.102
+port=80
+sensor1=d69779ec53a9323b695ee86b5328dd28
+sensor2=
+sensor3=
+sen1ena=1
+sen2ena=0
+sen3ena=0

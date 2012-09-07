@@ -1,0 +1,1492 @@
+#!/usr/bin/perl
+#
+# start_network 3rd generation script.
+#
+# Synopsis:
+#    start_network [interface]
+# or, if you're calling it as wpa_cli does:
+#    start_network [interface] [DIS]CONNECT
+# or, when symlinked as ap_scan:
+#    ap_scan [interface]
+#
+# This is the third-generation start_network script.  It differs from the
+# previous generations in that it uses wpa_supplicant to do most of the
+# heavy lifting, rather than iwconfig / iwpriv, when connecting to wireless
+# networks.
+#
+# When running as ap_scan, if the file /tmp/hidden_ssid exists, then ap_scan
+# will disassociate with the current network, attempt to associate with
+# the specified network, rescan, disassociate, then reassociate with the
+# previous network.
+
+
+
+# Load the BDXML parser to read in the XML config data.
+BEGIN {
+    # Lock out multiple ap_scan instances from running.
+    my (@progname) = split('/', $0);
+    my $progname = $progname[-1];
+    if($progname eq "ap_scan") {
+        # Make sure only one instance of ap_scan is running at a time.
+        if( -e "/var/run/$progname.pid" ) {
+            open(my $f, '<', "/var/run/$progname.pid");
+            my $pid = <$f>;
+            chomp $pid;
+            if( -e "/proc/$pid" ) {
+                die("$progname is already running.  "
+                . "Kill pid $pid or wait for it to finish\n");
+            }
+            close($f);
+        }
+
+        # Save our PID to a pidfile.
+        open(my $f, '>', "/var/run/$progname.pid");
+        print $f $$;
+        close($f);
+    }
+}
+BEGIN{ unshift @INC, "/mnt/usb", "/usr/chumby/scripts" }
+use BDXML;
+$|++;
+
+
+# Add /usr/local/bin to the path, as that's where wpa_supplicant lives.
+# Also add the chumby script directory.
+$ENV{'PATH'} .= ":/usr/local/bin:/usr/local/sbin:/usr/chumby/scripts";
+
+
+
+# Various default settings.
+my $config_file;
+if( -e "/mnt/usb/network_config" ) {
+    $config_file = "/mnt/usb/network_config";
+}
+else {
+    $config_file = "/psp/network_config";
+}
+
+
+
+# Read in the arguments from the command line.
+# Note that these are the same regardless of the invokation method.
+my ($iface, $command) = @ARGV;
+
+
+
+
+# Set this to 1 to have try_multiple print out errors when it starts
+# the block.  This can be used to determin where start_network is in its
+# execution.
+my $debug_mode = 0;
+
+
+
+# If a configuration file exists, read it in.
+# It's a fatal error only if we're not in ap_scan mode.
+my $config;
+if(! -e $config_file) {
+    if($0 !~ /ap_scan$/ ) {
+        die("Config file $config_file not found.\n");
+    }
+}
+else {
+    $config = read_config($config_file);
+}
+
+
+
+# Determine the interface, if one wasn't specified.
+if(!defined $iface) {
+    if($0 =~ /ap_scan$/ || !defined($config->{'type'})) {
+        if(!defined $config) {
+            $config = {};
+        }
+        $config->{'type'} = "wlan";
+    }
+    $iface = network_interface($config->{'type'});
+}
+
+
+
+# Figure out how we were called.
+if($0 =~ /ap_scan$/) {
+    $config->{'type'} = "wlan";
+    $iface = network_interface($config->{'type'});
+    exit(do_ap_scan($config, $iface));
+}
+
+if(defined $command) {
+    exit(do_wpa_event($config, $iface, $command));
+}
+
+else {
+
+    # Start SSH first, so it comes up even if we're not connected.
+    start_ssh();
+
+    # Set the config to wait 20 seconds for the network to connect.
+    $config->{'connect_timeout'} = 30;
+
+    # If do_start_network succeeds (and returns 1), print the XML that
+    # the control_panel expects, and launch all of the network-aware daemons.
+    eval { do_start_network($config, $iface) };
+
+    # Write the network config file out again if we succeeded # in connecting,
+    # which will be indicated by $@ being zero.
+    # This allows us to save IP information, and if we connecting using a
+    # WEP ASCII password, to translate it back to a Hex password.
+    if($@) {
+        print STDERR "Unable to connect: $@\n";
+    }
+
+    # Check to see if the network was successfully brought up.
+    if(!system("network_status.sh --fast")) { #edited by o.monti , added --fast param to skip another chumby.com access!
+
+        # Run this unforked, because this writes the time to the
+        # cryptoprocessor which may interfere when download_cp is run later on.
+        
+        # edited by o.monti; for the moment there is no access to NTP server...
+        # sync_time($iface);
+
+        # Daemonize ourselves to start the services, as the network is up now.
+        if(!fork()) {
+            start_ap($iface);
+            start_zeroconf();
+            start_ssh();
+            start_djmount();
+        }
+        exit(0);
+    }
+
+    # Exit failure.
+    exit(1);
+}
+
+
+
+
+
+# Grab variables from the BDXML parser.
+# The configuration XML looks like:
+# <configuration allocation="dhcp" key="8585858585" encoding="hex"
+#                encryption="WEP" auth="WEPAUTO" hwaddr="00:22:55:F2:FA:A1"
+#                ssid="KR1" type="wlan" />
+sub read_config {
+    my ($cfg_filename) = @_;
+
+    # Read the config file.  It should return a valid BDXML object.
+    my $config;
+    {
+        # Slurp the file in by changing $/ to grab the entire file, rather
+        # than line-by-line.
+        local $/ = undef;
+        open(my $cfg_file, '<', $cfg_filename)
+            or die("Couldn't open network config file \"$cfg_filename\": $!");
+        $config = BDXML::parse(<$cfg_file>);
+        close($cfg_file);
+    }
+    if(!$config) {
+        die("No configuration data found!");
+    }
+    if(!$config->{'properties'}) {
+        die("Didn't get the expected configuration data");
+    }
+
+    return $config->{'properties'};
+}
+
+# Generates a config file that can be read by read_config().
+sub write_config {
+    my ($file, $config) = @_;
+
+    open(my $f, ">", $file);
+
+    # Generate the XML tag.
+    print $f "<configuration ";
+    foreach my $k (keys %$config) {
+        print $f "$k=\"" . BDXML::html_escape($config->{$k}) . "\" ";
+    }
+    print $f "/>\n";
+
+    close($f);
+}
+
+
+
+
+sub network_interface {
+    my ($type) = @_;
+    my $cmd;
+    my $base = "wlan";
+    my $iface;
+
+    # Default to a type of wlan, because that's what most people will have.
+    if(!defined $type) {
+        $type = "wlan";
+    }
+
+    if($type eq "lan") {
+        $base = "eth";
+    }
+
+    # For ppp connections, the interface may not have been created yet, so
+    # just return the interface without calling the command.
+    elsif($type eq "ppp" || $type eq "3G" || $config->{'ssid'} eq "3G") {
+        return "ppp0";
+    }
+
+
+    # Generate a command to read all available network interfaces matching
+    # the string $base.
+    $cmd = "ifconfig -a | grep ^[a-z0-9] | cut -d' ' -f1 | grep ^$base";
+    open(my $f, '-|', $cmd)
+        or die("Couldn't open comm pipe: $!");
+
+    # Grab the first interface we see.
+    # We assume it's already sorted.
+    $iface = <$f>;
+    chomp $iface;
+
+    close($f);
+
+    # Default to "wlan0" if an interface wasn't found.
+    if(!defined($iface) || $iface eq "") {
+        $iface = "wlan0";
+    }
+
+    return $iface;
+}
+
+
+# Bring up the specified network interface.
+sub do_start_network {
+    my ($config, $iface) = @_;
+
+
+    # If a proxy server is defined in the configuration, set the
+    # environment variables to match.
+    # libcurl, which is what everything uses, will pick up these variables
+    # without us needing to specify them.
+    if(defined $config->{'http_proxy'}) {
+        $ENV{'http_proxy'} = $config->{'http_proxy'};
+        if(defined $config->{'http_proxy_port'}) {
+            $ENV{'http_proxy'} .= ":" . $config->{'http_proxy_port'};
+        }
+    }
+
+
+    # Bring all active interfaces down.
+    killall("udhcpc");
+    open(my $if_h, '-|', "ifconfig | grep ^[a-zA-Z0-9] | cut -f1 -d' '")
+        or die("Couldn't get a list of interfaces: $!\n");
+    while(<$if_h>) {
+        chomp;
+        next if($_ eq "lo");
+        system("ifconfig $_ 0.0.0.0 down");
+    }
+    close($if_h);
+
+
+
+    # 3G is special, since it combines network interface bringup with
+    # IP configuration.
+    if($config->{'type'} eq "3G" || $config->{'ssid'} eq "3G") {
+        return connect_3g($config, $iface);
+    }
+
+
+    
+    # Begin by bringing the interface down.  This will clear out the
+    # routing tables, and allow us to go to Managed mode (for wifi).
+    if(system("ifconfig $iface 0.0.0.0 down")) {
+        die("Network interface not found\n");
+    }
+    
+    
+    # Remove resolv.conf, so we can wait for it to be populated
+    # as an indication we're connected.
+    system("echo > /etc/resolv.conf");
+
+
+    # Remove the file that indicates we connected, as well as the
+    # error log file.
+    unlink("/tmp/network.connected");
+    unlink("/tmp/network.error");
+
+
+    if($config->{'type'} eq 'wlan') {
+    
+        # XXX Hack Mode!
+        # We can't go from WPA to WEP, due to what I suspect is a bug in
+        # the firmware.  The only recourse we have is to reset the USB
+        # connection.
+        if(!system("grep -q psk= /tmp/wpa.$iface.conf")
+            && $config->{'encryption'} eq 'WEP'
+            && $ENV{'CNPLATFORM'} eq "falconwing") {
+            #system("hub-ctrl -h 0 -P 2 -p; sleep 1; hub-ctrl -h 0 -P 2 -p 1");
+            system("reset_usb.sh");
+            
+            try_multiple(10, "Wireless interface never came back after reset",
+                sub {
+                    return system("ifconfig $iface 2> /dev/null > /dev/null")
+                } );
+        }
+
+        # Always re-run wpa_supplicant.  It works around some issues related
+        # to interfaces not reconnecting properly.
+        terminate_wpa_supplicant($iface);
+        run_wpa_supplicant($iface);
+        
+
+        # Make sure the card is in Managed mode, then bring it up.
+        system("iwconfig $iface mode managed power off");
+        if(system("ifconfig $iface up")) {
+            die("Couldn't bring wifi card up\n");
+        }
+        
+        
+        # Turn power management off.  It uses about 50mA more, but provides
+        # us with a more reliable connection.
+        system("iwconfig $iface power off");
+
+        mute_leds();
+
+
+        # If WPA supplicant isn't running, generate a bare config file
+        # and start it running.  This will give us something to talk to.
+        if(! -e "/var/run/wpa_supplicant/$iface") {
+            run_wpa_supplicant($iface);
+        }
+
+
+        # Determine which sort of config file to write, and then write it.
+        if($config->{'auth'} eq 'WPAPSK'
+        || $config->{'auth'} eq 'WPA2PSK'
+        || $config->{'auth'} eq 'WPAEAP'
+        || $config->{'auth'} eq 'WPA2EAP') {
+            write_wpa_config_wpa("/tmp/wpa.$iface.conf", $config, $iface);
+        }
+
+        elsif($config->{'auth'} eq 'WEPAUTO') {
+            # If the WEP key is ASCII, calculate all possible WEP keys and
+            # try each one of them.  Once one succeeds, we consider
+            # ourselves connected.
+            if($config->{'encoding'} eq 'ascii') {
+                my $key_ascii = $config->{'key'};
+                my @hex_possibilities = generate_wep_keys($config->{'key'});
+                for my $key(@hex_possibilities) {
+                    $config->{'encoding'}        = 'hex';
+                    $config->{'key'}             = $key;
+                    $config->{'connect_timeout'} = 20;
+                    eval {
+                        do_start_network($config, $iface);
+                    };
+                    if(!$@) {
+                        return 0;
+                    }
+                }
+                die("Unable to convert ASCII key to Hex\n");
+            }
+
+            write_wpa_config_wep("/tmp/wpa.$iface.conf", $config, $iface);
+        }
+
+        # Passwordless networks.
+        elsif($config->{'auth'} eq 'OPEN') {
+            write_wpa_config_open("/tmp/wpa.$iface.conf", $config, $iface);
+        }
+
+        elsif($config->{'auth'} eq 'WPS') {
+            write_wpa_config_dummy("/tmp/wpa.$iface.conf", $config, $iface);
+        }
+
+
+        # Unknown encryption type.
+        else {
+            die("Unrecognized encryption type '$config->{'encryption'}'\n");
+        }
+
+
+
+        # Now that the configuration file is written, all we should need to
+        # do is reload the network config, then tell it to connect to the
+        # network called 'network'.
+        if($config->{'auth'} eq 'WPS') {
+            if( $ENV{'CNPLATFORM'} eq "silvermoon") {
+                # use wpsapp: assume the following:
+                # AP broadcasts the SSID (wpsapp does NOT work with hidden
+                # SSIDs.)  We are using PBC mode ONLY, which technically
+                # doesn't conform but it's what BBY wants.  The user should
+                # have up to two minutes to push the button.
+                # We will block until timeout (yeach).
+                wpa_cli($iface, "disconnect");
+
+                # Can't have WPA supplicant running while wpsapp runs.
+                terminate_wpa_supplicant($iface);
+                system("rm -f /tmp/wps.conf");
+                my $wpsapp_ret = `/sbin/wpsapp $iface -c /etc/wpsapp/wps_init.conf`;
+                
+                wpa_cli($iface, "reconnect");
+                if( $wpsapp_ret =~ /WPS Registration Protocol Completed Successfully/ ) {
+                    # the result is in /tmp/wps.conf
+                    if(! -e "/tmp/wps.conf") {
+                        die("wpsapp did not create a config file\n");
+                    }
+                    else {
+                        $config = read_config("/tmp/wps.conf");
+                    }
+
+                    run_wpa_supplicant($iface); # restore the supplicant so the state is unaffected
+
+                    return do_start_network($config, $iface);
+                }
+                else {
+                    run_wpa_supplicant($iface); # restore the supplicant so the state is unaffected
+                    die("wpsapp did not complete successfully: '$config->{'encryption'}'\n");
+                }
+            }
+            else {
+
+                # XXX There's a bug with wpa_supplicant where when you switch
+                # to WPS, wpa_supplicant freezes.  We get around this by
+                # killing wpa_supplicant and wpa_cli.
+                terminate_wpa_supplicant($iface);
+                run_wpa_supplicant($iface);
+                if($config->{'encryption'} eq 'PBC') {
+                    wpa_cli($iface, "wps_pbc");
+                }
+                elsif($config->{'encryption'} eq 'PIN') {
+                    wpa_cli($iface, "wps_reg $config->{'hwaddr'} $config->{'key'}");
+                }
+                else {
+                    die("Unknown WPS type: '$config->{'encryption'}'\n");
+                }
+            }
+        }
+        else {
+            wpa_cli($iface, "disconnect");
+            wpa_cli($iface, "reconfigure");
+            wpa_cli($iface, "select_network 0");
+            wpa_cli($iface, "reassociate");
+        }
+    }
+
+
+    # For LAN, there is no Layer 3 to bring up, so just simulate a
+    # connection, which will do the DHCP or static configuration.
+    elsif($config->{'type'} eq 'lan') {
+        eval { do_wpa_event($config, $iface, "CONNECTED") };
+    }
+
+
+    else {
+        die("Unknown interface type '$config->{'type'}'\n");
+    }
+
+
+    # Now wait for the network connection to be completed.
+    try_multiple($config->{'connect_timeout'}, "Network interface never connected",
+            sub { return ! -e "/tmp/network.connected" }
+    );
+    
+    # Wait for resolv.conf to be populated.
+    try_multiple(5, "resolv.conf never got nameserver data",
+        sub { return system("grep -q nameserver /etc/resolv.conf > /dev/null") }
+    );
+
+
+    # Finally, wait for DNS to start resolving.
+    try_multiple(3, "DNS never started working",
+        sub {
+
+            # We need to use an alarm here, because under certain
+            # conditions (static IP, WEP ASCII), ping will never return.
+            local $SIG{'ALRM'} = sub { die("failed to ping") };
+            alarm(3);
+            my $val = "";
+            if( $ENV{'CNPLATFORM'} eq "yume" ) {
+                $val = eval {
+                    open(my $f, '-|', "curl http://ssm.internet.sony.tv/DASH/index.html 2>/dev/null | md5sum | cut -d' ' -f1")
+                        or die("Couldn't connect to the Internet\n");
+                    my $md5 = <$f>;
+                    chomp $md5;
+                    close $f;
+                
+                    return $md5 ne "f950fd823547ce3f2a68cd5933eae02f";
+                };
+            } 
+            else {
+                $val = eval {
+                  #~ EDIT o.monti @ 21.10.2011:
+                  #~ disable check for access to chumby.com - for the time being without any replacement
+                  #~ sooner or later another checking SHOULD be implemented instead to make sure the encrypted connection is actually working!! 
+                  
+                    #~ open(my $f, '-|', "wget -T 5 -q -O - http://ping.chumby.com/setecastronomy 2>/dev/null | md5sum | cut -d' ' -f1")
+                        #~ or die("Couldn't connect to the Internet\n");
+                    #~ my $md5 = <$f>;
+                    #~ chomp $md5;
+                    #~ close $f;
+                  #~ 
+                    #~ return $md5 ne "ce8e2a4f32e85691d3197054e511ed43";
+                    return 0;
+                };
+            }
+            alarm(0);
+
+            # If the alarm hits, then $val will be undef.  Set it to 1,
+            # which indicates failure.
+            if(!defined $val) {
+                $val = 1;
+            }
+            return $val;
+    });
+
+
+    # For WPS, things like "Access Point" and such will have been filled in
+    # by the "connect" command.  Reload that information.
+    if($config->{'auth'} eq 'WPS') {
+        my $config_new = read_config($config_file);
+        while(my ($key, $value) = each %$config_new) {
+            $config->{$key} = $value;
+        }
+    }
+    
+}
+
+
+
+sub do_wpa_event {
+    my ($config, $iface, $event) = @_;
+
+    unlink("/tmp/do_wpa_event_failure.txt");
+    eval {
+        if($event eq 'CONNECTED') {
+        
+            # Yume-specific hack.
+            # On Yume, there's a problem where all the Layer-2 stuff will
+            # get set up, but nothing above that will work.  No DHCP,
+            # no traffic, nothing.  The solution is to disconnect and
+            # then reconnect.  It works on the second try, every time.
+            # We use the flag /tmp/network.phase.1 to keep track of this.
+            if(($ENV{'CNPLATFORM'} eq "yume")
+                    && $config->{'type'} eq "wlan") {
+                if(! -e "/tmp/network.phase.1") {
+                    system("touch /tmp/network.phase.1");
+                    wpa_cli($iface, "disconnect");
+                    wpa_cli($iface, "reconnect");
+                    return;
+                }
+                else {
+                    unlink("/tmp/network.phase.1");
+                }
+            }
+
+            
+            configure_address($config, $iface);
+
+
+            # Grab wireless status information from wpa_supplicant if we're
+            # connected to a wlan-type network.
+            if($config->{'type'} eq "wlan") {
+                open(my $wpa, '-|', "wpa_cli -i $iface status");
+                while(<$wpa>) {
+                    chomp;
+                    parse_wpa_line($config, $_);
+                }
+                close($wpa);
+                
+                wpa_cli($iface, "save_config");
+                open(my $wps, '<', "/tmp/wpa.$iface.conf")
+                    or die("Couldn't open wpa config: $!\n");
+                while(<$wps>) {
+                    chomp;
+                    parse_wpa_line($config, $_);
+                }
+                close($wps);
+            }
+            
+
+            # Update the config file and notify all listeners that we've
+            # connected successfully.
+            write_config("/psp/network_config", $config);
+            system("touch /tmp/network.connected");
+            return 0;
+        }
+    };
+    if($@) {
+        open(my $f, '>', "/tmp/do_wpa_event_failure.txt");
+        print $f $@;
+        close($f);
+    }
+}
+
+
+sub parse_wpa_line {
+    my ($config, $line) = @_;
+    $line =~ s/\s+//;
+    
+    if($line =~ /^ssid=/) {
+        if($line =~ /ssid="/) {
+            ($config->{'ssid'}) = $line =~ /ssid="(.+)"/;
+        }
+        else {
+            ($config->{'ssid'}) = $line =~ /ssid=(.+)$/;
+        }
+    }
+    elsif($line =~ /^wep_key0=/) {
+        if($line =~ /wep_key0="/) {
+            ($config->{'key'})    = $line =~ /wep_key0="(.+)"/;
+            # Never accept an encoding of ASCII, as it takes too long to
+            # connect.  Always force the key back down to hex.
+            ($config->{'key'}) =~ s/(.|\n)/sprintf("%02lx", ord $1)/eg;
+        }
+        else {
+            ($config->{'key'})    = $line =~ /wep_key0=(.+)/;
+        }
+        $config->{'encoding'} = "hex";
+    }
+    elsif($line =~ /^psk=/) {
+        if($line =~ /psk="/) {
+            ($config->{'key'})    = $line =~ /psk="(.+)"/;
+            $config->{'encoding'} = "ascii";
+        }
+        else {
+            ($config->{'key'})    = $line =~ /psk=(.+)/;
+            $config->{'encoding'} = "hex";
+        }
+    }
+    elsif($line =~ /^key_mgmt=/) {
+        if($line =~ /WPA2-PSK/) {
+            $config->{'auth'} = 'WPA2PSK';
+        }
+        elsif($line =~ /WPA-PSK/) {
+            $config->{'auth'} = 'WPAPSK';
+        }
+        # WEP has key management of NONE
+        elsif($line =~ /NONE/) {
+            ;
+        }
+        elsif($line =~ /EAP/) {
+            $config->{'auth'} = 'WPAEAP';
+        }
+        else {
+            open(my $f, '>>', "/tmp/parse_wpa_line_error.txt");
+            print $f "Unknown key management: $line\n";
+            close($f);
+        }
+    }
+    elsif($line =~ /^pairwise=/ || $line =~ /^pairwise_cipher=/) {
+        if($line =~ /CCMP/) {
+            $config->{'encryption'} = "AES";
+        }
+        elsif($line =~ /TKIP/) {
+            $config->{'encryption'} = "TKIP";
+        }
+        # None for e.g. WEP
+        elsif($line =~ /NONE/) {
+            ;
+        }
+        elsif($line =~ /WEP/) {
+            $config->{'encryption'} = "WEP";
+        }
+        else {
+            open(my $f, '>>', "/tmp/parse_wpa_line_error.txt");
+            print $f "Unknown encryption: $line\n";
+            close($f);
+        }
+    }
+    else {
+        open(my $f, '>>', "/tmp/parse_wpa_line_error.txt");
+        print $f "Unrecognized line: $line\n";
+        close($f);
+    }
+}
+
+
+
+sub do_ap_scan {
+    my ($config, $iface) = @_;
+    my ($hidden_ssid, $hidden_ssid_network);
+    my %aps;
+
+    # wpa_supplicant returns frequencies.  Convert these to channels.
+    my %channel_lut = (
+        2412    => 1,
+        2417    => 2,
+        2422    => 3,
+        2427    => 4,
+        2432    => 5,
+        2437    => 6,
+        2442    => 7,
+        2447    => 8,
+        2452    => 9,
+        2457    => 10,
+        2462    => 11,
+        2467    => 12,
+        2472    => 13,
+        2484    => 14,
+    );
+
+
+    # Ensure the wifi card is up.  It may have been brought down by
+    # starting a connection on e.g. eth0.
+    system("ifconfig $iface up");
+
+
+    # There seems to be a race condition wherein the wifi card
+    # won't be able to scan at all when it is first brought up,
+    # unless we give it a small amount of time.
+    sleep(2);
+
+
+    # Ensure the LEDs are all turned off.  When bringing the card up the
+    # first time, they can be blinking.
+    system("mute_leds") if($ENV{'CNPLATFORM'} eq "falconwing");
+
+
+    # Ensure wpa_supplicant is running, as that's what we use for scanning.
+    if(! -e "/var/run/wpa_supplicant/$iface") {
+        run_wpa_supplicant($iface);
+    }
+    
+    
+    # Determine if we need to do a special hidden-ssid scan.
+    if(-e "/tmp/hidden_ssid") {
+        open(my $fh, '<', "/tmp/hidden_ssid")
+            or die("Couldn't open /tmp/hidden_ssid: $!\n");
+        $hidden_ssid = <$fh>;
+        chomp $hidden_ssid;
+        close($fh);
+        unlink("/tmp/hidden_ssid");
+    } 
+    
+    if(defined $hidden_ssid) {
+    
+        # Add a network to wpa_supplicant.  We'll make this network's ssid
+        # be the hidden ssid, so we'll be able to see it when we scan.
+        open(my $fh, '-|', "wpa_cli -i $iface add_network");
+        while(<$fh>) {
+            chomp;
+            $hidden_ssid_network = $_;
+        }
+        close($fh);
+        
+        if(!defined($hidden_ssid_network) || $hidden_ssid_network eq "") {
+            die("Couldn't create a new network for SSID scanning\n");
+        }
+        
+        wpa_cli($iface, "set_network $hidden_ssid_network scan_ssid 1");
+        wpa_cli($iface, "set_network $hidden_ssid_network ssid \\\""  . quotemeta($hidden_ssid) . "\\\"");
+        wpa_cli($iface, "disconnect");
+        wpa_cli($iface, "select_network $hidden_ssid_network");
+    }
+        
+
+
+    # Perform two scans of the wifi network.
+    for(1..2) {
+        wpa_cli($iface, "scan");
+        # Scanning seems to take about six seconds on this card, so give
+        # it some time before we check the results below.
+        sleep(5);
+        
+        
+        # Open a pipe to wpa_cli and read out the scan results.
+        open(my $cli, '-|', "wpa_cli -i $iface scan_results")
+            or die("Unable to communicate with wpa_cli: $!");
+            
+        while(my $line=<$cli>) {
+            chomp $line;
+            next if $line =~ /^bssid/;
+            next if $line =~ /^Selected/;
+        
+            # wpa_supplicant returns tab-delimited values.  There are always
+            # five fields, even if some are empty.  Some explanations:
+            # For WPA-EAP network:
+            #00:1e:4a:e4:8d:50  2412    190 [WPA-EAP-TKIP]  Chumby
+            # For an open network:
+            #00:16:b6:b9:a9:fe  2462    198     chu33
+            # For an open, hidden network:
+            #00:16:b6:b9:a9:fe  2462    196     
+            # For a hidden WPA2 network:
+            #00:19:5b:0b:b3:d8  2412    212 [WPA2-PSK-CCMP-preauth] 
+            #
+            # The code that geneates this is in ctrl_iface.c, in a function
+            # called wpa_supplicant_ctrl_iface_scan_result().
+
+        
+        
+            my ($bssid, $freq, $strength, $flags, $ssid) = split("\t", $line, 5);
+            my $auth       = "OPEN";
+            my $encryption = "NONE";
+            my $channel    = 1;
+            my $wps        = "no";
+
+            # Occasionally, we'll get an error from the card, which will
+            # result in blank values.  Retry the scan.
+            next if(!defined($bssid) || !defined($ssid));
+    
+            $channel = $channel_lut{$freq} if(defined $channel_lut{$freq});
+            
+            
+            # Special case: If we're scanning hidden SSIDs, only print out
+            # SSIDs that match what we're looking for.
+            if(defined($hidden_ssid) && $ssid ne $hidden_ssid) {
+                next;
+            }
+    
+            
+            if($flags =~ /WPA2-PSK/) {
+                $auth = "WPA2PSK";
+            }
+            elsif($flags =~ /WPA-PSK/) {
+                $auth = "WPAPSK";
+            }
+            elsif($flags =~ /WPA2-EAP/) {
+                $auth = "WPA2EAP";
+            }
+            elsif($flags =~ /WPA-EAP/) {
+                $auth = "WPAEAP";
+            }
+            elsif($flags =~ /WEP/) {
+                $encryption = "WEP";
+                $auth       = "WEPAUTO";
+            }
+
+            if($flags =~ /WPS-PBC/) {
+                $wps = "PBC";
+                if($flags =~ /WPS-PIN/) {
+                    $wps = "PBC,PIN";
+                }
+            }
+            elsif($flags =~ /WPS-PIN/) {
+                $wps = "PIN";
+            }
+            elsif($flags =~ /WPS/) {
+                $wps = "yes";
+            }
+            
+            if($flags =~ /CCMP/) {
+                $encryption = "AES";
+            }
+            elsif($flags =~ /TKIP/) {
+                $encryption = "TKIP";
+            }
+            
+#            # Arbitrary voodoo.
+#            $strength = ($strength-160)*2;
+#            if($strength < 0) {
+#                $strength = 0;
+#            }
+            
+            $aps{$bssid} = {
+                auth            => $auth,
+                mode            => "Master",
+                channel         => $channel,
+                signalstrength  => -$strength,
+                linkquality     => $strength,
+                encryption      => $encryption,
+                ssid            => BDXML::html_escape($ssid),
+                hwaddr          => $bssid,
+                wps             => $wps,
+            };
+
+            add_bss_info($iface, $aps{$bssid}, $bssid);
+            
+        #    print STDERR "Line: $line\n";
+        }
+        close($cli);
+    }
+    
+    print "<aps>\n";
+    my @aps = sort { $a->{'strength'} <=> $b->{'strength'} } values %aps;
+    for my $ap(@aps) {
+            print "  <ap"
+                . " mode=\"$ap->{'mode'}\""
+                . " encryption=\"$ap->{'encryption'}\""
+                . " channel=\"$ap->{'channel'}\""
+                . " hwaddr=\"$ap->{'hwaddr'}\""
+                . " auth=\"$ap->{'auth'}\""
+                . " linkquality=\"$ap->{'linkquality'}\""
+                . " signalstrength=\"$ap->{'signalstrength'}\""
+                . " noiselevel=\"$ap->{'noiselevel'}\""
+                . " ssid=\"$ap->{'ssid'}\""
+                . " wps=\"$ap->{'wps'}\""
+                . " />\n";
+    }
+    print "</aps>\n";
+
+    
+    
+    # Reconfigure the interface to use the previous network connection.
+    if(defined($hidden_ssid)) {
+        wpa_cli($iface, "remove_network $hidden_ssid_network");
+        
+        # If the hidden network is not zero, then we probably have a previous
+        # network setting on network id 0.  Select that one and reconnect to it.
+        if($hidden_ssid_network) {
+            wpa_cli($iface, "select_network 0");
+            wpa_cli($iface, "reconnect");
+        }
+    }
+}
+
+
+
+sub add_bss_info {
+    my ($iface, $hash, $bssid) = @_;
+    open(my $bs, '-|', "wpa_cli -i $iface bss $bssid");
+    while(<$bs>) {
+        chomp;
+        my ($key, $value) = split('=', $_, 2);
+
+        # Translate wpa_supplicant names to our names.
+        if($key eq "level") {
+            $key = "signalstrength";
+            $value = (int($value)/-10.0);
+        }
+        elsif($key eq "qual") {
+            $key = "linkquality";
+            $value = ($value / 2) + 50; # Scale value to be equal to IF.
+        }
+        elsif($key eq "noise") {
+            $key = "noiselevel";
+        }
+
+        $hash->{$key} = BDXML::html_escape($value);
+    }
+    close($bs);
+
+}
+
+
+# Come up with a list of all possible WEP keys, given the specified ASCII key.
+sub generate_wep_keys {
+    my ($key) = @_;
+    chomp( $key );
+
+    # Generate a list of all possible hex keys given the provided ascii key.
+    $key =~ s/([^a-zA-Z0-9])/\\$1/g;
+    my $wepKeys = `weppasswd.pl $key`;
+    chomp($wepKeys);
+    my @wepKeys = split("\n", $wepKeys);
+
+    # If the password entered is exactly 10 or 26 HEX characters,
+    # add them to the front of the list of keys to try.
+    if( $key =~ m/^[0-9A-F]{10}$|^[0-9A-F]{26}$/i ) {
+        unshift(@wepKeys, $key);
+    }
+    return @wepKeys;
+}
+
+
+sub configure_address {
+    my ($config, $iface) = @_;
+
+    killall("udhcpc");
+
+	# On Silvermoon, we use the Marvell sd8686 driver.  There is a
+	# feature with WEP where the firmware on the card will not remember WEP
+	# keys.  If you associate with an AP, and then immediately reassociate,
+	# such as issuing:
+	#     iwconfig wlan0 key 1234567890 open
+	#     iwconfig wlan0 essid Foo
+	#     iwconfig wlan0 essid Foo
+	# Then the driver will report that it's connected to the network Foo,
+	# but will not pass any traffic.
+	# This function gets called when the driver reports that it's
+	# connected.  In the event that the SSID has been updated twice, which
+	# may happen as a result of the ordering of the disconnect /
+	# reconfigure / select_network / reassociate calls above, we'll
+	# re-issue the key which solves the problem.
+	if(($ENV{'CNPLATFORM'} eq "silvermoon")
+			&& $config->{'type'} eq "wlan"
+			&& $config->{'encryption'} eq "WEP") {
+		system("iwconfig " . $iface . " key " . $config->{'key'} . " open");
+	}
+    
+    # If the network is configured statically, specify everything manually.
+    if($config->{'allocation'} eq "static") {
+    
+        # Configure the IP and netmask.
+        if(system("ifconfig $iface"
+                     . " $config->{'ip'}"
+                     . " netmask $config->{'netmask'}"
+                  )) {
+            die("Network interface not found\n");
+        }
+
+
+        # Set default gateway.
+        if(system("route add default gw $config->{'gateway'} dev $iface")) {
+            die("Unable to configure default gateway\n");
+        }
+
+        # Write nameserver configuration file.
+        open(my $f, ">", "/etc/resolv.conf");
+        print $f "nameserver $config->{'nameserver1'}\n";
+        print $f "nameserver $config->{'nameserver2'}\n";
+        close($f);
+    }
+
+
+    # For DHCP allocation, call udhcpc.  Timeout and exit immediately
+    # if we don't have an IP within 5 seconds.
+    elsif( $config->{'allocation'} eq "dhcp" || $config->{'auth'} eq "WPS" ) {
+        try_multiple(2, "DHCP never gave us an address", sub {
+            return system("udhcpc -t 5 -n -p /var/run/udhcpc.$iface.pid -i $iface");
+        });
+    }
+
+    else {
+        die("Unrecognized network allocation mechanism '$config->{'allocation'}'\n");
+    }
+    
+}
+
+
+
+
+# Generate a ppp config file, then connect to a 3G connection.
+sub connect_3g {
+    my ($config, $iface) = @_;
+
+
+    my $peer_file = "ppp-peer";
+    my $tries     = 100;
+    my $try       = 0;
+    my $success   = 0;
+    my $auth      = "noauth";
+
+    # Default settings.  May be overridden by the config file.
+    my $cfg_3g    = {
+        apn      => "",
+        username => "guest",
+        password => "guest",
+        pin      => "",
+        number   => "#777",
+        device   => "/dev/ttyUSB0",
+    };
+
+    
+    # For demo purposes, udev creates files in /psp to indicate what sort
+    # of 3G device is connected.  Ideally, we'd just check for the SIM card.
+    if( -e "/tmp/3g.japan" ) {
+        open(my $g3, '>', "/psp/3g_config");
+        print $g3 '<configuration apn="emb.ne.jp" username="em" password="em" number="*99***1#"/>';
+        close $g3;
+        
+        # Wait for the modem to appear.
+        try_multiple(10, "Modem never appeared!", sub {
+                return ! -e "/dev/ttyUSB0";
+        });
+    }
+    
+    elsif( -e "/tmp/3g.china" ) {
+        open(my $g3, '>', "/psp/3g_config");
+        print $g3 '<configuration username="guest" password="guest" number="#777"/>';
+        close $g3;
+        
+        # Wait for the modem to appear.
+        try_multiple(10, "Modem never appeared!", sub {
+                return ! -e "/dev/ttyUSB0";
+        });
+    }
+
+    elsif( -e "/tmp/3g.willcom" ) {
+        $peer_file = "willcom";
+    }
+        
+    
+    # Insert the ppp_generic module, which isn't loaded by default.
+    system("modprobe ppp_generic");
+    
+
+    # Read the config file, if one exists.
+    # It should return a valid BDXML object.         
+    if( -e "/psp/3g_config" ) {
+        my $config;
+        local $/ = undef;
+        open(my $cfg_file, '<', "/psp/3g_config")
+            or die("Couldn't open 3g config file \"/psp/3g_config\": $!");
+        $config = BDXML::parse(<$cfg_file>);
+        close($cfg_file);
+
+        $cfg_3g = {
+            %$cfg_3g,
+            %{$$config{'properties'}},
+        }
+    }
+    
+    
+    
+    # Prefix the username and/or password with their respective strings,
+    # so we can just drop them in the config file.
+    if($cfg_3g->{'username'} ne "") {
+        $cfg_3g->{'username'} = "user " . $cfg_3g->{'username'};
+    }
+    if($cfg_3g->{'password'} ne "") {
+        $cfg_3g->{'password'} = "password " . $cfg_3g->{'password'};
+    }
+    if($cfg_3g->{'apn'} ne "") {
+        $cfg_3g->{'apn'} = "#APN: " . $cfg_3g->{'apn'};
+    }
+
+
+    # Generate the PPP configuration file.
+    open(my $cfg, '>', "/psp/ppp-peer")
+        or die("Couldn't open PPP config file /psp/ppp-peer: $!");
+
+    
+    
+    # Write the config.
+    print $cfg <<END_OF_CONFIG;
+$cfg_3g->{'device'}
+460800
+$auth
+debug
+usepeerdns
+defaultroute
+noccp
+nobsdcomp
+novj
+persist
+holdoff 0
+maxfail 0
+$cfg_3g->{'username'}
+$cfg_3g->{'password'}
+$cfg_3g->{'apn'}
+#NUMBER: $cfg_3g->{'number'}
+connect "perl /usr/chumby/scripts/chumby_3g_connect.pl"
+END_OF_CONFIG
+    
+    
+    # Initiate the call to the host.
+    system("pppd call " . $peer_file);
+    
+    
+    # Continue calling until (1) we time out, or (2) we're successful.
+    # Note that the call can take several minutes to complete.
+    eval {
+        try_multiple($tries, "Call never completed", sub {
+        
+            # Fail if pppd isn't running anymore.
+            return 0 if(system("ps | grep -v grep | grep -q pppd"));
+            #print STDERR "pppd still running!\n";
+            
+            # Succeed when ppp0 appears.
+            if(int(`ifconfig | grep ppp0 | grep -v grep | wc -l`) > 0) {
+                $success = 1;
+                return 0;
+            }
+            #print STDERR "pppd interface not yet present.\n";
+            
+            # Otherwise, try again.
+            return 1;
+        });
+    };
+    # If pppd fails (for whatever reason), ensure it's dead and then
+    # throw the error.
+    if($@) {
+        killall("pppd");
+        die($@ . "\n");
+    }
+    
+    
+    # We've successfully connected.
+    # Point the user's DNS at opendns.  This may or may not break,
+    # but some modems have problems reading DNS.
+    system("echo nameserver 208.67.222.222 >> /etc/resolv.conf");
+    system("echo nameserver 208.67.220.220 >> /etc/resolv.conf");
+    
+    
+    # Read in the IP address, so it may be passed to the controlpanel
+    # when it asks for the configuration.
+    $config->{'ip'} = `ifconfig ppp0 | grep inet | cut -d':' -f2 | cut -d' ' -f1`;
+    chomp $config->{'ip'};
+    $config->{'gateway'}     = $$config{'ip'};
+    $config->{'nameserver1'} = "208.67.222.222";
+    $config->{'nameserver2'} = "208.67.220.220";
+    
+    return 1;
+}
+
+
+
+# Kills wpa_supplicant.
+# XXX Ignores the iface parameter.  Need to figure out how to kill the
+# /correct/ wpa_supplicant if there are multiple interfaces.
+sub terminate_wpa_supplicant {
+    my ($iface) = @_;
+    killall("wpa_supplicant wpa_cli");
+    sleep(1);
+    killall("-9 wpa_supplicant wpa_cli");
+    sleep(1);
+}
+
+
+# Runs wpa_supplicant on the specified interface.
+sub run_wpa_supplicant {
+    my ($iface) = @_;
+
+    write_wpa_config_dummy("/tmp/wpa.$iface.conf", {}, $iface);
+
+    # Run wpa_supplicant, using the wext driver.  Background it,
+    # but Wait for wpa_cli to connect before proceeding.
+    if(system("wpa_supplicant"
+                . " -i$iface"
+                . " -Dwext"
+                . " -c/tmp/wpa.$iface.conf"
+                . " -C/var/run/wpa_supplicant"
+#                . " -g/var/run/wpa_supplicant.$iface"
+                . " -B"
+                . " -W")) {
+        die("Unable to run wpa_supplicant\n");
+    }
+
+
+    # Now run wpa_cli and point it at ourselves, so that if we ever
+    # connect or disconnect we can take action.
+    if(system("wpa_cli"
+                . " -B"
+                . " -p/var/run/wpa_supplicant"
+                . " -a$0")) {
+        die("Unable to run wpa_cli to monitor network events\n");
+    }
+}
+
+
+
+sub killall {
+    my ($apps) = @_;
+    return system("killall $apps 2> /dev/null");
+}
+
+sub wpa_cli {
+    my ($iface, $cmd) = @_;
+    return system("wpa_cli -i $iface $cmd 2> /dev/null > /dev/null");
+}
+
+sub try_multiple {
+    my ($times, $error, $block, $block_args) = @_;
+
+    if($debug_mode) {
+        print STDERR "Waiting for event: $error\n";
+    }
+
+    for(my $i=0; $i<$times; $i++) {
+        return if !$block->($block_args);
+        sleep(1);
+    }
+
+    open(my $f, '>', "/tmp/network.error");
+    print $f $error;
+    close($f);
+    die($error . "\n");
+}
+
+
+sub write_wpa_config_wpa {
+    my ($filename, $config, $iface) = @_;
+    my $key         = $config->{'key'};
+    my $ssid        = $config->{'ssid'};
+    my $encoding    = $config->{'encoding'};
+    my $auth        = $config->{'auth'}; 
+    my $encryption  = $config->{'encryption'};
+
+
+
+    # Convert chumby auth to wpa_supplicant auth (e.g. WPAPSK -> WPA-PSK).
+    if($auth =~ /WPA2/) {
+        $auth =~ s/WPA2/WPA2-/g;
+    }
+    else {
+        $auth =~ s/WPA/WPA-/g;
+    }
+
+    # Convert chumby encryption to wpa_supplicant encryption.
+    if($encryption eq "AES") {
+        $encryption = "CCMP";
+    }
+
+
+    # Quote the key if it's ascii.
+    if($encoding eq "ascii") {
+        $key = "\"$key\"";
+    }
+
+
+
+    open(my $f, ">", $filename)
+        or die("Couldn't open $filename: $!");
+
+
+    print $f <<END;
+ctrl_interface=/var/run/wpa_supplicant
+ap_scan=1
+update_config=1
+network={
+    ssid="$ssid"
+    scan_ssid=1
+END
+#    pairwise=$encryption
+
+    if($auth eq "WPA-EAP" || $auth eq "WPA2-EAP") {
+        print $f "    identity=\"$config->{'username'}\"\n";
+        print $f "    password=$key\n";
+        print $f "    key_mgmt=WPA-EAP\n";
+    }
+    else {
+        print $f "    psk=$key\n";
+#        print $f "    key_mgmt=$auth\n";
+    }
+    print $f "}";
+    close( $f );
+}
+
+
+
+
+sub write_wpa_config_wep {
+    my ($filename, $config, $iface) = @_;
+    my $ssid    = $config->{'ssid'};
+    my $key     = $config->{'key'};
+
+    open(my $f, ">", $filename)
+        or die("Couldn't open $filename: $!");
+
+    print $f <<END;
+ctrl_interface=/var/run/wpa_supplicant
+ap_scan=1
+update_config=1
+network={
+    ssid="$ssid"
+    scan_ssid=1
+    key_mgmt=NONE
+    wep_key0=$key
+    wep_tx_keyidx=0
+}
+END
+    close($f);
+}
+
+
+
+# Writes a wpa config file to connect to an open network.
+sub write_wpa_config_open {
+    my ($filename, $config, $iface) = @_;
+
+    my $ssid    = $config->{'ssid'};
+
+    open(my $f, ">", $filename)
+        or die("Couldn't open $filename: $!");
+
+    print $f <<END;
+ctrl_interface=/var/run/wpa_supplicant
+ap_scan=1
+update_config=1
+network={
+    ssid="$ssid"
+    scan_ssid=1
+    key_mgmt=NONE
+}
+END
+    close($f);
+}
+
+
+
+# Writes a dummy wpa_config, suitable for performing scans and doing wps
+# discovery.
+sub write_wpa_config_dummy {
+    my ($filename, $config, $iface) = @_;
+    open(my $f, ">", $filename)
+        or die("Couldn't open $filename: $!");
+    print $f "ap_scan=1\n";
+    print $f "update_config=1\n";
+    close($f);
+}
+
+
+
+
+
+sub start_ap {
+    my ($iface) = @_;
+    if( -e "/psp/start_ap" || -e "/mnt/usb/start_ap" ) {
+        system("start_ap.sh $iface");
+    }
+}
+
+
+# synchronize time with an NTP server if the interface is running
+sub sync_time {
+    my ($iface) = @_;
+    system("sync_time.sh");
+}
+
+# start sshd if applicable
+sub start_ssh {
+    if( $ENV{'CNPLATFORM'} ne "yume" ) {
+        if( ( -e "/psp/start_sshd" ) || ( -e "/mnt/usb/start_sshd" ) ) {
+            system("/sbin/sshd");
+        }
+    }
+}
+
+
+#
+# start djmount, the upnp fuse-based client
+#
+sub start_djmount {
+    my ($iface) = @_;
+#    if($ENV{'CNPLATFORM'} eq 'silvermoon'
+#    || $ENV{'CNPLATFORM'} eq 'stormwind') {
+#        system("mkdir -p /mnt/av");
+#
+#        # Unmount djmount if it's currently running.
+#        if(!system("mount | grep -q djmount")) {
+#            system("umount /mnt/av");
+#        }
+#        system("ulimit -s 1024; djmount /mnt/av");
+#    }
+}
+
+# restart zeroconf service, which kicks off mDNSResponder and mDNSPublish
+sub start_zeroconf {
+    if( $ENV{'CNPLATFORM'} ne 'yume' ) {
+        system("service_control zeroconf restart");
+    }
+}
+
+
+
+sub mute_leds {
+
+    if( $ENV{'CNPLATFORM'} eq "falconwing" ) {
+        # Turn LEDs off.
+        # Note that we open a pipe to ls here, because globbing just
+        # doesn't seem to work on this version of perl at all.
+        # All we need to do for this process is write a zero for every
+        # one of this device's LEDs.
+        my $LED_DIR = "/sys/class/leds";
+        open(my $list_h, "-|", "/bin/ls -1 --color=never $LED_DIR/")
+            or die("Couldn't list led dir: $!");
+        while(my $dir = <$list_h>) {
+            chomp $dir;
+            open(my $led_bright, '>', "$LED_DIR/$dir/brightness")
+                or die("Couldn't open brightness file: $!");
+            print $led_bright "0";
+            close($led_bright);
+        }
+        close($list_h);
+    }
+}
+
+
+sub END {
+    # Remove our PID file.
+    my (@progname) = split('/', $0);
+    my $progname = $progname[-1];
+    unlink("/var/run/$progname.pid");
+}

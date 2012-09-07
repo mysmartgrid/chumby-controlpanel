@@ -35,6 +35,7 @@ find_package(ASound)
 
 # search for iwlib
 # search for libts
+find_package(LibTS)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXXFLAGS}")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC --rtti -W -Wall -Wextra ")
@@ -51,6 +52,7 @@ link_directories(${TOOLCHAIN_PREFIX}/usr/lib)
 
 add_subdirectory(controlpanel)
 add_subdirectory(plugins)
+add_subdirectory(tools)
 
 # enable unit testing
 include(CTest)
@@ -65,7 +67,6 @@ message("             prefix: ${CMAKE_INSTALL_PREFIX}")
 INSTALL(FILES README INSTALL COPYRIGHT DESTINATION
   share/doc/chumby-${V_MAJOR}-${V_MINOR}
 )
-makeChumbyImage()
 
 # CPACK packaging
 INCLUDE(InstallRequiredSystemLibraries)
