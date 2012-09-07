@@ -23,6 +23,7 @@ set(_asm_compiler ${TARGET_TRIPLET}-as)
 set(QTDIR "${TOOLCHAIN_PREFIX}/usr/qt4")
 # set(QTDIR "/mnt/usb")
 set(ENV{QTDIR} ${QTDIR})
+set(ENV{PKG_CONFIG_PATH} ${TOOLCHAIN_PREFIX}/lib/pkgconfig)
 
 #compiler
 find_program(c_compiler
