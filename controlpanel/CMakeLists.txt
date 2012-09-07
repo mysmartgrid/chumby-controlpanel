@@ -11,7 +11,7 @@ set(controlpanel_SRCS
   plugin.cpp
   audioplugin.cpp
   dllmanager.cpp
-#  PlaybackThread.cpp
+  #  PlaybackThread.cpp
   )
 set(controlpanel_HDRS
   alarmdaemon.h
@@ -20,8 +20,8 @@ set(controlpanel_HDRS
   alarmwidget.h
   plugin.h
   audioplugin.h
-#  dllmanager.h
-#  PlaybackThread.h
+  #  dllmanager.h
+  #  PlaybackThread.h
   )
 
 set(controlpanel_RCS controlpanel.qrc)
@@ -49,20 +49,21 @@ qt4_wrap_ui (controlpanel_UI_HDRS
   )
 qt4_wrap_cpp( controlpanel_MOC_SRCS
   ${controlpanel_HDRS}
-)
+  )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${ASOUND_INCLUDE_DIR})
 
 add_executable(chumby-controlpanel  ${controlpanel_SRCS}
   ${controlpanel_MOC_SRCS}
   ${controlpanel_RC_SRCS} 
   ${controlpanel_UI_HDRS}
- )
+  )
 target_link_libraries(chumby-controlpanel ${QT_QTGUI_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTNETWORK_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTCORE_LIBRARY})
-target_link_libraries(chumby-controlpanel asound)
+target_link_libraries(chumby-controlpanel ${ASOUND_LIBRARY})
 target_link_libraries(chumby-controlpanel ts)
 target_link_libraries(chumby-controlpanel iw)
 target_link_libraries(chumby-controlpanel dl)
@@ -72,4 +73,4 @@ set_target_properties(chumby-controlpanel PROPERTIES INSTALL_RPATH "/mnt/usb/lib
 set_target_properties(chumby-controlpanel PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS chumby-controlpanel
-  RUNTIME DESTINATION controlpanel)
+  RUNTIME DESTINATION ${PANEL_DIR})

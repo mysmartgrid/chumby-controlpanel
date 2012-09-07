@@ -14,6 +14,9 @@ set(CHUMBY_VERSION "${CHUMBY_SHORT_VERSION}${VERSION_SEP}${CHUMBY_SUB_VERSION}")
 set(CHUMBY_RPM_VERSION "${CHUMBY_MAJOR_VERSION}.${CHUMBY_MINOR_VERSION}.${CHUMBY_SUB_VERSION}")
 set(VERSION_DATE "2012-08-24")
 
+set(PANEL_DIR "chumby-controlpanel/controlpanel")
+set(PLUGIN_DIR "chumby-controlpanel/plugins")
+
 ###########################################################
 # Where are the additional libraries installed? Note: provide includes
 # path here, subsequent checks will resolve everything else
@@ -28,6 +31,8 @@ IF(NOT QT_FOUND)
 ENDIF(NOT QT_FOUND)
 
 # search for alsa sound
+find_package(ASound)
+
 # search for iwlib
 # search for libts
 
@@ -60,6 +65,7 @@ message("             prefix: ${CMAKE_INSTALL_PREFIX}")
 INSTALL(FILES README INSTALL COPYRIGHT DESTINATION
   share/doc/chumby-${V_MAJOR}-${V_MINOR}
 )
+makeChumbyImage()
 
 # CPACK packaging
 INCLUDE(InstallRequiredSystemLibraries)

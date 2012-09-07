@@ -24,6 +24,7 @@ set(radioplugin_HDRS
 
 include_directories(${CMAKE_SOURCE_DIR}/controlpanel)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${ASOUND_INCLUDE_DIR})
 
 
 qt4_add_resources(radioplugin_RC_SRCS radioplugin.qrc)
@@ -40,5 +41,5 @@ set_target_properties(radioplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(radioplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS radioplugin
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION ${PLUGIN_DIR})
 
