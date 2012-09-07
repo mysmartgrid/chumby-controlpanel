@@ -27,4 +27,4 @@ set_target_properties(chumbykbddriver PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(chumbykbddriver PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS chumbykbddriver 
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION plugins/kbddrivers)
