@@ -20,4 +20,4 @@ set_target_properties(helloworld PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(helloworld PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS helloworld
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION ${PLUGIN_DIR})

@@ -38,4 +38,4 @@ set_target_properties(netconfigplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(netconfigplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS netconfigplugin
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION ${PLUGIN_DIR})

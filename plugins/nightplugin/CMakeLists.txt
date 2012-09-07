@@ -73,6 +73,7 @@ qt4_wrap_cpp(nightplugin_MOC_SRCS
 include_directories(${CMAKE_SOURCE_DIR}/controlpanel)
 include_directories(${CMAKE_BINARY_DIR}/controlpanel)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${ASOUND_INCLUDE_DIR})
 
 
 
@@ -89,4 +90,4 @@ set_target_properties(nightplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(nightplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS nightplugin
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION ${PLUGIN_DIR})

@@ -44,4 +44,4 @@ set_target_properties(dispvaluesplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(dispvaluesplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
 install(TARGETS dispvaluesplugin 
-  LIBRARY DESTINATION plugins)
+  LIBRARY DESTINATION ${PLUGIN_DIR})
