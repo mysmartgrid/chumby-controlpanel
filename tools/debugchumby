@@ -1,0 +1,43 @@
+#set environment up for qws
+export TSLIB_TSDEVICE=/dev/input/event1
+export TSLIB_FBDEVICE=/dev/fb0
+export TSLIB_PLUGINDIR=/mnt/usb/lib/ts
+#export TSLIB_CONSOLEDEVICE=/dev/ttyS0
+export TSLIB_CONFFILE=/mnt/usb/etc/ts.conf
+export TSLIB_CALIBFILE=/mnt/usb/etc/pointercal
+export LD_LIBRARY_PATH=/lib:/mnt/usb/lib
+export POINTERCAL_FILE=/mnt/usb/etc/pointercal
+export QWS_DISPLAY=LinuxFb:/dev/fb0:mmWidth113:mmHeight85
+export QWS_MOUSE_PROTO=tslib:/dev/input/event1
+export QWS_KEYBOARD=chumbykbdhandler:/dev/input/event0
+export QT_QWS_FONTDIR=/mnt/usb/lib/fonts
+
+if [[ $(cat /etc/software_version) != "1.0.7" ]];
+then
+	# start update
+	/usr/chumby/scripts/update_usb.sh
+	# ugly hack to prevent system to start up during update
+	while true; do
+		sleep 255;
+	done
+fi
+
+# check if start_network tries to reach chumby.com and replace it as we do not depend on chumby.com
+if [ -f /mnt/usb/start_network ] && [[ $(grep -c '^[^#]*chumby.com' /usr/chumby/scripts/start_network) -gt 0 ]];
+then
+	mount -o remount,rw /
+	cp /usr/chumby/scripts/start_network /usr/chumby/scripts/start_network.bak
+	cp /mnt/usb/start_network /usr/chumby/scripts/
+	mount -o remount,ro /
+fi
+
+# run calibration if no calibration file found
+if [ ! -f /mnt/usb/etc/pointercal ];
+then
+	/mnt/usb/bin/ts_calibrate;
+fi
+
+# run the controlpanel in an endless loop
+while true; do
+	/mnt/usb/chumby-controlpanel/controlpanel/chumby-controlpanel -qws
+done
