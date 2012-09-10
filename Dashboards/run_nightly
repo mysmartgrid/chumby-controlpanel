@@ -8,15 +8,15 @@ export CTEST=/usr/bin/ctest
 echo "Running ctest"
 
 
-# ${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly.cmake,TARGET_ARCH=ar71xx,CTEST_PUSH_PACKAGES=1
-${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly.cmake,_git_branch=kk-dev,CTEST_PUSH_PACKAGES=1
+# ${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly.cmake,TARGET_ARCH=ar71xx,CTEST_PUSH_PACKAGES=1
+${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly.cmake,_git_branch=kk-dev,CTEST_PUSH_PACKAGES=1
 
-#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly.cmake,compiler=clang
-#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly.cmake,_git_branch=kk-dev
+#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly.cmake,compiler=clang
+#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly.cmake,_git_branch=kk-dev
 
-#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly_2.cmake
-# ${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelNightly_x86-kk-dev.cmake
+#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly_2.cmake
+# ${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelNightly_x86-kk-dev.cmake
 
-#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelCoverage.cmake,_git_branch=kk-dev
-#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/Chumby-ControlpanelCoverage.cmake,_git_branch=kk-dev,compiler=clang
+#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelCoverage.cmake,_git_branch=kk-dev
+#${CTEST} -V -VV -S ${HOME}/chumby-controlpanel/Dashboards/ChumbyPanelCoverage.cmake,_git_branch=kk-dev,compiler=clang
 
