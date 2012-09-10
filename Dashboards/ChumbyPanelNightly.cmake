@@ -18,7 +18,6 @@ set(KDE_CTEST_VCS "git")
 set(KDE_CTEST_VCS_REPOSITORY ${URL})
 
 set(CMAKE_INSTALL_PREFIX "${CTEST_BINARY_DIRECTORY}/install")
-set(CMAKE_TOOLCHAIN_FILE ${CTEST_SOURCE_DIRECTORY}/modules/Toolchain-arm.cmake)
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 #set(CTEST_BUILD_CONFIGURATION "Profiling")
 
@@ -42,9 +41,11 @@ if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
   set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone ${URL} ${CTEST_SOURCE_DIRECTORY}")
 endif(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
 
+set(CMAKE_TOOLCHAIN_FILE ${CTEST_SOURCE_DIRECTORY}/modules/Toolchain-arm.cmake)
+
 ctest_start(${_ctest_type})
 ctest_update(SOURCE ${CTEST_SOURCE_DIRECTORY})
-#ctest_submit(PARTS Update)
+ctest_submit(PARTS Update)
 
 execute_process(
   COMMAND ${CTEST_GIT_COMMAND} checkout  ${_git_branch}
@@ -81,7 +82,7 @@ message("====> BUILD: ${build_res}")
 ctest_test(BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE test_res)
 message("====> TESTS: ${test_res}")
 
-#ctest_submit(RETURN_VALUE res)
+ctest_submit(RETURN_VALUE res)
 
 # package files
 include(${CTEST_BINARY_DIRECTORY}/CPackConfig.cmake)
