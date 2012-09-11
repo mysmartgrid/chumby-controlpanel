@@ -58,7 +58,6 @@ if(CMAKE_TOOLCHAIN_FILE)
     CMAKE_INSTALL_PREFIX
     )
   set(OS_NAME "openWRT")
-  set(OS_VERSION "10.03.1")
   set(CMAKE_SYSTEM_PROCESSOR ${openwrt_arch})
 else(CMAKE_TOOLCHAIN_FILE)
   kde_ctest_write_initial_cache("${CTEST_BINARY_DIRECTORY}"
