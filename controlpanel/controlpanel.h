@@ -49,8 +49,8 @@ private:
 
 	int sock_iwconfig;
 
-	MusicControl* mc;
-	AlarmDaemon* alarm;
+	MusicControl* _mc;
+	AlarmDaemon* _alarm;
 };
 
 class InitThread : public QThread

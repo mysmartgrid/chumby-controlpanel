@@ -16,6 +16,10 @@ namespace Msg
 {
 Controlpanel::Controlpanel(QWidget *parent)
   : QWidget(parent)
+	, currentPlugin(0)
+	, pluginWidget(0)
+	, _mc(0)
+	, _alarm(0)
 {
 	ui.setupUi(this);
 	this->grabKeyboard();
@@ -36,13 +40,16 @@ Controlpanel::Controlpanel(QWidget *parent)
 	connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
 	sock_iwconfig = ::iw_sockets_open();
-	//mc = MusicControl();
+	//_mc = MusicControl();
 
 	currentPlugin = NULL;
 
-	mc = &MusicControl::getInstance();
-	alarm = &AlarmDaemon::getInstance();
-	connect(this, SIGNAL(keyPressed()), alarm, SIGNAL(snooze()));
+#ifdef Q_WS_QWS
+	_mc = &MusicControl::getInstance();
+#endif /* Q_WS_QWS */
+
+	_alarm = &AlarmDaemon::getInstance();
+	connect(this, SIGNAL(keyPressed()), _alarm, SIGNAL(snooze()));
 }
 
 Controlpanel::~Controlpanel()
@@ -92,7 +99,10 @@ void Controlpanel::showWidget()
 
 void Controlpanel::stopPlugin()
 {
-	pluginWidget->close();
+	if( pluginWidget != NULL) {
+		printf(">>pluginWidget not NULL\n");
+		pluginWidget->close();
+	}
 	this->show();
 }
 
@@ -157,7 +167,7 @@ void Controlpanel::updateClock()
 	if (time.second() == 0)
 	{
 		qDebug() << "Checking alarms!";
-		alarm->check();
+		_alarm->check();
 	}
 	ui.timeLabel->setText( text );
 
@@ -190,7 +200,11 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 	         << ")";
 	switch ( event->key() )
 	{
+#ifdef Q_WS_QWS
 	case 28:
+#else /* Q_WS_QWS */
+	case 65:
+#endif /* Q_WS_QWS */
 		if ( AlarmDaemon::getInstance().isAlarmActive() )
 		{
 			qDebug() << "snooze";
@@ -202,10 +216,10 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 	case 8:
 		// volume
 		std::cout << "adjusting volume" << std::endl;
-		mc->increaseMasterVolume();
+		_mc->increaseMasterVolume();
 		break;
 	case 9:
-		mc->lowerMasterVolume();
+		_mc->lowerMasterVolume();
 		break;
 	}
 }
