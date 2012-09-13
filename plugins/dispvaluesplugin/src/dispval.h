@@ -25,10 +25,12 @@
 #include "spritevis/tacho.h"
 #include <cmath>
 
-class Plotter;
+
+	class Plotter;
 class TimeConverter_m; //plot label formater with minutes resolution
 class TimeConverter_s; //plot label formater with seconds resolution
 
+namespace Msg {
 //-----------------
 class DisplayPage : public QWidget
 {
@@ -165,5 +167,7 @@ class TimeConverter_m : public Converter
 	public:
 		QString convert ( double );
 };
+}
+// namespace Msg
 
 #endif // __DISPVAL_H__
