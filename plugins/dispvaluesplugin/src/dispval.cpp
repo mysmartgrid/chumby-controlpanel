@@ -2,7 +2,7 @@
 #include <QObject>
 
 
-DisplayPage::DisplayPage ( QWidget* parent ) : QWidget ( parent )
+Msg::DisplayPage::DisplayPage ( QWidget* parent ) : QWidget ( parent )
 {
 	digitalClk = new QLCDNumber ();
 	digitalClk->setSegmentStyle ( QLCDNumber::Filled );
@@ -70,7 +70,7 @@ DisplayPage::DisplayPage ( QWidget* parent ) : QWidget ( parent )
 }
 
 
-URLPage::URLPage ( QWidget* parent ) : QWidget ( parent )
+Msg::URLPage::URLPage ( QWidget* parent ) : QWidget ( parent )
 {
 	//QSettings settings ( "flukso.conf", QSettings::IniFormat );	
 	//QSettings settings ( "/mnt/usb/displayvalues/flukso.conf", QSettings::IniFormat );
@@ -160,7 +160,7 @@ URLPage::URLPage ( QWidget* parent ) : QWidget ( parent )
 	connect ( sen3, SIGNAL ( toggled ( bool ) ), this, SLOT ( buttonToggled ( bool ) ) );
 }
 
-void URLPage::buttonToggled ( bool checked )
+void Msg::URLPage::buttonToggled ( bool checked )
 {
 	QPushButton* button = ( QPushButton* ) sender();
 	button->setText ( ( checked ) ? QString ( "Disable" ) : QString ( "Enable" ) );
@@ -168,12 +168,12 @@ void URLPage::buttonToggled ( bool checked )
 
 
 
-PlotPage::PlotPage ( QWidget* parent ) : QWidget ( parent )
+Msg::PlotPage::PlotPage ( QWidget* parent ) : QWidget ( parent )
 {
 	QVBoxLayout* layout = new QVBoxLayout ( this );
 	plotter = new Plotter ( this );
 
-	TimeConverter_s* tc = new TimeConverter_s(); //create a new converter object...
+	TimeConverter_s* tc = new Msg::TimeConverter_s(); //create a new converter object...
 	plotter->setConverter ( tc ); //override the default "do-nothing"-converter
 
 	layout->addWidget ( plotter );
@@ -182,7 +182,7 @@ PlotPage::PlotPage ( QWidget* parent ) : QWidget ( parent )
 }
 
 
-VisPage::VisPage ( QWidget* parent ) : QWidget ( parent )
+Msg::VisPage::VisPage ( QWidget* parent ) : QWidget ( parent )
 {
 	QVBoxLayout* layout = new QVBoxLayout ( this );
 	tacho = new Tacho ( this );
@@ -193,7 +193,7 @@ VisPage::VisPage ( QWidget* parent ) : QWidget ( parent )
 }
 
 
-Display::Display() : QDialog()
+Msg::Display::Display() : QDialog()
 {
 	startButton = new QPushButton ( tr ( "Start" ) );
 	startButton->setDefault ( true );
@@ -277,7 +277,7 @@ Display::Display() : QDialog()
 
 //performs a quick check at app-start; if the flukso device specified in "flukso.conf" with
 //it's first sensor is reachable or not
-void Display::checkSettings()
+void Msg::Display::checkSettings()
 {
 	if ( QFile::exists ( "/mnt/usb/flukso.conf" ) ) {
 
@@ -306,7 +306,7 @@ void Display::checkSettings()
 
 
 //evaluates the result of the networking check at the start..
-void Display::checkSettingsStatus ( QNetworkReply* rep )
+void Msg::Display::checkSettingsStatus ( QNetworkReply* rep )
 {
 
 	if ( rep->error() == QNetworkReply::NoError ) {
@@ -338,7 +338,7 @@ void Display::checkSettingsStatus ( QNetworkReply* rep )
 }
 
 
-void Display::buttonToggled_gatekeeper ( bool checked )
+void Msg::Display::buttonToggled_gatekeeper ( bool checked )
 {
 	( checked ) ? currentsensors++ : currentsensors--;
 	qDebug() << "sensors enabled: " << currentsensors;
@@ -360,7 +360,7 @@ void Display::buttonToggled_gatekeeper ( bool checked )
 }
 
 
-void Display::updatePlotter()
+void Msg::Display::updatePlotter()
 {
 	//qDebug() << "plotupdate triggered..";
 	tplot->stop();
@@ -369,7 +369,7 @@ void Display::updatePlotter()
 }
 
 
-void Display::doNext() // TODO: refactor button functions!
+void Msg::Display::doNext() // TODO: refactor button functions!
 {
 	switch ( pages->currentIndex() ) {
 
@@ -396,7 +396,7 @@ void Display::doNext() // TODO: refactor button functions!
 }
 
 
-void Display::doPrev()
+void Msg::Display::doPrev()
 {
 
 	switch ( pages->currentIndex() ) {
@@ -424,13 +424,13 @@ void Display::doPrev()
 }
 
 
-void Display::enablestartButton()
+void Msg::Display::enablestartButton()
 {
 	startButton->setEnabled ( !urlPg->urlLineEdit->text().isEmpty() );
 }
 
 
-void Display::startDisp()
+void Msg::Display::startDisp()
 {
 	if ( tshow->isActive() || tfetch->isActive() ) {
 		qDebug() << "stoping...";
@@ -458,7 +458,7 @@ void Display::startDisp()
 }
 
 
-void Display::getSensor ( QNetworkReply*& replyn, QString sensortoken, QString sensormarker )
+void Msg::Display::getSensor ( QNetworkReply*& replyn, QString sensortoken, QString sensormarker )
 {
 
 	QString sensortxt = "/sensor/%1?unit=watt&interval=minute&version=1.0";
@@ -478,7 +478,7 @@ void Display::getSensor ( QNetworkReply*& replyn, QString sensortoken, QString s
 }
 
 
-void Display::getAllSensors_new()
+void Msg::Display::getAllSensors_new()
 {
 	if ( !urlPg->sensorLabel1->text().isEmpty() && urlPg->sen1->isChecked() ) {
 		getSensor ( reply1 , urlPg->sensorLabel1->text(), "sensor1" );
@@ -494,7 +494,7 @@ void Display::getAllSensors_new()
 }
 
 
-void Display::httpFinished ( QObject* repn )
+void Msg::Display::httpFinished ( QObject* repn )
 {
 	QNetworkReply* replyn = qobject_cast<QNetworkReply*> ( repn );
 
@@ -513,7 +513,7 @@ void Display::httpFinished ( QObject* repn )
 
 // this slot is only triggered when QNetworkReply has new data available,
 // not when the finished() signal is emmited - this way we use less RAM
-void Display::httpReadyRead ( QObject* repn )
+void Msg::Display::httpReadyRead ( QObject* repn )
 {
 	QNetworkReply* replyn = qobject_cast<QNetworkReply*> ( repn );
 
@@ -579,7 +579,7 @@ void Display::httpReadyRead ( QObject* repn )
 
 }
 
-void Display::plotData_new ( Plotter* plotter )
+void Msg::Display::plotData_new ( Plotter* plotter )
 {
 
 	int plotlen = 900; //TODO: make plot length method parameter, thus variable
@@ -589,7 +589,7 @@ void Display::plotData_new ( Plotter* plotter )
 	bool s3 = urlPg->sen1->isChecked();
 
 	if ( plotlen > 240 ) {
-		TimeConverter_m* tc = new TimeConverter_m();
+		TimeConverter_m* tc = new Msg::TimeConverter_m();
 		plotPg->plotter->setConverter ( tc );
 	}
 
@@ -648,7 +648,7 @@ void Display::plotData_new ( Plotter* plotter )
 }
 
 // plot-helper method; just to keep the code a bit cleaner..
-QVector<QPointD> Display::plotData_helper ( QMap<uint, uint>* mp, int plen, uint& miny, uint& maxy )
+QVector<QPointD> Msg::Display::plotData_helper ( QMap<uint, uint>* mp, int plen, uint& miny, uint& maxy )
 {
 	int msize = mp->size();
 	int goback = ( msize < plen ) ? msize : plen ;
@@ -671,7 +671,7 @@ QVector<QPointD> Display::plotData_helper ( QMap<uint, uint>* mp, int plen, uint
 }
 
 
-void Display::showCurrentVal_alt()
+void Msg::Display::showCurrentVal_alt()
 {
 	//qDebug() << "lastval: " << displayPg->lastval;
 	//qDebug() << "mapend:" << ( map->constEnd() - 1 ).key();
@@ -697,7 +697,7 @@ void Display::showCurrentVal_alt()
 }
 
 
-void Display::showAvg() //TODO: make dependant on which sensor data is displayed in the first place..
+void Msg::Display::showAvg() //TODO: make dependant on which sensor data is displayed in the first place..
 {
 	uint avg1 = 0;
 	uint avg2 = 0;
@@ -732,7 +732,7 @@ void Display::showAvg() //TODO: make dependant on which sensor data is displayed
 }
 
 
-void Display::sensorErr ( QObject* repn )
+void Msg::Display::sensorErr ( QObject* repn )
 {
 	QNetworkReply* replyn = qobject_cast<QNetworkReply*> ( repn );
 	qDebug() << QString ( "seems there was a problem downloading %1 data!" ).arg ( replyn->request().attribute ( QNetworkRequest::User ).toString() );
@@ -744,14 +744,14 @@ void Display::sensorErr ( QObject* repn )
 }
 
 
-QString TimeConverter_s::convert ( double value )
+QString Msg::TimeConverter_s::convert ( double value )
 {
 	QDateTime dtime = QDateTime::fromMSecsSinceEpoch ( qint64 ( value ) * 1000 );
 	return dtime.toString ( "hh:mm:ss" );
 }
 
 
-QString TimeConverter_m::convert ( double value )
+QString Msg::TimeConverter_m::convert ( double value )
 {
 	QDateTime dtime = QDateTime::fromMSecsSinceEpoch ( qint64 ( value ) * 1000 );
 	return dtime.toString ( "hh:mm" );
