@@ -1,13 +1,25 @@
 # -*- mode: cmake; -*-
 
 if(NOT TOOLCHAIN_PREFIX)
-     set(TOOLCHAIN_PREFIX "/opt/arm-2008q3")
-     message(STATUS "No TOOLCHAIN_PREFIX specified, using default: " ${TOOLCHAIN_PREFIX})
+  if("" MATCHES "$ENV{TOOLCHAIN_PREFIX}")
+    set(TOOLCHAIN_PREFIX $ENV{TOOLCHAIN_PREFIX})
+  else()
+    set(TOOLCHAIN_PREFIX "/opt/arm-2008q3")
+    message(STATUS "No TOOLCHAIN_PREFIX specified, using default: " ${TOOLCHAIN_PREFIX})
+  endif()
+else()
+  set(ENV{TOOLCHAIN_PREFIX} ${TOOLCHAIN_PREFIX})
 endif()
 
 if(NOT TARGET_TRIPLET)
+  if("" MATCHES "$ENV{TARGET_TRIPLET}")
+    set(TARGET_TRIPLET $ENV{TARGET_TRIPLET})
+  else()
     set(TARGET_TRIPLET "arm-none-linux-gnueabi")
     message(STATUS "No TARGET_TRIPLET specified, using default: " ${TARGET_TRIPLET})
+  endif()
+else()
+  set(ENV{TARGET_TRIPLET} ${TARGET_TRIPLET})
 endif()
 
 set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
@@ -38,7 +50,7 @@ find_program(c_compiler
   NO_CMAKE_SYSTEM_PATH
 )
 if( ${c_compiler} STREQUAL "c_compiler-NOTFOUND" )
-  message(FATAL_ERROR  "OpenWRT cross c-compiler ${c_compiler} not found.")
+  message(FATAL_ERROR  "ARM cross c-compiler ${c_compiler} not found.")
 endif( ${c_compiler} STREQUAL "c_compiler-NOTFOUND" )
 
 find_program(cxx_compiler
