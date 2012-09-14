@@ -38,7 +38,7 @@ set(controlpanel_RCS controlpanel.qrc)
 #controlpanel.pro
 #resources/
 
-qt4_add_resources(controlpanel_RC_SRCS ${controlpanel_RESOURCES})
+qt4_add_resources(controlpanel_RC_SRCS ${controlpanel_RCS})
 qt4_wrap_ui (controlpanel_UI_HDRS 
   ${loadingWidget_UIS}
   ${alarmwidget_UIS}

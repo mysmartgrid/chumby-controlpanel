@@ -116,7 +116,7 @@ void Controlpanel::getPlugins()
 
 		std::cout << directory_walker.fileName().toStdString() << std::endl;
 
-		if ( directory_walker.fileInfo().completeSuffix() == "so" )
+		if ( !directory_walker.fileInfo().isHidden() )
 		{
 			// Now create a DLLFactory for our PlugInFactory attached
 			// to the requested file
