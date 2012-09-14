@@ -15,13 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QListWidget" name="alarmList">
-     <property name="font">
-      <font>
-       <pointsize>20</pointsize>
-      </font>
-     </property>
-    </widget>
+    <widget class="QListWidget" name="alarmList"/>
    </item>
    <item>
     <widget class="QPushButton" name="doneButton">

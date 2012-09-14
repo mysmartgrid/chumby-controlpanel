@@ -9,7 +9,7 @@
 
 #include <QtCore/QDebug>
 
-AlarmWizard::AlarmWizard(QWidget *parent, Alarm* alarm) :
+AlarmWizard::AlarmWizard(QWidget *parent, Msg::Alarm* alarm) :
         QWizard(parent)
 {
         setOption(QWizard::IndependentPages);
@@ -30,7 +30,7 @@ AlarmWizard::AlarmWizard(QWidget *parent, Alarm* alarm) :
                 qDebug() << "time:" << alarm->getHour() << ":" << alarm->getMinute();
                 setField("hour", alarm->getHour());
                 setField("minute", alarm->getMinute());
-                Weekdays days = alarm->getDays();
+                Msg::Weekdays days = alarm->getDays();
                 if ( days.saturday && days.sunday )
                         setField("weekend", true);
                 else
@@ -79,11 +79,11 @@ void AlarmWizard::accept()
 {
         qDebug() << "accept";
         if ( _alarm ) {
-                AlarmDaemon::getInstance().removeAlarm(_alarm);
+                Msg::AlarmDaemon::getInstance().removeAlarm(_alarm);
                 delete _alarm;
                 _alarm = NULL;
         }
-        _alarm = new Alarm(field("name").toString());
+        _alarm = new Msg::Alarm(field("name").toString());
         qDebug() << "saving alarm:" << field("name").toString();
         qDebug() << "time:" << field("hour").toString() << ":" << field("minute").toString();
         _alarm->setTime(field("hour").toInt(), field("minute").toInt());
@@ -100,7 +100,7 @@ void AlarmWizard::accept()
                 setField("saturday", true);
                 setField("sunday", true);
         }
-        Weekdays days = { field("monday").toBool(),
+        Msg::Weekdays days = { field("monday").toBool(),
                           field("tuesday").toBool(),
                           field("wednesday").toBool(),
                           field("thursday").toBool(),
@@ -111,7 +111,7 @@ void AlarmWizard::accept()
         _alarm->setDays(days);
         _alarm->setSource(_source);
         _alarm->setSnooze(field("snooze").toInt());
-        AlarmDaemon::getInstance().addAlarm(_alarm);
+        Msg::AlarmDaemon::getInstance().addAlarm(_alarm);
         QWizard::accept();
 }
 

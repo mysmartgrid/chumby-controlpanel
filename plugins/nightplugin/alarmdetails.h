@@ -14,7 +14,7 @@ class AlarmDetails : public QWidget
     Q_OBJECT
 
 public:
-    explicit AlarmDetails(QWidget *parent = 0, Alarm* alarm = 0);
+    explicit AlarmDetails(QWidget *parent = 0, Msg::Alarm* alarm = 0);
     ~AlarmDetails();
 
 private slots:
@@ -23,7 +23,7 @@ private slots:
 
 private:
     Ui::AlarmDetails *_ui;
-    Alarm *_alarm;
+    Msg::Alarm *_alarm;
 };
 
 #endif // ALARMDETAILS_H

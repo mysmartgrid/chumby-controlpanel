@@ -17,7 +17,7 @@ public:
 		NAMEPAGE,
 		SUMMARYPAGE
 	};
-    explicit AlarmWizard(QWidget *parent = 0, Alarm *alarm = 0);
+    explicit AlarmWizard(QWidget *parent = 0, Msg::Alarm *alarm = 0);
 	void accept();
 	int getNextPage();
 	void addPage(QWizardPage* page);
@@ -29,7 +29,7 @@ signals:
 public slots:
 	
 private:
-	Alarm* _alarm;
+    Msg::Alarm* _alarm;
 	int _nextPage;
 	QString _source;
 };

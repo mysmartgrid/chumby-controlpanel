@@ -5,6 +5,7 @@
 #include "alarmwizard.h"
 
 #include <QtCore/QDebug>
+#include <QtGui/QCheckBox>
 
 AlarmForm::AlarmForm(QWidget *parent) :
     QWidget(parent),
@@ -37,8 +38,8 @@ void AlarmForm::refresh()
 {
     _ui->alarmList->clear();
     _ui->alarmList->addItem("New Alarm");
-    std::list<Alarm*> alarms = AlarmDaemon::getInstance().getAlarms();
-    for ( std::list<Alarm*>::iterator it = alarms.begin(); it != alarms.end(); it++ )
+    std::list<Msg::Alarm*> alarms = Msg::AlarmDaemon::getInstance().getAlarms();
+    for ( std::list<Msg::Alarm*>::iterator it = alarms.begin(); it != alarms.end(); it++ )
         _ui->alarmList->addItem((*it)->getName());
 }
 
@@ -47,9 +48,9 @@ void AlarmForm::alarmDetails()
     if ( _ui->alarmList->selectedItems().count() == 0 )
         return;
 
-    Alarm *alarm = NULL;
-    std::list<Alarm*> alarms = AlarmDaemon::getInstance().getAlarms();
-    for ( std::list<Alarm*>::iterator it = alarms.begin(); it != alarms.end(); it++ )
+    Msg::Alarm *alarm = NULL;
+    std::list<Msg::Alarm*> alarms = Msg::AlarmDaemon::getInstance().getAlarms();
+    for ( std::list<Msg::Alarm*>::iterator it = alarms.begin(); it != alarms.end(); it++ )
     {
         if ( (*it)->getName().compare(_ui->alarmList->selectedItems().first()->text()) == 0 )
         {

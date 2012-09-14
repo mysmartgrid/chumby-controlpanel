@@ -3,6 +3,7 @@
 # export QT_QWS_FONTDIR=/mnt/usb/lib/fonts
 
 set(controlpanel_SRCS
+  alarm.cpp
   alarmdaemon.cpp
   controlpanel.cpp
   main.cpp
@@ -14,6 +15,7 @@ set(controlpanel_SRCS
   #  PlaybackThread.cpp
   )
 set(controlpanel_HDRS
+  alarm.h
   alarmdaemon.h
   controlpanel.h			
   musiccontrol.h

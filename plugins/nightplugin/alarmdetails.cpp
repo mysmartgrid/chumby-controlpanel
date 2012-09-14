@@ -4,7 +4,7 @@
 #include "alarmwizard.h"
 #include "../../controlpanel/alarmdaemon.h"
 
-AlarmDetails::AlarmDetails(QWidget *parent, Alarm *alarm) :
+AlarmDetails::AlarmDetails(QWidget *parent, Msg::Alarm *alarm) :
     QWidget(parent),
     _ui(new Ui::AlarmDetails),
     _alarm(alarm)
@@ -21,7 +21,7 @@ AlarmDetails::AlarmDetails(QWidget *parent, Alarm *alarm) :
     _ui->detailBrowser->append(alarm->getName());
     _ui->detailBrowser->append("Time: " + alarm->getTime());
     QString rep = "";
-    Weekdays days = alarm->getDays();
+    Msg::Weekdays days = alarm->getDays();
     bool weekend = false, weekdays = false;
     if ( days.monday && days.tuesday && days.wednesday && days.thursday && days.friday )
             weekdays = true;
@@ -74,7 +74,7 @@ void AlarmDetails::editAlarm()
 
 void AlarmDetails::deleteAlarm()
 {
-        AlarmDaemon::getInstance().removeAlarm(_alarm);
+        Msg::AlarmDaemon::getInstance().removeAlarm(_alarm);
         this->close();
         delete this;
 }

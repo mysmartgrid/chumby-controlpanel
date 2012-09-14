@@ -7,23 +7,26 @@
 #include <QtGui/QLabel>
 #include <QtCore/QTimer>
 
-class AlarmWidget : public QWidget
+namespace Msg
 {
-    Q_OBJECT
-public:
-    explicit AlarmWidget(QWidget *parent = 0);
+    class AlarmWidget : public QWidget
+    {
+        Q_OBJECT
+    public:
+        explicit AlarmWidget(QWidget *parent = 0);
 
-signals:
-    void dismissed();
-    void snoozed();
-    void resumed();
+    signals:
+        void dismissed();
+        void snoozed();
+        void resumed();
 
-private slots:
-    void updateClock();
+    private slots:
+        void updateClock();
 
-private:
-    Ui::alarmWidget *_ui;
-    QTimer* timer;
-};
+    private:
+        Ui::alarmWidget *_ui;
+        QTimer* _timer;
+    };
+}
 
 #endif // ALARMWIDGET_H
