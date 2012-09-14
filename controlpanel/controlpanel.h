@@ -42,15 +42,15 @@ signals:
 	void keyPressed();
 
 private:
-	Ui::controlWidget ui;
-	QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>* > > plugins;
-	Plugin* currentPlugin;
-	QWidget* pluginWidget;
+    Ui::controlWidget* _ui;
+    QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>* > > _plugins;
+    Plugin* _currentPlugin;
+    QWidget* _pluginWidget;
 
-	int sock_iwconfig;
+    int _sock_iwconfig;
 
-	MusicControl* mc;
-	AlarmDaemon* alarm;
+    MusicControl* _mc;
+    AlarmDaemon* _alarm;
 };
 
 class InitThread : public QThread
@@ -64,7 +64,7 @@ signals:
 	void ready();
 
 private:
-	Plugin* plugin;
+    Plugin* _plugin;
 };
 }
 

@@ -15,34 +15,34 @@
 namespace Msg
 {
 Controlpanel::Controlpanel(QWidget *parent)
-  : QWidget(parent)
+  : QWidget(parent),
+    _ui(new Ui::controlWidget),
+    _currentPlugin(NULL),
+    _pluginWidget(NULL),
+    _sock_iwconfig(::iw_sockets_open()),
+    _mc(&MusicControl::getInstance()),
+    _alarm(&AlarmDaemon::getInstance())
 {
-	ui.setupUi(this);
-	this->grabKeyboard();
-	plugins = QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >();
-	this->getPlugins();
+    _ui->setupUi(this);
+
+    _plugins = QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >();
+    grabKeyboard();
+    getPlugins();
 	QTimer* timer = new QTimer( this );
-	this->updateClock();
+    updateClock();
 	connect( timer, SIGNAL( timeout() ), this, SLOT( updateClock() ) );
 	timer->start( 1000 );
-	QListWidget* list = ui.pluginsWidget;
+    QListWidget* list = _ui->pluginsWidget;
 	list->setGridSize(QSize(92, 65));
 	list->setViewMode(QListWidget::IconMode);
 	list->setMovement(QListWidget::Static);
-	for ( QMap<QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >::iterator i = plugins.begin(); i != plugins.end(); i++ )
+    for ( QMap<QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >::iterator i = _plugins.begin(); i != _plugins.end(); i++ )
 	{
 		list->addItem(new QListWidgetItem(*(i.value().first), i.key()));
 	}
 	connect(list, SIGNAL( clicked(QModelIndex) ), this, SLOT( startPlugin() ));
 
-	sock_iwconfig = ::iw_sockets_open();
-	//mc = MusicControl();
-
-	currentPlugin = NULL;
-
-	mc = &MusicControl::getInstance();
-	alarm = &AlarmDaemon::getInstance();
-	connect(this, SIGNAL(keyPressed()), alarm, SIGNAL(snooze()));
+    connect(this, SIGNAL(keyPressed()), _alarm, SIGNAL(snooze()));
 }
 
 Controlpanel::~Controlpanel()
@@ -55,44 +55,44 @@ void Controlpanel::startPlugin()
 	QWidget* loadingWidget = new QWidget();
 	Ui::loadingWidget lui;
 	lui.setupUi(loadingWidget);
-	QString key = ui.pluginsWidget->selectedItems().first()->text();
+    QString key = _ui->pluginsWidget->selectedItems().first()->text();
 	lui.loadingLabel->setText("Loading " + key);
 	loadingWidget->showFullScreen();
 	qApp->processEvents();
-	if ( currentPlugin != NULL && currentPlugin->getName().compare(key.toStdString()) != 0 )
+    if ( _currentPlugin != NULL && _currentPlugin->getName().compare(key.toStdString()) != 0 )
 	{
-		qDebug() << QString::fromStdString(currentPlugin->getName()) << " != " << key;
-		delete pluginWidget;
-		delete currentPlugin;
-		currentPlugin = NULL;
-		pluginWidget = NULL;
+        qDebug() << QString::fromStdString(_currentPlugin->getName()) << " != " << key;
+        delete _pluginWidget;
+        delete _currentPlugin;
+        _currentPlugin = NULL;
+        _pluginWidget = NULL;
 	}
-	if ( currentPlugin == NULL )
+    if ( _currentPlugin == NULL )
 	{
-		currentPlugin = plugins.value(key).second->factory->CreatePlugin();
-		currentPlugin->init();
-		pluginWidget = NULL;
-		qDebug() << "Plugin version:" << currentPlugin->getVersion();
+        _currentPlugin = _plugins.value(key).second->factory->CreatePlugin();
+        _currentPlugin->init();
+        _pluginWidget = NULL;
+        qDebug() << "Plugin version:" << _currentPlugin->getVersion();
 	}
 	showWidget();
-	qDebug() << QString::fromStdString(currentPlugin->getName()) << " == " << key;
+    qDebug() << QString::fromStdString(_currentPlugin->getName()) << " == " << key;
 }
 
 void Controlpanel::showWidget()
 {
-	if ( pluginWidget == NULL )
+    if ( _pluginWidget == NULL )
 	{
-		pluginWidget = currentPlugin->getWidget();
-		connect( currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
+        _pluginWidget = _currentPlugin->getWidget();
+        connect( _currentPlugin, SIGNAL( stopWidget() ), this, SLOT( stopPlugin() ) );
 	}
-	pluginWidget->raise();
-	pluginWidget->showFullScreen();
+    _pluginWidget->raise();
+    _pluginWidget->showFullScreen();
 	this->hide();
 }
 
 void Controlpanel::stopPlugin()
 {
-	pluginWidget->close();
+    _pluginWidget->close();
 	this->show();
 }
 
@@ -127,7 +127,7 @@ void Controlpanel::getPlugins()
 
 				Plugin *c=dll->factory->CreatePlugin();
 
-				plugins.insert(QString::fromStdString(c->getName()), QPair< QIcon*, DLLFactory<PluginFactory>* >(c->getIcon(), dll));
+                _plugins.insert(QString::fromStdString(c->getName()), QPair< QIcon*, DLLFactory<PluginFactory>* >(c->getIcon(), dll));
 
 				if ( c->getType() == AUDIO_PLUGIN )
 					MusicControl::getInstance().addAudioPlugin(QString::fromStdString(c->getName()), dll);
@@ -157,16 +157,16 @@ void Controlpanel::updateClock()
 	if (time.second() == 0)
 	{
 		qDebug() << "Checking alarms!";
-		alarm->check();
+        _alarm->check();
 	}
-	ui.timeLabel->setText( text );
+    _ui->timeLabel->setText( text );
 
 
 	iwstats stats;
 	QIcon wicon;
-	if (iw_get_stats(sock_iwconfig, "wlan0", &stats, NULL, 0) >= 0 )
+    if (iw_get_stats(_sock_iwconfig, "wlan0", &stats, NULL, 0) >= 0 )
 	{
-		unsigned int quality = stats.qual.qual;
+        unsigned int quality = stats.qual.qual;
 		qDebug() << "Stats: " << quality;
 		if ( quality >= 60 )
 			wicon = QIcon(":/icon/green/wifi-high");
@@ -178,7 +178,7 @@ void Controlpanel::updateClock()
 		//qDebug() << "retrieving iw stats failed!";
 		wicon = QIcon(":/icon/green/wifi-disconnected");
 	}
-	ui.wifiLabel->setPixmap( wicon.pixmap(15) );
+    _ui->wifiLabel->setPixmap( wicon.pixmap(15) );
 }
 
 void Controlpanel::keyPressEvent(QKeyEvent *event)
@@ -202,22 +202,22 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 	case 8:
 		// volume
 		std::cout << "adjusting volume" << std::endl;
-		mc->increaseMasterVolume();
+        _mc->increaseMasterVolume();
 		break;
 	case 9:
-		mc->lowerMasterVolume();
+        _mc->lowerMasterVolume();
 		break;
 	}
 }
 
 InitThread::InitThread(Plugin *plugin)
 {
-	this->plugin = plugin;
+    _plugin = plugin;
 }
 
 void InitThread::run()
 {
-		plugin->init();
+        _plugin->init();
 		emit ready();
 }
 }
