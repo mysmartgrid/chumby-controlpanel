@@ -17,10 +17,14 @@ class myApplication : public QApplication
 
 int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
+#ifdef Q_WS_QWS
     QWSServer::setBackground(QBrush(Qt::white));
     QWSServer::setCursorVisible(false);
-    QApplication a(argc, argv);
     a.setOverrideCursor( QCursor( Qt::BlankCursor ) );
+#else
+		a.setOverrideCursor( QCursor( Qt::CrossCursor ) );
+#endif
 
     //QFont font("Arial", 14);
     //QApplication::setFont(font);
