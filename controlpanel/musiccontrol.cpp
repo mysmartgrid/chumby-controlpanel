@@ -14,7 +14,10 @@ namespace Msg
     {
         qDebug() << "Initializing music control!";
         const char *card = "default";
-        const char *selem_name = "DAC";
+        char* cname = getenv("CHUMBY_SOUND_CARD");
+        if ( !cname )
+            cname = "DAC";
+        const char *selem_name = cname;
 
         ::snd_mixer_open(&handle, 0);
         ::snd_mixer_attach(handle, card);
@@ -25,6 +28,12 @@ namespace Msg
         snd_mixer_selem_id_set_index(sid, 0);
         snd_mixer_selem_id_set_name(sid, selem_name);
         elem = snd_mixer_find_selem(handle, sid);
+
+        if ( !elem )
+        {
+            qDebug() << "Sound device \"" << selem_name << "\" not found. Disabling MusicControl.";
+            return;
+        }
 
         snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
         if ( min < 128 )
