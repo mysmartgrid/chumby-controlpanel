@@ -100,7 +100,11 @@ void Controlpanel::stopPlugin()
 
 void Controlpanel::getPlugins()
 {
-	QDirIterator directory_walker("/mnt/usb/chumby-controlpanel/plugins/", QDir::Files);
+	QString dir = getenv("CHUMBY_PLUGIN_DIR");
+	if ( dir.isEmpty() )
+        dir = "/mnt/usb/chumby-controlpanel/plugins/";
+    qDebug() << "Loading Plugins from" << dir;
+    QDirIterator directory_walker(dir, QDir::Files, QDirIterator::Subdirectories);
 
 	while ( directory_walker.hasNext() )
 	{
