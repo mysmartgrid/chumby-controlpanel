@@ -92,8 +92,10 @@ void Controlpanel::showWidget()
 
 void Controlpanel::stopPlugin()
 {
-    _pluginWidget->close();
+    if ( _pluginWidget )
+        _pluginWidget->close();
 	this->show();
+    this->raise();
 }
 
 void Controlpanel::getPlugins()
