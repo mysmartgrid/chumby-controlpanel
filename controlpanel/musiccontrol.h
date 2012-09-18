@@ -29,10 +29,10 @@ namespace Msg
         void showWidget();
 
     private:
-        long int volume;
-        QHBoxLayout* layout;
-        QProgressBar* bar;
-        QTimer* timer;
+        long int _volume;
+        QHBoxLayout* _layout;
+        QProgressBar* _bar;
+        QTimer* _timer;
     };
 
     class PlaybackThread : public QThread
@@ -49,9 +49,9 @@ namespace Msg
         void run();
 
     private:
-        bool thread_running;
-        snd_pcm_t* playback;
-        snd_pcm_t* capture;
+        bool _thread_running;
+        snd_pcm_t* _playback;
+        snd_pcm_t* _capture;
     };
 
     class MusicControl
@@ -82,21 +82,21 @@ namespace Msg
         MusicControl();
         MusicControl(const MusicControl&) {}
         ~MusicControl();
-        static MusicControl* instance;
+        static MusicControl* _instance;
 
-        snd_mixer_t *handle;
-        snd_mixer_selem_id_t *sid;
-        snd_mixer_elem_t* elem;
-        long min, max;
+        snd_mixer_t *_handle;
+        snd_mixer_selem_id_t *_sid;
+        snd_mixer_elem_t* _elem;
+        long _min, _max;
 
-        VolumeWidget* vol;
+        VolumeWidget* _vol;
 
-        snd_pcm_t* capture;
-        snd_pcm_t *playback;
+        snd_pcm_t* _capture;
+        snd_pcm_t *_playback;
 
-        QMap< QString, DLLFactory<PluginFactory>* > audioPlugins;
+        QMap< QString, DLLFactory<PluginFactory>* > _audioPlugins;
 
-        PlaybackThread* thread;
+        PlaybackThread* _thread;
     };
 }
 

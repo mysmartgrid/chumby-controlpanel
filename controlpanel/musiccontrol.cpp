@@ -4,13 +4,23 @@
 
 namespace Msg
 {
-    MusicControl* MusicControl::instance = 0;
+    MusicControl* MusicControl::_instance = 0;
 //    snd_pcm_t* MusicControl::playback = 0;
 //    snd_pcm_t* MusicControl::capture = 0;
 //    pthread_t MusicControl::playback_thread = 0;
 //    volatile int MusicControl::playback_thread_running = 0;
 
     MusicControl::MusicControl()
+        :_audioPlugins(QMap< QString, DLLFactory<PluginFactory>* >()),
+          _handle(NULL),
+          _sid(NULL),
+          _elem(NULL),
+          _min(0),
+          _max(0),
+          _vol(NULL),
+          _capture(NULL),
+          _playback(NULL),
+          _thread(NULL)
     {
         qDebug() << "Initializing music control!";
         const char *card = "default";
@@ -19,192 +29,186 @@ namespace Msg
             cname = "DAC";
         const char *selem_name = cname;
 
-        ::snd_mixer_open(&handle, 0);
-        ::snd_mixer_attach(handle, card);
-        ::snd_mixer_selem_register(handle, NULL, NULL);
-        ::snd_mixer_load(handle);
+        ::snd_mixer_open(&_handle, 0);
+        ::snd_mixer_attach(_handle, card);
+        ::snd_mixer_selem_register(_handle, NULL, NULL);
+        ::snd_mixer_load(_handle);
 
-        snd_mixer_selem_id_alloca(&sid);
-        snd_mixer_selem_id_set_index(sid, 0);
-        snd_mixer_selem_id_set_name(sid, selem_name);
-        elem = snd_mixer_find_selem(handle, sid);
+        snd_mixer_selem_id_alloca(&_sid);
+        snd_mixer_selem_id_set_index(_sid, 0);
+        snd_mixer_selem_id_set_name(_sid, selem_name);
+        _elem = snd_mixer_find_selem(_handle, _sid);
 
-        if ( !elem )
+        if ( !_elem )
         {
             qDebug() << "Sound device \"" << selem_name << "\" not found. Disabling MusicControl.";
             return;
         }
 
-        snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-        if ( min < 128 )
-            min = 128;
+        snd_mixer_selem_get_playback_volume_range(_elem, &_min, &_max);
+        if ( _min < 128 )
+            _min = 128;
 
-        vol = new VolumeWidget(min, max);
-        QPalette p(vol->palette());
+        _vol = new VolumeWidget(_min, _max);
+        QPalette p(_vol->palette());
         p.setColor(QPalette::Background, Qt::darkGray);
-        vol->setPalette(p);
-        vol->setVolume(getMasterVolume());
-        vol->move(60, 180);
+        _vol->setPalette(p);
+        _vol->setVolume(getMasterVolume());
+        _vol->move(60, 180);
 
         //if ( playback == NULL )
-        MusicControl::alsa_open(&playback, SND_PCM_STREAM_PLAYBACK);
+        MusicControl::alsa_open(&_playback, SND_PCM_STREAM_PLAYBACK);
 
         //if ( playback == NULL )
         //    qDebug() << "MC says: playback is null";
-
-        capture = 0;
-
-        thread = 0;
-
-        audioPlugins = QMap< QString, DLLFactory<PluginFactory>* >();
     }
 
     MusicControl::~MusicControl()
     {
-        snd_mixer_close(handle);
+        snd_mixer_close(_handle);
     }
 
     MusicControl& MusicControl::getInstance()
     {
-        if ( !instance )
-            instance = new MusicControl();
+        if ( !_instance )
+            _instance = new MusicControl();
 
-        return *instance;
+        return *_instance;
     }
 
     void MusicControl::destroy()
     {
-        if ( instance )
-            delete instance;
-        instance = 0;
+        if ( _instance )
+            delete _instance;
+        _instance = 0;
     }
 
     void MusicControl::setMasterVolume(long int volume)
     {
-        if ( !elem )
+        if ( !_elem )
             return;
 
         setMasterMute(1);
 
-        snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
+        snd_mixer_selem_set_playback_volume_all(_elem, volume * _max / 100);
 
-        vol->setVolume(getMasterVolume());
-        vol->showWidget();
+        _vol->setVolume(getMasterVolume());
+        _vol->showWidget();
     }
 
     long int MusicControl::getMasterVolume()
     {
-        if ( !elem )
+        if ( !_elem )
             return;
 
         long int volume;
-        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
+        snd_mixer_selem_get_playback_volume(_elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
 
         return volume;
     }
 
     void MusicControl::increaseMasterVolume()
     {
-        if ( !elem )
+        if ( !_elem )
             return;
 
         setMasterMute(1);
 
         long int volume = getMasterVolume();
-        qDebug() << min << " <= " << volume << " <= " << max;
-				if ( volume < min )
+        qDebug() << _min << " <= " << volume << " <= " << _max;
+                if ( volume < _min )
 				{
-					volume = min;
-					snd_mixer_selem_set_playback_volume_all(elem, volume);
-					snd_mixer_selem_set_playback_switch_all(elem, 1);
+                    volume = _min;
+                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
+                    snd_mixer_selem_set_playback_switch_all(_elem, 1);
 				}
-        if ( volume <= max - 3 )
+        if ( volume <= _max - 3 )
         {
             volume += 3;
-            snd_mixer_selem_set_playback_volume_all(elem, volume);
+            snd_mixer_selem_set_playback_volume_all(_elem, volume);
         }
 				else
 				{
-					volume = max;
-          snd_mixer_selem_set_playback_volume_all(elem, volume);
+                    volume = _max;
+          snd_mixer_selem_set_playback_volume_all(_elem, volume);
 				}
 
-        vol->setVolume(volume);
-        vol->showWidget();
+        _vol->setVolume(volume);
+        _vol->showWidget();
     }
 
     void MusicControl::lowerMasterVolume()
     {
-        if ( !elem )
+        if ( !_elem )
             return;
 
         setMasterMute(1);
         long int volume = getMasterVolume();
-        qDebug() << min << " <= " << volume << " <= " << max;
-        if ( volume >= min + 3 )
+        qDebug() << _min << " <= " << volume << " <= " << _max;
+        if ( volume >= _min + 3 )
         {
             volume -= 3;
-            snd_mixer_selem_set_playback_volume_all(elem, volume);
+            snd_mixer_selem_set_playback_volume_all(_elem, volume);
         }
 				else
 				{
 					volume = 0;
-					snd_mixer_selem_set_playback_volume_all(elem, volume);
-					snd_mixer_selem_set_playback_switch_all(elem, 0);
+                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
+                    snd_mixer_selem_set_playback_switch_all(_elem, 0);
 				}
 
-        vol->setVolume(volume);
-        vol->showWidget();
+        _vol->setVolume(volume);
+        _vol->showWidget();
     }
 
     //set mute flag ( 0: muted, 1: not muted )
     void MusicControl::setMasterMute(int value)
     {
-        if ( !elem )
+        if ( !_elem )
             return;
 
-        snd_mixer_selem_set_playback_switch_all(elem, value);
+        snd_mixer_selem_set_playback_switch_all(_elem, value);
     }
 
     void MusicControl::play(snd_pcm_t *source) {
         qDebug() << "Starting playback thread!";
-        capture = source;
+        _capture = source;
         /*dev_info_t dev;
         dev.source = source;
         dev.dest = playback;*/
-        if ( playback == NULL )
+        if ( _playback == NULL )
         {
             qDebug() << "ERROR: playback null";
             return;
         }
-        if ( capture == NULL )
+        if ( _capture == NULL )
         {
             qDebug() << "ERROR: capture null";
             return;
         }
-        if ( thread == NULL )
-            thread = new PlaybackThread(capture, playback);
+        if ( _thread == NULL )
+            _thread = new PlaybackThread(_capture, _playback);
 
         setMasterMute(1);
         qDebug() << "Calling pthread";
-        thread->start();
+        _thread->start();
 //        MusicControl::playback_thread_running = 1;
 //        pthread_create(&MusicControl::playback_thread, NULL, &playback_run, NULL);
     }
 
     void MusicControl::stop() {
-        if ( !thread )
+        if ( !_thread )
         {
             qDebug() << "MusicControl: Nothing to stop here!";
             return;
         }
 
-        thread->stop();
+        _thread->stop();
 //        MusicControl::playback_thread_running = 0;
         setMasterMute(0);
-        thread->wait();
-        delete thread;
-        thread = 0;
+        _thread->wait();
+        delete _thread;
+        _thread = 0;
     }
 
     int MusicControl::alsa_open(snd_pcm_t **pcm_handle, int stream_type) {
@@ -343,8 +347,8 @@ namespace Msg
     }
 
     void MusicControl::alsa_close() {
-        if ( capture )
-            snd_pcm_close(capture);
+        if ( _capture )
+            snd_pcm_close(_capture);
     }
 
     void MusicControl::alsa_select_input(int input) {
@@ -386,17 +390,17 @@ namespace Msg
 
     void MusicControl::addAudioPlugin(QString name, DLLFactory<PluginFactory> *dll)
     {
-        audioPlugins.insert(name, dll);
+        _audioPlugins.insert(name, dll);
     }
 
     QList<QString> MusicControl::getAudioPlugins()
     {
-        return audioPlugins.keys();
+        return _audioPlugins.keys();
     }
 
     AudioPlugin* MusicControl::getAudioPlugin(QString plugin)
     {
-        return (AudioPlugin*) audioPlugins.find(plugin).value()->factory->CreatePlugin();
+        return (AudioPlugin*) _audioPlugins.find(plugin).value()->factory->CreatePlugin();
     }
 
     /*QList<QString> MusicControl::getAudioSources()
@@ -415,33 +419,33 @@ namespace Msg
     }*/
 
     PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
+        :_capture(in),
+          _playback(out)
     {
-        this->capture = in;
-        this->playback = out;
     }
 
     void PlaybackThread::stop()
     {
-        this->thread_running = false;
+        _thread_running = false;
     }
 
     void PlaybackThread::run() {
-        this->thread_running = true;
+        _thread_running = true;
         qDebug() << "I'm a playback thread!";
-        if ( playback == NULL )
+        if ( _playback == NULL )
         {
             qDebug() << "ERROR/pthread: playback null";
             return;
         }
-        if ( capture == NULL )
+        if ( _capture == NULL )
         {
             qDebug() << "ERROR/pthread: capture null";
             return;
         }
         qDebug() << "Starting playback!";
         snd_pcm_uframes_t data[4096];
-        while (thread_running) {
-            int bytes_read = snd_pcm_readi(capture, data, sizeof(data)/sizeof(data[0]));
+        while (_thread_running) {
+            int bytes_read = snd_pcm_readi(_capture, data, sizeof(data)/sizeof(data[0]));
             // If we didn't get enough data, wait, then try again.
             if(bytes_read == -EAGAIN) {
                 fprintf(stderr, "Read error, trying again: %s\n",
@@ -451,8 +455,8 @@ namespace Msg
 
             else if(bytes_read == -EPIPE) {
                 fprintf(stderr, "Read error: (Over/Under)run\n");
-                if(snd_pcm_prepare(capture) < 0) {
-                    this->thread_running = false;
+                if(snd_pcm_prepare(_capture) < 0) {
+                    _thread_running = false;
                     break;
                 }
                 continue;
@@ -461,16 +465,16 @@ namespace Msg
             // Or if we had a different error, bail.
             else if(bytes_read < 0) {
                 fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
-                this->thread_running = false;
+                _thread_running = false;
                 break;
             }
 
-            int bytes_written = snd_pcm_writei(playback, data, bytes_read);
+            int bytes_written = snd_pcm_writei(_playback, data, bytes_read);
 
             if(bytes_written == -EPIPE) {
                 fprintf(stderr, "Write error: (Over/Under)run\n");
-                if(snd_pcm_prepare(playback) < 0) {
-                    this->thread_running = false;
+                if(snd_pcm_prepare(_playback) < 0) {
+                    _thread_running = false;
                     break;
                 }
                 continue;
@@ -479,44 +483,44 @@ namespace Msg
             else if(bytes_written <= 0) {
                 fprintf(stderr, "Write error (%d): %s\n",
                         bytes_written, snd_strerror(bytes_written));
-                this->thread_running = false;
+                _thread_running = false;
                 break;
             }
         }
     }
 
     VolumeWidget::VolumeWidget(int min = 0, int max = 100)
-        :QWidget(NULL, Qt::ToolTip)
+        :QWidget(NULL, Qt::ToolTip),
+          _layout(new QHBoxLayout(this)),
+          _bar(new QProgressBar()),
+          _timer(new QTimer())
     {
-        layout = new QHBoxLayout(this);
         QLabel* low = new QLabel();
         low->setPixmap(QIcon(":/icon/resources/vol-down.png").pixmap(15));
-        layout->addWidget(low);
+        _layout->addWidget(low);
         qDebug() << "Building Progressbar";
-        bar = new QProgressBar();
-        bar->setMaximum(max);
-        bar->setMinimum(min);
-        layout->addWidget(bar);
+        _bar->setMaximum(max);
+        _bar->setMinimum(min);
+        _layout->addWidget(_bar);
         QLabel* high = new QLabel();
         high->setPixmap(QIcon(":/icon/resources/vol-up.png").pixmap(15));
-        layout->addWidget(high);
-        timer = new QTimer();
-        timer->setInterval(1000);
-        connect(timer, SIGNAL(timeout()), this, SLOT(hide()));
+        _layout->addWidget(high);
+        _timer->setInterval(1000);
+        connect(_timer, SIGNAL(timeout()), this, SLOT(hide()));
     }
 
     void VolumeWidget::setVolume(long int vol)
     {
-			this->volume = vol;
-			if ( vol < bar->minimum() )
-				bar->setValue(bar->minimum());
+            this->_volume = vol;
+            if ( vol < _bar->minimum() )
+                _bar->setValue(_bar->minimum());
 			else
-				bar->setValue(this->volume);
+                _bar->setValue(this->_volume);
     }
 
     void VolumeWidget::showWidget()
     {
         this->show();
-        timer->start();
+        _timer->start();
     }
 }
