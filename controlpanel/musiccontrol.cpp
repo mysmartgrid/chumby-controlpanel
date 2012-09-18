@@ -81,6 +81,9 @@ namespace Msg
 
     void MusicControl::setMasterVolume(long int volume)
     {
+        if ( !elem )
+            return;
+
         setMasterMute(1);
 
         snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
@@ -91,6 +94,9 @@ namespace Msg
 
     long int MusicControl::getMasterVolume()
     {
+        if ( !elem )
+            return;
+
         long int volume;
         snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
 
@@ -99,6 +105,9 @@ namespace Msg
 
     void MusicControl::increaseMasterVolume()
     {
+        if ( !elem )
+            return;
+
         setMasterMute(1);
 
         long int volume = getMasterVolume();
@@ -126,6 +135,9 @@ namespace Msg
 
     void MusicControl::lowerMasterVolume()
     {
+        if ( !elem )
+            return;
+
         setMasterMute(1);
         long int volume = getMasterVolume();
         qDebug() << min << " <= " << volume << " <= " << max;
@@ -148,6 +160,9 @@ namespace Msg
     //set mute flag ( 0: muted, 1: not muted )
     void MusicControl::setMasterMute(int value)
     {
+        if ( !elem )
+            return;
+
         snd_mixer_selem_set_playback_switch_all(elem, value);
     }
 
@@ -160,10 +175,12 @@ namespace Msg
         if ( playback == NULL )
         {
             qDebug() << "ERROR: playback null";
+            return;
         }
         if ( capture == NULL )
         {
             qDebug() << "ERROR: capture null";
+            return;
         }
         if ( thread == NULL )
             thread = new PlaybackThread(capture, playback);
@@ -176,6 +193,12 @@ namespace Msg
     }
 
     void MusicControl::stop() {
+        if ( !thread )
+        {
+            qDebug() << "MusicControl: Nothing to stop here!";
+            return;
+        }
+
         thread->stop();
 //        MusicControl::playback_thread_running = 0;
         setMasterMute(0);
@@ -408,10 +431,12 @@ namespace Msg
         if ( playback == NULL )
         {
             qDebug() << "ERROR/pthread: playback null";
+            return;
         }
         if ( capture == NULL )
         {
             qDebug() << "ERROR/pthread: capture null";
+            return;
         }
         qDebug() << "Starting playback!";
         snd_pcm_uframes_t data[4096];
