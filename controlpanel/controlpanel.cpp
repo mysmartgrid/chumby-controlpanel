@@ -190,7 +190,11 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 	         << ")";
 	switch ( event->key() )
 	{
+#ifdef Q_WS_QWS
 	case 28:
+#else // Q_WS_QWS
+    case 65: // "a"
+#endif // Q_WS_QWS
 		if ( AlarmDaemon::getInstance().isAlarmActive() )
 		{
 			qDebug() << "snooze";
@@ -199,12 +203,20 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 		else
 			this->stopPlugin();
 		break;
+#ifdef Q_WS_QWS
 	case 8:
+#else // Q_WS_QWS
+    case 43: // "+"
+#endif // Q_WS_QWS
 		// volume
 		std::cout << "adjusting volume" << std::endl;
         _mc->increaseMasterVolume();
 		break;
+#ifdef Q_WS_QWS
 	case 9:
+#else // Q_WS_QWS
+    case 45: // "-"
+#endif // Q_WS_QWS
         _mc->lowerMasterVolume();
 		break;
 	}
