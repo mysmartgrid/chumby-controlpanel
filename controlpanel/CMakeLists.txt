@@ -63,7 +63,6 @@ add_executable(chumby-controlpanel  ${controlpanel_SRCS}
   ${controlpanel_UI_HDRS}
   )
 target_link_libraries(chumby-controlpanel ${QT_QTGUI_LIBRARY})
-target_link_libraries(chumby-controlpanel ${QT_QTNETWORK_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTCORE_LIBRARY})
 target_link_libraries(chumby-controlpanel ${ASOUND_LIBRARY})
 target_link_libraries(chumby-controlpanel iw)
