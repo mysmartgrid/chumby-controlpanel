@@ -83,6 +83,8 @@ void AlarmDetails::updateAlarm()
         if ( days.sunday )
             rep += "Sunday, ";
     }
+    if ( rep.isEmpty() )
+        rep = "No Repeat, ";
     _alarm->setName(rep + _alarm->getTime());
     rep.chop(2);
     _ui->dayButton->setText(rep);
