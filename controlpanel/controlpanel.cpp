@@ -87,15 +87,15 @@ void Controlpanel::showWidget()
 	}
     _pluginWidget->raise();
     _pluginWidget->showFullScreen();
-	this->hide();
+    //this->hide();
 }
 
 void Controlpanel::stopPlugin()
 {
+    this->show();
+    this->raise();
     if ( _pluginWidget )
         _pluginWidget->close();
-	this->show();
-    this->raise();
 }
 
 void Controlpanel::getPlugins()
