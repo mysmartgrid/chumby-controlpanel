@@ -2,10 +2,10 @@
 
 set(_plugindirs 
         chumbykbddriver
+        clockplugin
         dispvaluesplugin
         helloworldplugin
         netconfigplugin
-        nightplugin 
         radioplugin
 )
 

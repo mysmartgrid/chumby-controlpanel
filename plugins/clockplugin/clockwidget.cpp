@@ -1,12 +1,12 @@
-#include "nightwidget.h"
-#include "ui_nightwidget.h"
+#include "clockwidget.h"
+#include "ui_clockwidget.h"
 
 #include <QtCore/QTime>
 
-NightWidget::NightWidget(QWidget *parent, Msg::NightPlugin *plugin) :
+ClockWidget::ClockWidget(QWidget *parent, Msg::ClockPlugin *plugin) :
     QWidget(parent),
     _timer(new QTimer),
-    _ui(new Ui::NightWidget),
+    _ui(new Ui::ClockWidget),
     _plugin(plugin),
     _alarm(new AlarmForm)
 {
@@ -20,12 +20,12 @@ NightWidget::NightWidget(QWidget *parent, Msg::NightPlugin *plugin) :
 		connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(showFullScreen()));
 }
 
-NightWidget::~NightWidget()
+ClockWidget::~ClockWidget()
 {
     delete _ui;
 }
 
-void NightWidget::updateClock()
+void ClockWidget::updateClock()
 {
 	QTime now = QTime::currentTime();
 	_ui->timeLabel->setText(now.toString("hh:mm"));
@@ -33,7 +33,7 @@ void NightWidget::updateClock()
 	_timer->setInterval(((60 - now.second()) * 1000) + (1000 - now.msec()));
 }
 
-void NightWidget::dimAction()
+void ClockWidget::dimAction()
 {
 	if ( _plugin->isDimmed() )
 	{

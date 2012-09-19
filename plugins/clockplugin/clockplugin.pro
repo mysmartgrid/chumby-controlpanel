@@ -1,10 +1,10 @@
-TARGET = nightplugin
+TARGET = clockplugin
 TEMPLATE = lib
 CONFIG += dll
 
 HEADERS += \
-	nightplugin.h \
-	nightwidget.h \
+	clockplugin.h \
+	clockwidget.h \
 	alarmform.h \
 	alarmwizard.h \
 	timepage.h \
@@ -16,8 +16,8 @@ HEADERS += \
 	alarmdetails.h
 
 SOURCES += \
-	nightplugin.cpp \
-	nightwidget.cpp \
+	clockplugin.cpp \
+	clockwidget.cpp \
 	alarmform.cpp \
 	alarmwizard.cpp \
 	timepage.cpp \
@@ -31,7 +31,7 @@ SOURCES += \
 DESTDIR = ../
 
 FORMS += \
-	nightwidget.ui \
+	clockwidget.ui \
 	alarmform.ui \
 	timepage.ui \
 	daypage.ui \

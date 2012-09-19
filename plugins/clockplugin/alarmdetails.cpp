@@ -18,7 +18,7 @@ AlarmDetails::AlarmDetails(QWidget *parent, Msg::Alarm *alarm) :
 
     if ( _alarm == NULL )
     {
-        qDebug() << "NightPlugin/AlarmDetails: creating new alarm!";
+        qDebug() << "ClockPlugin/AlarmDetails: creating new alarm!";
         _alarm = new Msg::Alarm("");
         Msg::AlarmDaemon::getInstance().addAlarm(_alarm);
         _alarm->save();
@@ -43,7 +43,7 @@ AlarmDetails::~AlarmDetails()
 
 void AlarmDetails::deleteAlarm()
 {
-    qDebug() << "NightPlugin/AlarmDetails: deleting alarm" << _alarm->getName();
+    qDebug() << "ClockPlugin/AlarmDetails: deleting alarm" << _alarm->getName();
     Msg::AlarmDaemon::getInstance().removeAlarm(_alarm);
     _alarm->remove();
     deleteLater();
@@ -98,7 +98,7 @@ void AlarmDetails::updateAlarm()
 
 void AlarmDetails::editTime()
 {
-    qDebug() << "NightPlugin/Alarmdetails: editTime";
+    qDebug() << "ClockPlugin/Alarmdetails: editTime";
     TimePage *page = new TimePage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
     page->show();
@@ -106,7 +106,7 @@ void AlarmDetails::editTime()
 
 void AlarmDetails::editSnooze()
 {
-    qDebug() << "NightPlugin/Alarmdetails: editSnooze";
+    qDebug() << "ClockPlugin/Alarmdetails: editSnooze";
     SnoozePage *page = new SnoozePage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
     page->show();
@@ -114,17 +114,17 @@ void AlarmDetails::editSnooze()
 
 void AlarmDetails::editSource()
 {
-    qDebug() << "NightPlugin/Alarmdetails: editSource";
+    qDebug() << "ClockPlugin/Alarmdetails: editSource";
 }
 
 void AlarmDetails::editVolume()
 {
-    qDebug() << "NightPlugin/Alarmdetails: editVolume";
+    qDebug() << "ClockPlugin/Alarmdetails: editVolume";
 }
 
 void AlarmDetails::editDays()
 {
-    qDebug() << "NightPlugin/Alarmdetails: editDays";
+    qDebug() << "ClockPlugin/Alarmdetails: editDays";
     DayPage *page = new DayPage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
     page->show();

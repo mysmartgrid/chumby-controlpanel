@@ -1,5 +1,5 @@
-#ifndef NIGHTPLUGIN_H
-#define NIGHTPLUGIN_H
+#ifndef CLOCKPLUGIN_H
+#define CLOCKPLUGIN_H
 
 #include "../../controlpanel/plugin.h"
 
@@ -9,34 +9,12 @@
 
 namespace Msg
 {
-#if 0
-    class NightWidget : public QWidget
-    {
-	Q_OBJECT
-	
-	public:
-		NightWidget(QObject *parent);
-		
-	signals:
-		void closed();
-		
-	public slots:
-		void updateClock();
-		
-	protected:
-		virtual void closeEvent(QCloseEvent *event);
-	    
-	private:
-	    QLabel* timeLabel;
-    };
-#endif
-    
-    class NightPlugin : public Plugin
+    class ClockPlugin : public Plugin
     {
 	Q_OBJECT
 	
         public:
-						~NightPlugin();
+						~ClockPlugin();
 			
             virtual QIcon* getIcon() {
                 return new QIcon(":/icon/resources/plugin.png");
@@ -73,11 +51,11 @@ namespace Msg
 						static QString backlight_file;
     };
 
-    class NightPluginFactory : public PluginFactory
+    class ClockPluginFactory : public PluginFactory
     {
         public:
         virtual Plugin* CreatePlugin();
     };
 }
 
-#endif //NIGHTPLUGIN_H
+#endif //CLOCKPLUGIN_H

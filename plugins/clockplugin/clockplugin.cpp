@@ -1,6 +1,6 @@
-#include "nightplugin.h"
+#include "clockplugin.h"
 
-#include "nightwidget.h"
+#include "clockwidget.h"
 
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
@@ -12,20 +12,20 @@
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
 
-QString Msg::NightPlugin::backlight_file = "/sys/devices/platform/stmp3xxx-bl/backlight/stmp3xxx-bl/brightness";
+QString Msg::ClockPlugin::backlight_file = "/sys/devices/platform/stmp3xxx-bl/backlight/stmp3xxx-bl/brightness";
 
-Msg::NightPlugin::~NightPlugin()
+Msg::ClockPlugin::~ClockPlugin()
 {
 }
 
-std::string Msg::NightPlugin::getName()
+std::string Msg::ClockPlugin::getName()
 {
-    return "Night";
+    return "Clock";
 }
 
-QWidget* Msg::NightPlugin::getWidget()
+QWidget* Msg::ClockPlugin::getWidget()
 {
-    QWidget* widget = new NightWidget(0, this);
+    QWidget* widget = new ClockWidget(0, this);
 
     maxBrightness = getMaxBrightness();
 
@@ -38,7 +38,7 @@ QWidget* Msg::NightPlugin::getWidget()
     return widget;
 }
 
-int Msg::NightPlugin::getMaxBrightness()
+int Msg::ClockPlugin::getMaxBrightness()
 {
     QFile* file = new QFile(backlight_file);
     file->open(QIODevice::ReadOnly | QIODevice::Text);
@@ -49,7 +49,7 @@ int Msg::NightPlugin::getMaxBrightness()
     return max_backlight;
 }
 
-int Msg::NightPlugin::getBrightness()
+int Msg::ClockPlugin::getBrightness()
 {
     QFile* file = new QFile(backlight_file);
     file->open(QIODevice::ReadOnly | QIODevice::Text);
@@ -60,7 +60,7 @@ int Msg::NightPlugin::getBrightness()
     return backlight;
 }
 
-void Msg::NightPlugin::setBrightness(int brightness)
+void Msg::ClockPlugin::setBrightness(int brightness)
 {
     QFile* file = new QFile(backlight_file);
     file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -69,31 +69,31 @@ void Msg::NightPlugin::setBrightness(int brightness)
     file->close();
 }
 
-void Msg::NightPlugin::dim()
+void Msg::ClockPlugin::dim()
 {
     qDebug() << "dim";
         _dimmed = true;
     setBrightness(dark*maxBrightness);
 }
 
-void Msg::NightPlugin::brighten()
+void Msg::ClockPlugin::brighten()
 {
     qDebug() << "brighten";
         _dimmed = false;
     setBrightness(bright*maxBrightness);
 }
 
-bool Msg::NightPlugin::isDimmed()
+bool Msg::ClockPlugin::isDimmed()
 {
     return _dimmed;
 }
 
-Msg::Plugin* Msg::NightPluginFactory::CreatePlugin()
+Msg::Plugin* Msg::ClockPluginFactory::CreatePlugin()
 {
-    return new Msg::NightPlugin;
+    return new Msg::ClockPlugin;
 }
 
 extern "C" void * factory0( void )
 {
-        return new Msg::NightPluginFactory;
+        return new Msg::ClockPluginFactory;
 }
