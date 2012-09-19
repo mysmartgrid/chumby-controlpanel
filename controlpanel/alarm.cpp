@@ -42,6 +42,7 @@ void Msg::Alarm::save()
     settings->setValue("sunday", _weekdays.sunday);
     settings->setValue("snooze", _snoozeTime);
     settings->setValue("source", getSource());
+    settings->setValue("volume", _volume);
     settings->endGroup();
 }
 

@@ -39,6 +39,7 @@ Msg::AlarmDaemon::AlarmDaemon()
         newAlarm->setDays(monday, tuesday, wednesday, thursday, friday, saturday, sunday);
         newAlarm->setSnooze(_settings->value("snooze").toInt());
         newAlarm->setSource(_settings->value("source").toString());
+        newAlarm->setVolume(_settings->value("volume").toInt());
         _alarms->push_back(newAlarm);
         _settings->endGroup();
     }
