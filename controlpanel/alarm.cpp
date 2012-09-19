@@ -8,11 +8,23 @@
 Msg::Alarm::Alarm(QString name, QObject *parent)
     : QObject(parent),
       _name(name),
+      _time(QTime::currentTime()),
+      _source(""), //TODO: default ringtone
+      _snoozeTime(5),
       _active(true),
+      _plugin(NULL),
       _timer(new QTimer),
-      _widget(NULL),
-      _plugin(NULL)
+      _widget(NULL)
 {
+    _weekdays.monday = true;
+    _weekdays.tuesday = true;
+    _weekdays.wednesday = true;
+    _weekdays.thursday = true;
+    _weekdays.friday = true;
+    _weekdays.saturday = true;
+    _weekdays.sunday = true;
+    if ( _name.isEmpty() )
+        _name = _time.toString("hh:mm");
 }
 
 void Msg::Alarm::save()

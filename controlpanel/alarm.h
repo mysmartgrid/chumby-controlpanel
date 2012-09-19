@@ -26,7 +26,7 @@ namespace Msg
     {
         Q_OBJECT
     public:
-        Alarm(QString name, QObject* parent = 0);
+        Alarm(QString name = "", QObject* parent = 0);
         void save();
         void remove();
         bool setTime(unsigned int hour, unsigned int minute);
