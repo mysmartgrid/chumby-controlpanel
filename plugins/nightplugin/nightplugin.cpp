@@ -14,46 +14,6 @@
 
 QString Msg::NightPlugin::backlight_file = "/sys/devices/platform/stmp3xxx-bl/backlight/stmp3xxx-bl/brightness";
 
-#if 0
-Msg::NightWidget::NightWidget(QObject* parent)
-{
-    QVBoxLayout* layout = new QVBoxLayout();
-
-    timeLabel = new QLabel(QString("00:00"));
-    updateClock();
-
-    QTimer* timer = new QTimer();
-    timer->setInterval(1000);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateClock()));
-    timer->start();
-    //TODO: update clock <- same as controlpanel
-
-    QPushButton* dimmer = new QPushButton("Dim");
-    connect(dimmer, SIGNAL(clicked()), parent, SLOT(dim()));
-
-    QPushButton* brightener = new QPushButton("Brighten");
-    connect(brightener, SIGNAL(clicked()), parent, SLOT(brighten()));
-
-    layout->addWidget(timeLabel);
-    layout->addWidget(dimmer);
-    layout->addWidget(brightener);
-
-    setLayout(layout);
-}
-
-void Msg::NightWidget::updateClock()
-{
-    QTime time = QTime::currentTime();
-    timeLabel->setText(time.toString("hh:mm"));
-}
-
-void Msg::NightWidget::closeEvent(QCloseEvent *event)
-{
-    emit closed();
-    event->accept();
-}
-#endif
-
 Msg::NightPlugin::~NightPlugin()
 {
 }
