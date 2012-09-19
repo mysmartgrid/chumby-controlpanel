@@ -4,33 +4,23 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTime>
 
-TimePage::TimePage(QWidget *parent) :
-  QWizardPage(parent),
-  _ui(new Ui::TimePage)
+TimePage::TimePage(Msg::Alarm *alarm, QWidget *parent) :
+  QWidget(parent),
+  _ui(new Ui::TimePage),
+  _alarm(alarm)
 {
     _ui->setupUi(this);
 
-    registerField("hour", _ui->hourEdit);
-    registerField("minute", _ui->minEdit);
-}
-
-void TimePage::initializePage()
-{
-    if ( ! field("hour").toString().isEmpty() )
-    {
-        qDebug() << "loaded time:" << field("hour").toString() << field("minute").toString();
-        _ui->hourEdit->setText(QString::number(field("hour").toInt()).rightJustified(2, '0'));
-        _ui->minEdit->setText(QString::number(field("minute").toInt()).rightJustified(2, '0'));
-    } else {
-        QTime now = QTime::currentTime();
-        _ui->hourEdit->setText(QString::number(now.hour()).rightJustified(2, '0'));
-        _ui->minEdit->setText(QString::number(now.minute()).rightJustified(2, '0'));
-    }
+    _ui->hourEdit->setText(QString::number(_alarm->getHour()).rightJustified(2, '0'));
+    _ui->minEdit->setText(QString::number(_alarm->getMinute()).rightJustified(2, '0'));
 
     connect(_ui->hourUp, SIGNAL(clicked()), this, SLOT(hourUp()));
     connect(_ui->hourDown, SIGNAL(clicked()), this, SLOT(hourDown()));
     connect(_ui->minUp, SIGNAL(clicked()), this, SLOT(minuteUp()));
     connect(_ui->minDown, SIGNAL(clicked()), this, SLOT(minuteDown()));
+
+    connect(_ui->backButton, SIGNAL(clicked()), this, SLOT(deleteLater()));
+    connect(_ui->setButton, SIGNAL(clicked()), this, SLOT(setTime()));
 }
 
 TimePage::~TimePage()
@@ -72,4 +62,10 @@ void TimePage::minuteDown()
         _ui->minEdit->setText(QString::number(minute-1).rightJustified(2, '0'));
     else
         _ui->minEdit->setText("59");
+}
+
+void TimePage::setTime()
+{
+    _alarm->setTime(_ui->hourEdit->text().toInt(), _ui->minEdit->text().toInt());
+    deleteLater();
 }
