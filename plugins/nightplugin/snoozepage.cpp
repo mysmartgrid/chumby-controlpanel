@@ -1,29 +1,31 @@
 #include "snoozepage.h"
 #include "ui_snoozepage.h"
 
-SnoozePage::SnoozePage(QWidget *parent) :
-    QWizardPage(parent),
-    _ui(new Ui::SnoozePage)
+SnoozePage::SnoozePage(Msg::Alarm *alarm, QWidget *parent) :
+    QWidget(parent),
+    _ui(new Ui::SnoozePage),
+    _alarm(alarm)
 {
     _ui->setupUi(this);
 
-    registerField("snooze", _ui->snoozeEdit);
+    _ui->snoozeEdit->setText(QString::number(_alarm->getSnoozeTime()).rightJustified(2, '0'));
 
         connect(_ui->snoozeUp, SIGNAL(clicked()), this, SLOT(up()));
         connect(_ui->snoozeDown, SIGNAL(clicked()), this, SLOT(down()));
-}
 
-void SnoozePage::initializePage()
-{
-        if ( ! field("snooze").toString().isEmpty() )
-                _ui->snoozeEdit->setText(field("snooze").toString());
-        else
-                _ui->snoozeEdit->setText("05");
+        connect(_ui->backButton, SIGNAL(clicked()), this, SLOT(deleteLater()));
+        connect(_ui->setButton, SIGNAL(clicked()), this, SLOT(setSnooze()));
 }
 
 SnoozePage::~SnoozePage()
 {
     delete _ui;
+}
+
+void SnoozePage::setSnooze()
+{
+    _alarm->setSnooze(_ui->snoozeEdit->text().toInt());
+    deleteLater();
 }
 
 void SnoozePage::up()

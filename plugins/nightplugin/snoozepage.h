@@ -1,27 +1,30 @@
 #ifndef SNOOZEPAGE_H
 #define SNOOZEPAGE_H
 
-#include <QWizardPage>
+#include <QWidget>
+
+#include "alarm.h"
 
 namespace Ui {
 class SnoozePage;
 }
 
-class SnoozePage : public QWizardPage
+class SnoozePage : public QWidget
 {
         Q_OBJECT
 
 public:
-        explicit SnoozePage(QWidget *parent = 0);
+        explicit SnoozePage(Msg::Alarm *alarm, QWidget *parent =0);
         ~SnoozePage();
-        void initializePage();
 
 private slots:
+    void setSnooze();
         void up();
         void down();
 
 private:
         Ui::SnoozePage *_ui;
+        Msg::Alarm *_alarm;
 };
 
 #endif // SNOOZEPAGE_H

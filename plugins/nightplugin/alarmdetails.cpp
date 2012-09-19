@@ -4,6 +4,7 @@
 #include "../../controlpanel/alarmdaemon.h"
 
 #include "timepage.h"
+#include "snoozepage.h"
 
 #include <QtCore/QDebug>
 
@@ -103,6 +104,9 @@ void AlarmDetails::editTime()
 void AlarmDetails::editSnooze()
 {
     qDebug() << "NightPlugin/Alarmdetails: editSnooze";
+    SnoozePage *page = new SnoozePage(_alarm);
+    connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
+    page->show();
 }
 
 void AlarmDetails::editSource()
