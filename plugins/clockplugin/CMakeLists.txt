@@ -10,6 +10,7 @@ set(clockplugin_SRCS
   snoozepage.cpp
   sourcepage.cpp
   timepage.cpp
+  volumepage.cpp
   )
 set(clockplugin_HDRS
   alarmdetails.h
@@ -21,6 +22,7 @@ set(clockplugin_HDRS
   snoozepage.h
   sourcepage.h
   timepage.h
+  volumepage.h
   )
 
 set(alarmdetails_UIS alarmdetails.ui)
@@ -47,6 +49,9 @@ set(sourcepage__MOC_HDRS sourcepage.h)
 set(timepage_UIS timepage.ui)
 set(timepage__MOC_HDRS timepage.h)
 
+set(volumepage_UIS volumepage.ui)
+set(volumepage__MOC_HDRS volumepage.h)
+
 qt4_add_resources(clockplugin_RC_SRCS ${clockplugin_RESOURCES})
 qt4_wrap_ui(clockplugin_UI_HDRS
   ${alarmdetails_UIS}
@@ -57,6 +62,7 @@ qt4_wrap_ui(clockplugin_UI_HDRS
   ${snoozepage_UIS}
   ${sourcepage_UIS}
   ${timepage_UIS}
+  ${volumepage_UIS}
   )
 qt4_wrap_cpp(clockplugin_MOC_SRCS
   ${clockplugin_HDRS}
