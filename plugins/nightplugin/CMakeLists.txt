@@ -3,27 +3,23 @@
 set(nightplugin_SRCS
   alarmdetails.cpp
   alarmform.cpp
-  alarmwizard.cpp
   daypage.cpp
   namepage.cpp
   nightplugin.cpp
   nightwidget.cpp
   snoozepage.cpp
   sourcepage.cpp
-  summarypage.cpp
   timepage.cpp
   )
 set(nightplugin_HDRS
   alarmdetails.h
   alarmform.h
-  alarmwizard.h
   daypage.h
   namepage.h
   nightplugin.h
   nightwidget.h
   snoozepage.h
   sourcepage.h
-  summarypage.h
   timepage.h
   )
 
@@ -48,9 +44,6 @@ set(snoozepage__MOC_HDRS snoozepage.h)
 set(sourcepage_UIS sourcepage.ui)
 set(sourcepage__MOC_HDRS sourcepage.h)
 
-set(summarypage_UIS summarypage.ui)
-set(summarypage__MOC_HDRS summarypage.h)
-
 set(timepage_UIS timepage.ui)
 set(timepage__MOC_HDRS timepage.h)
 
@@ -63,7 +56,6 @@ qt4_wrap_ui(nightplugin_UI_HDRS
   ${nightwidget_UIS}
   ${snoozepage_UIS}
   ${sourcepage_UIS}
-  ${summarypage_UIS}
   ${timepage_UIS}
   )
 qt4_wrap_cpp(nightplugin_MOC_SRCS

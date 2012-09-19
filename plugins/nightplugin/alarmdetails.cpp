@@ -1,7 +1,6 @@
 #include "alarmdetails.h"
 #include "ui_alarmdetails.h"
 
-#include "alarmwizard.h"
 #include "../../controlpanel/alarmdaemon.h"
 
 AlarmDetails::AlarmDetails(QWidget *parent, Msg::Alarm *alarm) :
@@ -11,22 +10,50 @@ AlarmDetails::AlarmDetails(QWidget *parent, Msg::Alarm *alarm) :
 {
     _ui->setupUi(this);
 
-    if ( alarm == NULL )
+    if ( _alarm == NULL )
     {
-            this->close();
-            delete this;
+        qDebug() << "NightPlugin/AlarmDetails: creating new alarm!";
+        _alarm = new Msg::Alarm("");
+        Msg::AlarmDaemon::getInstance().addAlarm(_alarm);
+        _alarm->save();
     }
 
-    _ui->detailBrowser->clear();
-    _ui->detailBrowser->append(alarm->getName());
-    _ui->detailBrowser->append("Time: " + alarm->getTime());
+    updateAlarm();
+
+    connect( _ui->timeButton, SIGNAL(clicked()), this, SLOT(editTime()));
+    connect( _ui->snoozeButton, SIGNAL(clicked()), this, SLOT(editSnooze()));
+    connect( _ui->ringtoneButton, SIGNAL(clicked()), this, SLOT(editSource()));
+    connect( _ui->volumeButton, SIGNAL(clicked()), this, SLOT(editVolume()));
+    connect( _ui->dayButton, SIGNAL(clicked()), this, SLOT(editDays()));
+
+    connect( _ui->backButton, SIGNAL(clicked()), this, SLOT(deleteLater()));
+    connect( _ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteAlarm()));
+}
+
+AlarmDetails::~AlarmDetails()
+{
+    delete _ui;
+}
+
+void AlarmDetails::deleteAlarm()
+{
+    qDebug() << "NightPlugin/AlarmDetails: deleting alarm" << _alarm->getName();
+    Msg::AlarmDaemon::getInstance().removeAlarm(_alarm);
+    _alarm->remove();
+    deleteLater();
+}
+
+void AlarmDetails::updateAlarm()
+{
+    _alarm->remove();
+    _ui->timeButton->setText(_alarm->getTime());
     QString rep = "";
-    Msg::Weekdays days = alarm->getDays();
+    Msg::Weekdays days = _alarm->getDays();
     bool weekend = false, weekdays = false;
     if ( days.monday && days.tuesday && days.wednesday && days.thursday && days.friday )
-            weekdays = true;
+        weekdays = true;
     if ( days.saturday && days.sunday )
-            weekend = true;
+        weekend = true;
     if ( weekdays && weekend )
         rep += "Everyday, ";
     else if ( weekdays )
@@ -50,31 +77,38 @@ AlarmDetails::AlarmDetails(QWidget *parent, Msg::Alarm *alarm) :
         if ( days.sunday )
             rep += "Sunday, ";
     }
+    _alarm->setName(rep + _alarm->getTime());
     rep.chop(2);
-    _ui->detailBrowser->append("Repetitions: " + rep);
-    _ui->detailBrowser->append("Ringtone: " + alarm->getSource() );
-    _ui->detailBrowser->append("Snoozetime: " + QString::number(alarm->getSnoozeTime()) );
+    _ui->dayButton->setText(rep);
+    _ui->ringtoneButton->setText(_alarm->getSource());
+    _ui->snoozeButton->setText(QString::number(_alarm->getSnoozeTime()).rightJustified(2, '0'));
+    _ui->volumeButton->setText(QString::number(_alarm->getVolume()));
+    _ui->nameLabel->setText(_alarm->getName());
 
-    connect( _ui->editButton, SIGNAL(clicked()), this, SLOT(editAlarm()));
-    connect( _ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteAlarm()));
+    _alarm->save();
 }
 
-AlarmDetails::~AlarmDetails()
+void AlarmDetails::editTime()
 {
-    delete _ui;
+    qDebug() << "NightPlugin/Alarmdetails: editTime";
 }
 
-void AlarmDetails::editAlarm()
+void AlarmDetails::editSnooze()
 {
-        AlarmWizard *wizard = new AlarmWizard(NULL, _alarm);
-        connect( wizard, SIGNAL(accepted()), this, SLOT(deleteLater()) );
-        connect( wizard, SIGNAL(rejected()), this, SLOT(deleteLater()) );
-        wizard->showFullScreen();
+    qDebug() << "NightPlugin/Alarmdetails: editSnooze";
 }
 
-void AlarmDetails::deleteAlarm()
+void AlarmDetails::editSource()
 {
-        Msg::AlarmDaemon::getInstance().removeAlarm(_alarm);
-        this->close();
-        delete this;
+    qDebug() << "NightPlugin/Alarmdetails: editSource";
+}
+
+void AlarmDetails::editVolume()
+{
+    qDebug() << "NightPlugin/Alarmdetails: editVolume";
+}
+
+void AlarmDetails::editDays()
+{
+    qDebug() << "NightPlugin/Alarmdetails: editDays";
 }

@@ -18,8 +18,13 @@ public:
     ~AlarmDetails();
 
 private slots:
-        void editAlarm();
         void deleteAlarm();
+        void updateAlarm();
+        void editTime();
+        void editSnooze();
+        void editSource();
+        void editVolume();
+        void editDays();
 
 private:
     Ui::AlarmDetails *_ui;

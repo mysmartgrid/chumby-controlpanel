@@ -18,9 +18,6 @@ class SourcePage : public QWizardPage
     
 public:
     explicit SourcePage(QWidget *parent = 0, QStringList source = QStringList());
-	void initializePage();
-	bool isComplete() const;
-	int nextId() const;
     ~SourcePage();
 	
 protected slots:

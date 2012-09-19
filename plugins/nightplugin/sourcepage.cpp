@@ -1,7 +1,6 @@
 #include "sourcepage.h"
 #include "ui_sourcepage.h"
 
-#include "alarmwizard.h"
 #include "../../controlpanel/musiccontrol.h"
 
 #include <QtCore/QDebug>
@@ -25,7 +24,7 @@ SourcePage::~SourcePage()
     delete _ui;
 }
 
-void SourcePage::initializePage()
+/*void SourcePage::initializePage()
 {
     if ( _source.size() == 1 )
     {
@@ -70,7 +69,7 @@ void SourcePage::initializePage()
             _ui->sourceList->setCurrentItem(_ui->sourceList->itemAt(1,1));
             selectSource(_ui->sourceList->selectedItems().first());
     }
-}
+}*/
 
 void SourcePage::selectSource(QListWidgetItem *item)
 {
@@ -92,12 +91,12 @@ void SourcePage::selectSource(QListWidgetItem *item)
     }
 }
 
-bool SourcePage::isComplete() const
+/*bool SourcePage::isComplete() const
 {
     return _ui->sourceList->selectedItems().size() > 0;
-}
+}*/
 
-int SourcePage::nextId() const
+/*int SourcePage::nextId() const
 {
     qDebug() << "pre nextId";
     if ( _source.size() == 0 )
@@ -113,7 +112,7 @@ int SourcePage::nextId() const
         ((AlarmWizard*) this->wizard())->addPage(next_page);
         return ((AlarmWizard*)this->wizard())->getNextPage();
     }
-}
+}*/
 
 Msg::AudioPlugin* SourcePage::getPlugin()
 {

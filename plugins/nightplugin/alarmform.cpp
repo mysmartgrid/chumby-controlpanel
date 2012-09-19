@@ -2,7 +2,6 @@
 #include "ui_alarmform.h"
 
 #include "alarmdetails.h"
-#include "alarmwizard.h"
 
 #include <QtCore/QDebug>
 #include <QtGui/QCheckBox>
@@ -59,17 +58,7 @@ void AlarmForm::alarmDetails()
         }
     }
 
-    if ( alarm )
-    {
-            AlarmDetails *widget = new AlarmDetails(NULL, alarm);
-            connect( widget, SIGNAL(destroyed()), this, SLOT(refresh()) );
-            widget->showFullScreen();
-    }
-    else
-    {
-            AlarmWizard *wizard = new AlarmWizard(NULL, alarm);
-            connect( wizard, SIGNAL(accepted()), this, SLOT(refresh()) );
-            connect( wizard, SIGNAL(rejected()), _ui->alarmList, SLOT(clearSelection()));
-            wizard->showFullScreen();
-    }
+    AlarmDetails *widget = new AlarmDetails(NULL, alarm);
+    connect( widget, SIGNAL(destroyed()), this, SLOT(refresh()) );
+    widget->showFullScreen();
 }
