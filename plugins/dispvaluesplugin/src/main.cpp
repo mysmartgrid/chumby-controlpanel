@@ -18,8 +18,8 @@ namespace Msg
 
             virtual ~DispValuesPlugin()
             {
-										if ( dlg )
-                    	delete dlg;
+                    /*if ( dlg )
+                        delete dlg;*/
                     std::cout << "DispValuesPlugin destroyed" << std::endl;
             }
 
