@@ -10,6 +10,7 @@ Msg::Alarm::Alarm(QString name, QObject *parent)
       _name(name),
       _time(QTime::currentTime()),
       _source(""), //TODO: default ringtone
+      _volume(Msg::MusicControl::getInstance().getMasterVolume()),
       _snoozeTime(5),
       _active(true),
       _plugin(NULL),
@@ -252,4 +253,14 @@ QString Msg::Alarm::getSource()
 int Msg::Alarm::getSnoozeTime()
 {
     return _snoozeTime;
+}
+
+void Msg::Alarm::setVolume(int vol)
+{
+    _volume = vol;
+}
+
+int Msg::Alarm::getVolume()
+{
+    return _volume;
 }

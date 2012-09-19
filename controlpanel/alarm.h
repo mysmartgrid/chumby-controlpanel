@@ -42,6 +42,7 @@ namespace Msg
         void setSource(QString source);
         void setSnooze(int snooze);
         void setName(QString name);
+        void setVolume(int vol);
         bool check(QDateTime current);
         bool isActive();
         void setActive(bool active);
@@ -52,6 +53,7 @@ namespace Msg
         Weekdays getDays();
         QString getSource();
         int getSnoozeTime();
+        int getVolume();
 
     public slots:
         bool run();
@@ -63,6 +65,7 @@ namespace Msg
         QTime _time;
         Weekdays _weekdays; // bit field encoding repetitions
         QString _source;
+        int _volume;
         int _snoozeTime;
         bool _active;
         Msg::AudioPlugin* _plugin;
