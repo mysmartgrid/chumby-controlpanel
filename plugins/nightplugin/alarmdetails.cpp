@@ -5,6 +5,7 @@
 
 #include "timepage.h"
 #include "snoozepage.h"
+#include "daypage.h"
 
 #include <QtCore/QDebug>
 
@@ -122,4 +123,7 @@ void AlarmDetails::editVolume()
 void AlarmDetails::editDays()
 {
     qDebug() << "NightPlugin/Alarmdetails: editDays";
+    DayPage *page = new DayPage(_alarm);
+    connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
+    page->show();
 }
