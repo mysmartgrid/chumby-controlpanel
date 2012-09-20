@@ -38,8 +38,10 @@ add_library(dispvaluesplugin MODULE ${dispvaluesplugin_SRCS}
   ${dispvaluesplugin_MOC_SRCS}
   ${dispvaluesplugin_RC_SRCS}
 )
+target_link_libraries(dispvaluesplugin ${QT_QTNETWORK_LIBRARY})
 
-set_target_properties(dispvaluesplugin PROPERTIES SOVERSION "1.0")
+
+#set_target_properties(dispvaluesplugin PROPERTIES SOVERSION "1.0")
 set_target_properties(dispvaluesplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(dispvaluesplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 

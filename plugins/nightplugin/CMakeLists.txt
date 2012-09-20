@@ -85,7 +85,7 @@ add_library(nightplugin MODULE ${nightplugin_SRCS}
   ${nightplugin_UI_HDRS}
   )
 
-set_target_properties(nightplugin PROPERTIES SOVERSION "1.0")
+#set_target_properties(nightplugin PROPERTIES SOVERSION "1.0")
 set_target_properties(nightplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(nightplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 

@@ -36,7 +36,7 @@ add_library(radioplugin MODULE ${radioplugin_SRCS}
   ${radioplugin_MOC_SRCS}
   )
 
-set_target_properties(radioplugin PROPERTIES SOVERSION "1.0")
+#set_target_properties(radioplugin PROPERTIES SOVERSION "1.0")
 set_target_properties(radioplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(radioplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 

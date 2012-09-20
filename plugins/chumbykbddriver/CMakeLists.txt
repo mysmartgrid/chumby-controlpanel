@@ -22,7 +22,7 @@ add_library(chumbykbddriver MODULE ${chumbykbddriver_SRCS}
   ${chumbykbddriver_RC_SRCS}
 )
 
-set_target_properties(chumbykbddriver PROPERTIES SOVERSION "1.0")
+#set_target_properties(chumbykbddriver PROPERTIES SOVERSION "1.0")
 set_target_properties(chumbykbddriver PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(chumbykbddriver PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
