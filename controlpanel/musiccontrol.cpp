@@ -1,3 +1,4 @@
+#include <msgException.hpp>
 #include "musiccontrol.h"
 
 #include <QtGui/QDesktopWidget>
@@ -39,17 +40,17 @@ namespace Msg
         snd_mixer_selem_id_set_name(_sid, selem_name);
         _elem = snd_mixer_find_selem(_handle, _sid);
 
-        if ( !_elem )
-        {
-            qDebug() << "Sound device \"" << selem_name << "\" not found. Disabling MusicControl.";
-            return;
-        }
-
-        snd_mixer_selem_get_playback_volume_range(_elem, &_min, &_max);
+        if(_elem ==NULL) {
+					throw msg::msgException("Cannot find sound card.");
+				}
+                snd_mixer_selem_get_playback_volume_range(_elem, &_min, &_max);
         if ( _min < 128 )
             _min = 128;
 
         _vol = new VolumeWidget(_min, _max);
+        if(_vol ==NULL) {
+					throw msg::msgException("Cannot find volume handle.");
+				}
         QPalette p(_vol->palette());
         p.setColor(QPalette::Background, Qt::darkGray);
         _vol->setPalette(p);
@@ -370,6 +371,10 @@ namespace Msg
         snd_mixer_selem_id_set_name(adc, selem_left_name);
         mElem = snd_mixer_find_selem(mHandle, adc);
 
+				if( mElem == NULL ) {
+					throw msg::msgException("Cannot find sound card.");
+				}
+
         int res;
         res = snd_mixer_selem_set_enum_item(mElem, SND_MIXER_SCHN_MONO, input);
         if ( res < 0 )
@@ -379,6 +384,9 @@ namespace Msg
 
         snd_mixer_selem_id_set_name(adc, selem_right_name);
         mElem = snd_mixer_find_selem(mHandle, adc);
+				if( mElem == NULL ) {
+					throw msg::msgException("Cannot find sound card.");
+				}
 
         res = snd_mixer_selem_set_enum_item(mElem, SND_MIXER_SCHN_MONO, input);
         if ( res < 0 )

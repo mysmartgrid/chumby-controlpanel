@@ -29,6 +29,7 @@ message(STATUS "QT: '${QT_LIBRARIES}'")
 IF(NOT QT_FOUND)
   message(FATAL_ERROR "No QT4 found, cannot continue.")
 ENDIF(NOT QT_FOUND)
+include(Tools)
 
 # search for alsa sound
 find_package(ASound)

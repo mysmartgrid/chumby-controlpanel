@@ -33,7 +33,7 @@ add_library(netconfigplugin MODULE ${netconfigplugin_SRCS}
 )
 target_link_libraries(netconfigplugin ${QT_QTXML_LIBRARY})
 
-set_target_properties(netconfigplugin PROPERTIES SOVERSION "1.0")
+#set_target_properties(netconfigplugin PROPERTIES SOVERSION "1.0")
 set_target_properties(netconfigplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(netconfigplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 

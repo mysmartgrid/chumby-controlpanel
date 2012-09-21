@@ -163,7 +163,7 @@ void Controlpanel::updateClock()
 	if (time.second() == 0)
 	{
 		qDebug() << "Checking alarms!";
-        _alarm->check();
+        	_alarm->check();
 	}
     _ui->timeLabel->setText( text );
 
@@ -212,16 +212,16 @@ void Controlpanel::keyPressEvent(QKeyEvent *event)
 #ifdef Q_WS_QWS
 	case 8:
 #else // Q_WS_QWS
-    case 43: // "+"
+    	case 43: // "+"
 #endif // Q_WS_QWS
 		// volume
 		std::cout << "adjusting volume" << std::endl;
-        _mc->increaseMasterVolume();
+		_mc->increaseMasterVolume();
 		break;
 #ifdef Q_WS_QWS
 	case 9:
 #else // Q_WS_QWS
-    case 45: // "-"
+    	case 45: // "-"
 #endif // Q_WS_QWS
         _mc->lowerMasterVolume();
 		break;

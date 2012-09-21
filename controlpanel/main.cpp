@@ -1,18 +1,22 @@
 #include <QtGui/QApplication>
-#include <QtGui/QWSServer>
-#include <QWSEvent>
+#ifdef Q_WS_QWS
+#  include <QtGui/QWSServer>
+#  include <QWSEvent>
+#endif /* Q_WS_QWS */
 #include "controlpanel.h"
 
 class myApplication : public QApplication
 {
-    bool qwsEventFilter(QWSEvent* event)
+#ifdef Q_WS_QWS
+	bool qwsEventFilter(QWSEvent* event)
     {
-        if (event->type == QWSEvent::Key )
-        {
-            std::cout << ((QWSKeyEvent*) event)->Key << std::endl;
-        }
-        return false;
+			if (event->type == QWSEvent::Key )
+			{
+				std::cout << ((QWSKeyEvent*) event)->Key << std::endl;
+			}
+			return false;
     }
+#endif /* Q_WS_QWS */
 };
 
 int main(int argc, char *argv[])
@@ -23,7 +27,7 @@ int main(int argc, char *argv[])
     QWSServer::setCursorVisible(false);
     a.setOverrideCursor( QCursor( Qt::BlankCursor ) );
 #else
-		a.setOverrideCursor( QCursor( Qt::CrossCursor ) );
+	a.setOverrideCursor( QCursor( Qt::CrossCursor ) );
 #endif
 
     //QFont font("Arial", 14);

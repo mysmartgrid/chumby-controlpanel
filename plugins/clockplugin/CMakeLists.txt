@@ -83,7 +83,7 @@ add_library(clockplugin MODULE ${clockplugin_SRCS}
   ${clockplugin_UI_HDRS}
   )
 
-set_target_properties(clockplugin PROPERTIES SOVERSION "1.0")
+#set_target_properties(clockplugin PROPERTIES SOVERSION "1.0")
 set_target_properties(clockplugin PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(clockplugin PROPERTIES BUILD_WITH_INSTALL_RPATH true)
 
