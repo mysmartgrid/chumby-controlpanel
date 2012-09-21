@@ -1,34 +1,36 @@
 #ifndef SOURCEPAGE_H
 #define SOURCEPAGE_H
 
-#include <QWizardPage>
+#include <QWidget>
 #include <QListWidgetItem>
 
-#include "../../controlpanel/audioplugin.h"
-
-//TODO: reselection must be handled
+#include "alarm.h"
+#include "audioplugin.h"
 
 namespace Ui {
 class SourcePage;
 }
 
-class SourcePage : public QWizardPage
+class SourcePage : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit SourcePage(QWidget *parent = 0, QStringList source = QStringList());
+    explicit SourcePage(Msg::Alarm* alarm, QWidget *parent = 0);
     ~SourcePage();
-	
+
 protected slots:
-	void selectSource(QListWidgetItem *item);
-    
+    void setSource();
+    void selectSource(QListWidgetItem *item);
+
 private:
-		Msg::AudioPlugin* getPlugin();
-		QString getPath() const;
+    Msg::AudioPlugin* getPlugin();
+    QString getPath() const;
+    void initSourceList();
     Ui::SourcePage *_ui;
-		QStringList _source;
-		Msg::AudioPlugin* _plugin;
+    Msg::Alarm *_alarm;
+    Msg::AudioPlugin* _plugin;
+    QStringList _source;
 };
 
 #endif // SOURCEPAGE_H

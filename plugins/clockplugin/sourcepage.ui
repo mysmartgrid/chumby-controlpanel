@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SourcePage</class>
- <widget class="QWizardPage" name="SourcePage">
+ <widget class="QWidget" name="SourcePage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,20 +11,36 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>WizardPage</string>
-  </property>
-  <property name="title">
-   <string>Ringtone</string>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QListWidget" name="sourceList">
-     <property name="font">
-      <font>
-       <pointsize>20</pointsize>
-      </font>
+    <widget class="QLabel" name="sourceLabel">
+     <property name="text">
+      <string>Ringtone</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <widget class="QListWidget" name="sourceList"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="backButton">
+       <property name="text">
+        <string>Back</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="setButton">
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

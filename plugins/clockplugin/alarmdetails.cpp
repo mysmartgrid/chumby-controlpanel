@@ -7,6 +7,7 @@
 #include "snoozepage.h"
 #include "daypage.h"
 #include "volumepage.h"
+#include "sourcepage.h"
 
 #include <QtCore/QDebug>
 
@@ -116,14 +117,20 @@ void AlarmDetails::editSnooze()
 void AlarmDetails::editSource()
 {
     qDebug() << "ClockPlugin/Alarmdetails: editSource";
+    SourcePage *page = new SourcePage(_alarm);
+    connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
+    page->show();
 }
 
 void AlarmDetails::editVolume()
 {
     qDebug() << "ClockPlugin/Alarmdetails: editVolume";
     VolumePage *page = new VolumePage(_alarm);
+    qDebug() << "1";
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
+    qDebug() << "2";
     page->show();
+    qDebug() << "3";
 }
 
 void AlarmDetails::editDays()
