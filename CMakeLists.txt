@@ -65,7 +65,10 @@ message("        ***** Configuration parameters *****")
 message("             prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # add some files to the installation target
-INSTALL(FILES README INSTALL COPYRIGHT DESTINATION
+INSTALL(FILES README.md DESTINATION 
+  share/doc/chumby-${V_MAJOR}-${V_MINOR} RENAME README
+)
+INSTALL(FILES INSTALL COPYRIGHT DESTINATION
   share/doc/chumby-${V_MAJOR}-${V_MINOR}
 )
 
@@ -77,7 +80,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Gridlicense Demo Tools")
 set(CPACK_PACKAGE_VENDOR              "Fraunhofer ITWM")
 set(CPACK_PACKAGE_CONTACT             "Kai Krueger <krueger@itwm.fhg.de>")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER   "Kai Krueger <krueger@itwm.fhg.de>")
-set(CPACK_PACKAGE_DESCRIPTION_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/README")
+set(CPACK_PACKAGE_DESCRIPTION_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYRIGHT")
 set(CPACK_PACKAGE_VERSION_MAJOR ${V_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${V_MINOR})
