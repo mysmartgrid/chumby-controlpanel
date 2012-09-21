@@ -103,7 +103,7 @@ void AlarmDetails::editTime()
     qDebug() << "ClockPlugin/Alarmdetails: editTime";
     TimePage *page = new TimePage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
-    page->show();
+    page->showFullScreen();
 }
 
 void AlarmDetails::editSnooze()
@@ -111,7 +111,7 @@ void AlarmDetails::editSnooze()
     qDebug() << "ClockPlugin/Alarmdetails: editSnooze";
     SnoozePage *page = new SnoozePage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
-    page->show();
+    page->showFullScreen();
 }
 
 void AlarmDetails::editSource()
@@ -119,18 +119,15 @@ void AlarmDetails::editSource()
     qDebug() << "ClockPlugin/Alarmdetails: editSource";
     SourcePage *page = new SourcePage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
-    page->show();
+    page->showFullScreen();
 }
 
 void AlarmDetails::editVolume()
 {
     qDebug() << "ClockPlugin/Alarmdetails: editVolume";
     VolumePage *page = new VolumePage(_alarm);
-    qDebug() << "1";
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
-    qDebug() << "2";
-    page->show();
-    qDebug() << "3";
+    page->showFullScreen();
 }
 
 void AlarmDetails::editDays()
@@ -138,5 +135,5 @@ void AlarmDetails::editDays()
     qDebug() << "ClockPlugin/Alarmdetails: editDays";
     DayPage *page = new DayPage(_alarm);
     connect(page, SIGNAL(destroyed()), this, SLOT(updateAlarm()));
-    page->show();
+    page->showFullScreen();
 }
