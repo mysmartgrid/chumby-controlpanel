@@ -5,7 +5,7 @@ get_filename_component(_currentDir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include( "${_currentDir}/KDECTestNightly.cmake")
 
 macro(my_ctest_setup)
-  set(_git_default_branch "kk-dev")
+  set(_git_default_branch "master")
 
   # init branch to checkout
   if( NOT _git_branch )

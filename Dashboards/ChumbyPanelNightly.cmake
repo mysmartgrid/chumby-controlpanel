@@ -57,8 +57,8 @@ if(CMAKE_TOOLCHAIN_FILE)
     CMAKE_TOOLCHAIN_FILE
     CMAKE_INSTALL_PREFIX
     )
-  set(OS_NAME "openWRT")
-  set(CMAKE_SYSTEM_PROCESSOR ${openwrt_arch})
+  set(OS_NAME "chumby")
+  set(CMAKE_SYSTEM_PROCESSOR ${arm})
 else(CMAKE_TOOLCHAIN_FILE)
   kde_ctest_write_initial_cache("${CTEST_BINARY_DIRECTORY}"
     BOOST_ROOT
