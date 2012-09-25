@@ -25,6 +25,8 @@ set(clockplugin_HDRS
   volumepage.h
   )
 
+set(clockplugin_RESOURCES clockplugin.qrc)
+
 set(alarmdetails_UIS alarmdetails.ui)
 set(alarmdetails__MOC_HDRS alarmdetails.h)
 

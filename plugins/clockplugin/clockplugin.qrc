@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>resources/vol-down.png</file>
+        <file>resources/vol-up.png</file>
+    </qresource>
+</RCC>
