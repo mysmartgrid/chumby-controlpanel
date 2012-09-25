@@ -21,11 +21,11 @@ Controlpanel::Controlpanel(QWidget *parent)
     _pluginWidget(NULL),
     _sock_iwconfig(::iw_sockets_open()),
     _mc(&MusicControl::getInstance()),
-    _alarm(&AlarmDaemon::getInstance())
+    _alarm(&AlarmDaemon::getInstance()),
+    _plugins()
 {
     _ui->setupUi(this);
 
-    _plugins = QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >();
     grabKeyboard();
     getPlugins();
 	QTimer* timer = new QTimer( this );
@@ -48,6 +48,10 @@ Controlpanel::Controlpanel(QWidget *parent)
 Controlpanel::~Controlpanel()
 {
 	this->releaseKeyboard();
+    for ( QMap<QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >::iterator i = _plugins.begin(); i != _plugins.end(); i++ )
+    {
+        delete i.value().second;
+    }
 }
 
 void Controlpanel::startPlugin()

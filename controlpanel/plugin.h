@@ -31,7 +31,9 @@ namespace Msg
             virtual ~Plugin();
 
             virtual QIcon* getIcon() {
-                return new QIcon(":/icon/resources/plugin.png");
+                if ( _icon == NULL )
+                    _icon = new QIcon(":/icon/resources/plugin.png");
+                return _icon;
             }
 
             virtual std::string getName() = 0;
@@ -56,6 +58,7 @@ namespace Msg
 
     protected:
             QWidget* _widget;
+            QIcon* _icon;
     };
 
 

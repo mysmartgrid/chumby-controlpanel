@@ -11,7 +11,8 @@
 namespace Msg
 {
     Plugin::Plugin()
-        : _widget(NULL)
+        : _widget(NULL),
+          _icon(NULL)
     {
     }
 
@@ -19,5 +20,7 @@ namespace Msg
     {
         if ( _widget )
             delete _widget;
+        if ( _icon )
+            delete _icon;
     }
 }
