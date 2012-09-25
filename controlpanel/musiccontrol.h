@@ -19,12 +19,14 @@
 #define INPUT_HP    2
 #define INPUT_LINE2 3
 
+#define VOLUME_STEP 3
+
 namespace Msg
 {
     class VolumeWidget : public QWidget
     {
     public:
-        VolumeWidget(int min, int max);
+        VolumeWidget();
         void setVolume(long int vol);
         void showWidget();
 
@@ -65,6 +67,8 @@ namespace Msg
         void setMasterMute(int value);
         void increaseMasterVolume();
         void lowerMasterVolume();
+        long getMinMasterVolume();
+        long getMaxMasterVolume();
 
         int alsa_open(snd_pcm_t **pcm_handle, int stream_type);
         void alsa_close();

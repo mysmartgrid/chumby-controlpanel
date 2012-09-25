@@ -47,7 +47,7 @@ namespace Msg
         if ( _min < 128 )
             _min = 128;
 
-        _vol = new VolumeWidget(_min, _max);
+        _vol = new VolumeWidget();
         if(_vol ==NULL) {
 					throw msg::msgException("Cannot find volume handle.");
 				}
@@ -91,7 +91,13 @@ namespace Msg
 
         setMasterMute(1);
 
-        snd_mixer_selem_set_playback_volume_all(_elem, volume * _max / 100);
+        // map volume back to hardware value range
+        double vol = ( _max - _min ) * volume / 100 + _min;
+        volume = vol;
+        if ( vol - volume > 0.5 )
+            volume++;
+
+        snd_mixer_selem_set_playback_volume_all(_elem, volume);
 
         _vol->setVolume(getMasterVolume());
         _vol->showWidget();
@@ -105,6 +111,13 @@ namespace Msg
         long int volume;
         snd_mixer_selem_get_playback_volume(_elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
 
+        // map the volume to a value range from 0 to 100
+        double vol = volume;
+        vol = ( vol - _min) * 100 / ( _max - _min );
+        volume = vol;
+        if ( vol - volume > 0.5 )
+            volume++;
+
         return volume;
     }
 
@@ -113,26 +126,11 @@ namespace Msg
         if ( !_elem )
             return;
 
-        setMasterMute(1);
-
         long int volume = getMasterVolume();
-        qDebug() << _min << " <= " << volume << " <= " << _max;
-                if ( volume < _min )
-				{
-                    volume = _min;
-                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
-                    snd_mixer_selem_set_playback_switch_all(_elem, 1);
-				}
-        if ( volume <= _max - 3 )
-        {
-            volume += 3;
-            snd_mixer_selem_set_playback_volume_all(_elem, volume);
-        }
-				else
-				{
-                    volume = _max;
-          snd_mixer_selem_set_playback_volume_all(_elem, volume);
-				}
+
+        if ( (volume += VOLUME_STEP) > 100)
+            volume = 100;
+        setMasterVolume(volume);
 
         _vol->setVolume(volume);
         _vol->showWidget();
@@ -143,24 +141,15 @@ namespace Msg
         if ( !_elem )
             return;
 
-        setMasterMute(1);
         long int volume = getMasterVolume();
-        qDebug() << _min << " <= " << volume << " <= " << _max;
-        if ( volume >= _min + 3 )
-        {
-            volume -= 3;
-            snd_mixer_selem_set_playback_volume_all(_elem, volume);
-        }
-				else
-				{
-					volume = 0;
-                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
-                    snd_mixer_selem_set_playback_switch_all(_elem, 0);
-				}
+        if ( ( volume -= VOLUME_STEP ) < 0 )
+            volume = 0;
+        setMasterVolume(volume);
 
         _vol->setVolume(volume);
         _vol->showWidget();
     }
+
 
     //set mute flag ( 0: muted, 1: not muted )
     void MusicControl::setMasterMute(int value)
@@ -169,6 +158,16 @@ namespace Msg
             return;
 
         snd_mixer_selem_set_playback_switch_all(_elem, value);
+    }
+
+    long MusicControl::getMinMasterVolume()
+    {
+        return _min;
+    }
+
+    long MusicControl::getMaxMasterVolume()
+    {
+        return _max;
     }
 
     void MusicControl::play(snd_pcm_t *source) {
@@ -497,7 +496,7 @@ namespace Msg
         }
     }
 
-    VolumeWidget::VolumeWidget(int min = 0, int max = 100)
+    VolumeWidget::VolumeWidget()
         :QWidget(NULL, Qt::ToolTip),
           _layout(new QHBoxLayout(this)),
           _bar(new QProgressBar()),
@@ -507,8 +506,8 @@ namespace Msg
         low->setPixmap(QIcon(":/icon/resources/vol-down.png").pixmap(15));
         _layout->addWidget(low);
         qDebug() << "Building Progressbar";
-        _bar->setMaximum(max);
-        _bar->setMinimum(min);
+        _bar->setMaximum(100);
+        _bar->setMinimum(0);
         _layout->addWidget(_bar);
         QLabel* high = new QLabel();
         high->setPixmap(QIcon(":/icon/resources/vol-up.png").pixmap(15));
