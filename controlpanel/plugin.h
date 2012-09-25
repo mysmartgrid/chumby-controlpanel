@@ -28,7 +28,7 @@ namespace Msg
      public:
             Plugin();
 
-            virtual ~Plugin() = 0;
+            virtual ~Plugin();
 
             virtual QIcon* getIcon() {
                 return new QIcon(":/icon/resources/plugin.png");
@@ -53,6 +53,9 @@ namespace Msg
 
     signals:
             void stopWidget();
+
+    protected:
+            QWidget* _widget;
     };
 
 

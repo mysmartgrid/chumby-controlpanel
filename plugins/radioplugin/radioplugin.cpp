@@ -455,7 +455,7 @@ public:
 
     virtual QWidget* getWidget()
     {
-        QWidget* widget = new QWidget();
+        _widget = new QWidget();
         QVBoxLayout* layout = new QVBoxLayout();
         QHBoxLayout* freq_layout = new QHBoxLayout();
         QVBoxLayout* radiotext_layout = new QVBoxLayout();
@@ -506,7 +506,7 @@ public:
         preset_layout->addWidget(preset5, 1, 1);
         preset_layout->addWidget(preset6, 1, 2);
 
-        widget->setLayout(layout);
+        _widget->setLayout(layout);
 
         connect( playButton, SIGNAL( clicked() ), radio, SLOT( play() ) );
         connect( stopButton, SIGNAL( clicked() ), radio, SLOT( stop() ) );
@@ -531,7 +531,7 @@ public:
         connect( preset5, SIGNAL( longPressed() ), radio, SLOT( setPreset() ) );
         connect( preset6, SIGNAL( longPressed() ), radio, SLOT( setPreset() ) );
 
-        return widget;
+        return _widget;
     }
 
 private:

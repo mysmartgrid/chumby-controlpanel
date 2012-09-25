@@ -25,7 +25,8 @@ std::string Msg::ClockPlugin::getName()
 
 QWidget* Msg::ClockPlugin::getWidget()
 {
-    QWidget* widget = new ClockWidget(0, this);
+    if ( _widget == NULL )
+        _widget = new ClockWidget(0, this);
 
     maxBrightness = getMaxBrightness();
 
@@ -33,9 +34,9 @@ QWidget* Msg::ClockPlugin::getWidget()
     bright = settings->value("bright", QVariant(0.7)).toDouble();
     dark = settings->value("dark", QVariant(0.4)).toDouble();
 
-    connect(widget, SIGNAL(destroyed()), this, SLOT(brighten()));
+    connect(_widget, SIGNAL(destroyed()), this, SLOT(brighten()));
 
-    return widget;
+    return _widget;
 }
 
 int Msg::ClockPlugin::getMaxBrightness()

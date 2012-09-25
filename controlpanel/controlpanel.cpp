@@ -62,7 +62,7 @@ void Controlpanel::startPlugin()
     if ( _currentPlugin != NULL && _currentPlugin->getName().compare(key.toStdString()) != 0 )
 	{
         qDebug() << QString::fromStdString(_currentPlugin->getName()) << " != " << key;
-        delete _pluginWidget;
+        //delete _pluginWidget; // the plugin should take care of cleaning up it's components
         delete _currentPlugin;
         _currentPlugin = NULL;
         _pluginWidget = NULL;

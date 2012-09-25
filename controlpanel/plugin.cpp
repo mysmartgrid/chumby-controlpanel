@@ -11,10 +11,13 @@
 namespace Msg
 {
     Plugin::Plugin()
+        : _widget(NULL)
     {
     }
 
     Plugin::~Plugin()
     {
+        if ( _widget )
+            delete _widget;
     }
 }
