@@ -74,8 +74,9 @@ void Controlpanel::startPlugin()
         _pluginWidget = NULL;
         qDebug() << "Plugin version:" << _currentPlugin->getVersion();
 	}
-	showWidget();
+    showWidget();
     qDebug() << QString::fromStdString(_currentPlugin->getName()) << " == " << key;
+    loadingWidget->deleteLater();
 }
 
 void Controlpanel::showWidget()
