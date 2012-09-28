@@ -43,6 +43,7 @@ void Msg::Alarm::save()
     settings->setValue("snooze", _snoozeTime);
     settings->setValue("source", getSource());
     settings->setValue("volume", _volume);
+    settings->setValue("active", _active);
     settings->endGroup();
 }
 
