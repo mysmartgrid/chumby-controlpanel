@@ -15,14 +15,33 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QListWidget" name="alarmList"/>
-   </item>
-   <item>
-    <widget class="QPushButton" name="doneButton">
-     <property name="text">
-      <string>Done</string>
+    <widget class="QListWidget" name="alarmList">
+     <property name="styleSheet">
+      <string notr="true">QListWidget::indicator:checked { image: url(:/icons/resources/on.png);}
+QListWidget::indicator:unchecked { image: url(:/icons/resources/off.png)}
+/*QListWidget::indicator:indeterminate { image: url(indeterminate.png); }*/
+QListWidget::indicator { width: 32px; height: 32px; }
+QListWidget::text { left-margin: 35px; }</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="doneButton">
+       <property name="text">
+        <string>Done</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="newButton">
+       <property name="text">
+        <string>New</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
