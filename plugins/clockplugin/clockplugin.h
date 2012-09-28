@@ -17,7 +17,7 @@ namespace Msg
 						~ClockPlugin();
 			
             virtual QIcon* getIcon() {
-                return new QIcon(":/icon/resources/plugin.png");
+                return new QIcon(":/icons/resources/clock.png");
             }
 
             virtual std::string getName();
