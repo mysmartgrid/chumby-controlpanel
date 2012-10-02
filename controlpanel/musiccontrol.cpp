@@ -99,8 +99,8 @@ namespace Msg
 
         snd_mixer_selem_set_playback_volume_all(_elem, volume);
 
-        _vol->setVolume(getMasterVolume());
-        _vol->showWidget();
+        /*_vol->setVolume(getMasterVolume());
+        _vol->showWidget();*/
     }
 
     long int MusicControl::getMasterVolume()

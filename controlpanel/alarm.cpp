@@ -147,6 +147,10 @@ bool Msg::Alarm::check(QDateTime current)
 
 bool Msg::Alarm::run()
 {
+    Msg::MusicControl* mc = &Msg::MusicControl::getInstance();
+    mc->stop();
+    _tmpVol = mc->getMasterVolume();
+    mc->setMasterVolume(this->getVolume());
     int index = _source.indexOf("/");
     QString audioPlugin = _source.left(index);
     QString pluginSource = _source;
@@ -154,7 +158,7 @@ bool Msg::Alarm::run()
     qDebug() << "Running" << audioPlugin << "with source" << pluginSource;
     if ( audioPlugin.length() == 0 || pluginSource.length() == 0 )
         return false;
-    _plugin = Msg::MusicControl::getInstance().getAudioPlugin(audioPlugin);
+    _plugin = mc->getAudioPlugin(audioPlugin);
     if ( ! _plugin )
         return false;
 
@@ -209,6 +213,7 @@ void Msg::Alarm::dismiss()
     qDebug() << "dismiss";
     AlarmDaemon::getInstance().setAlarmActive(false);
     _plugin->stop();
+    Msg::MusicControl::getInstance().setMasterVolume(_tmpVol);
     _widget->hide();
 }
 

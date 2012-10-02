@@ -66,6 +66,7 @@ namespace Msg
         Weekdays _weekdays; // bit field encoding repetitions
         QString _source;
         int _volume;
+        int _tmpVol;
         int _snoozeTime;
         bool _active;
         Msg::AudioPlugin* _plugin;
