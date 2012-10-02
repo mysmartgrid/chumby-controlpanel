@@ -38,5 +38,5 @@ fi
 
 # run the controlpanel in an endless loop
 while true; do
-	/mnt/usb/chumby-controlpanel/controlpanel/chumby-controlpanel -qws
+	/mnt/usb/chumby-controlpanel/controlpanel/chumby-controlpanel -qws -style plastique
 done
