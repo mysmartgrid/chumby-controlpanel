@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
     //QFont font("Arial", 14);
     QFont font = QApplication::font();
-    font.setPointSize(20);
+    font.setPointSize(16);
     QApplication::setFont(font);
 
     Msg::Controlpanel w;
