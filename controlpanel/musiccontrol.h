@@ -56,8 +56,10 @@ namespace Msg
         snd_pcm_t* _capture;
     };
 
-    class MusicControl
+    class MusicControl : public QObject
     {
+        Q_OBJECT
+
     public:
         static MusicControl& getInstance();
         static void destroy();
@@ -75,12 +77,16 @@ namespace Msg
         void alsa_select_input(int input);
         void play(snd_pcm_t* source);
         void stop();
+        void stopPlaybackThread();
         static void *playback_run(void *params);
 
         void addAudioPlugin(QString name, DLLFactory<PluginFactory>* dll);
         QList< QString > getAudioPlugins();
         AudioPlugin* getAudioPlugin(QString plugin);
         //QList< QMap< QString, QList< QString > > > getAudioSources();
+
+    signals:
+        void stopPlugins();
 
     private:
         MusicControl();

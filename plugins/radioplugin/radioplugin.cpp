@@ -85,6 +85,7 @@ void ChumbyRadio::play()
     crad_set_rds(p_crad, 1);
     rds = false;
     timer->start();
+    connect(mc, SIGNAL(stopPlugins()), this, SLOT(stop()));
 }
 
 void ChumbyRadio::stop()
@@ -93,7 +94,7 @@ void ChumbyRadio::stop()
     timer->stop();
     MusicControl* mc = &MusicControl::getInstance();
     //crad_set_power(p_crad, 0);
-    mc->stop();
+    mc->stopPlaybackThread();
     mc->alsa_close();
     //crad_set_rds(p_crad, 0);
     qDebug() << "Radio stopped!";

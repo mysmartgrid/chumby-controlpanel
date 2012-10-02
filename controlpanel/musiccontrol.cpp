@@ -197,6 +197,15 @@ namespace Msg
     }
 
     void MusicControl::stop() {
+        qDebug() << "stopping...";
+        emit stopPlugins();
+
+        stopPlaybackThread();
+        qDebug() << "mc stop finished";
+    }
+
+    void MusicControl::stopPlaybackThread()
+    {
         if ( !_thread )
         {
             qDebug() << "MusicControl: Nothing to stop here!";
