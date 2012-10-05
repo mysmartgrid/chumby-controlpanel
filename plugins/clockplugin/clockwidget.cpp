@@ -16,8 +16,10 @@ ClockWidget::ClockWidget(QWidget *parent, Msg::ClockPlugin *plugin) :
 		updateClock();
 		_timer->start();
 		
-		connect(_ui->dimButton, SIGNAL(clicked()), this, SLOT(dimAction()));
+        connect(_ui->dimButton, SIGNAL(clicked()), this, SLOT(dimAction()));
 		connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(showFullScreen()));
+        connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(raise()));
+        connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(refresh()));
 }
 
 ClockWidget::~ClockWidget()
