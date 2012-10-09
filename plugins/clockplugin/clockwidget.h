@@ -19,10 +19,19 @@ class ClockWidget : public QWidget
 public:
     explicit ClockWidget(QWidget *parent = 0, Msg::ClockPlugin *plugin = 0);
     ~ClockWidget();
+
+protected:
+    void mousePressEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *);
     
 protected slots:
 		void updateClock();
 		void dimAction();
+
+signals:
+        void pressed();
+        void released();
+        void clicked();
 		
 private:
 		QTimer *_timer;
@@ -30,6 +39,8 @@ private:
     Ui::ClockWidget *_ui;
 		Msg::ClockPlugin *_plugin;
 		AlarmForm *_alarm;
+
+        bool _clicked;
 };
 
 #endif // CLOCKWIDGET_H

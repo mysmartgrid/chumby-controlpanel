@@ -3,12 +3,19 @@
 
 #include <QtCore/QTime>
 
+#include <QtCore/QDebug>
+
+#ifdef Q_WS_QWS
+    #include <QWSEvent>
+#endif
+
 ClockWidget::ClockWidget(QWidget *parent, Msg::ClockPlugin *plugin) :
     QWidget(parent),
     _timer(new QTimer),
     _ui(new Ui::ClockWidget),
     _plugin(plugin),
-    _alarm(new AlarmForm)
+    _alarm(new AlarmForm),
+    _clicked(false)
 {
     _ui->setupUi(this);
 		
@@ -16,7 +23,7 @@ ClockWidget::ClockWidget(QWidget *parent, Msg::ClockPlugin *plugin) :
 		updateClock();
 		_timer->start();
 		
-        connect(_ui->dimButton, SIGNAL(clicked()), this, SLOT(dimAction()));
+        connect(this, SIGNAL(clicked()), this, SLOT(dimAction()));
 		connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(showFullScreen()));
         connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(raise()));
         connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(refresh()));
@@ -43,4 +50,20 @@ void ClockWidget::dimAction()
 	} else {
 		_plugin->dim();
 	}
+}
+
+void ClockWidget::mousePressEvent(QMouseEvent *)
+{
+    _clicked = true;
+    emit pressed();
+}
+
+void ClockWidget::mouseReleaseEvent(QMouseEvent *)
+{
+    if (_clicked)
+    {
+        _clicked = false;
+        emit clicked();
+    }
+    emit released();
 }
