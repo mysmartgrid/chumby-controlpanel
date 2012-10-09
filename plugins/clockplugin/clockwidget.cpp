@@ -22,7 +22,7 @@ ClockWidget::ClockWidget(QWidget *parent, Msg::ClockPlugin *plugin) :
 		connect(_timer, SIGNAL(timeout()), this, SLOT(updateClock()));
 		updateClock();
 		_timer->start();
-		
+
         connect(this, SIGNAL(clicked()), this, SLOT(dimAction()));
 		connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(showFullScreen()));
         connect(_ui->alarmButton, SIGNAL(clicked()), _alarm, SLOT(raise()));
@@ -67,3 +67,18 @@ void ClockWidget::mouseReleaseEvent(QMouseEvent *)
     }
     emit released();
 }
+
+void ClockWidget::leaveEvent(QEvent *)
+{
+    if ( _plugin->isDimmed() )
+        _plugin->brighten();
+}
+
+#ifdef Q_WS_QWS
+bool ClockWidget::qwsEvent(QWSEvent *event)
+{
+    if ( event->type == QWSEvent::Focus)
+        _plugin->brighten();
+    return false;
+}
+#endif

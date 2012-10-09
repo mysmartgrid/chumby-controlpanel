@@ -23,6 +23,10 @@ public:
 protected:
     void mousePressEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
+    void leaveEvent(QEvent *);
+#ifdef Q_WS_QWS
+    bool qwsEvent(QWSEvent *event);
+#endif
     
 protected slots:
 		void updateClock();

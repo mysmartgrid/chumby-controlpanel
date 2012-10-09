@@ -4,6 +4,7 @@
 #include "../../controlpanel/plugin.h"
 
 #include <QtCore/QSettings>
+#include <QtCore/QDir>
 
 #include <QtGui/QLabel>
 
@@ -47,14 +48,13 @@ namespace Msg
         int getBrightness();
         void setBrightness(int brightness);
 
+        QDir *_bldir;
+        QSettings *_settings;
         bool _dimmed;
         int _maxBrightness;
         double _bright;
         double _dark;
-        QSettings *_settings;
         QTimer *_sleep;
-
-        static QString backlight_file;
     };
 
     class ClockPluginFactory : public PluginFactory
