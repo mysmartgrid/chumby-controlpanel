@@ -16,7 +16,8 @@ namespace Msg
 {
 ChumbyRadio* ChumbyRadio::instance = 0;
 
-ChumbyRadio::ChumbyRadio()
+ChumbyRadio::ChumbyRadio() :
+    playing(false)
 {
     p_crad = 0;
     qDebug() << "creating ChumbyRadio";
@@ -74,30 +75,43 @@ void ChumbyRadio::refreshCrad()
 
 void ChumbyRadio::play()
 {
-    qDebug() << "Play!";
-    refreshCrad();
-    MusicControl* mc = &MusicControl::getInstance();
-    //crad_set_power(p_crad, 1);
-    mc->alsa_select_input(INPUT_LINE1);
-    snd_pcm_t* capture;
-    mc->alsa_open(&capture, SND_PCM_STREAM_CAPTURE);
-    mc->play(capture);
-    crad_set_rds(p_crad, 1);
-    rds = false;
-    timer->start();
-    connect(mc, SIGNAL(stopPlugins()), this, SLOT(stop()));
+    if ( !playing )
+    {
+        qDebug() << "Play!";
+        refreshCrad();
+        MusicControl* mc = &MusicControl::getInstance();
+        //crad_set_power(p_crad, 1);
+        mc->alsa_select_input(INPUT_LINE1);
+        snd_pcm_t* capture;
+        mc->alsa_open(&capture, SND_PCM_STREAM_CAPTURE);
+        mc->play(capture);
+        crad_set_rds(p_crad, 1);
+        rds = false;
+        timer->start();
+        connect(mc, SIGNAL(stopPlugins()), this, SLOT(stop()));
+        playing = true;
+    } else {
+        qDebug() << "Already playing!";
+    }
 }
 
 void ChumbyRadio::stop()
 {
-    refreshCrad();
-    timer->stop();
-    MusicControl* mc = &MusicControl::getInstance();
-    //crad_set_power(p_crad, 0);
-    mc->stopPlaybackThread();
-    mc->alsa_close();
-    //crad_set_rds(p_crad, 0);
-    qDebug() << "Radio stopped!";
+    if ( playing )
+    {
+        qDebug() << "Stop!";
+        refreshCrad();
+        timer->stop();
+        MusicControl* mc = &MusicControl::getInstance();
+        //crad_set_power(p_crad, 0);
+        mc->stopPlaybackThread();
+        mc->alsa_close();
+        playing = false;
+        //crad_set_rds(p_crad, 0);
+        qDebug() << "Radio stopped!";
+    } else {
+        qDebug() << "Radio not running. Nothing to stop!";
+    }
 }
 
 void ChumbyRadio::stepUp()
