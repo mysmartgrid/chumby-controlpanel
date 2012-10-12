@@ -38,6 +38,10 @@ find_package(ASound)
 # search for libts
 find_package(LibTS)
 
+find_package(Atomix)
+find_package(BlueTune)
+find_package(Neptune)
+
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXXFLAGS}")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC --rtti -W -Wall -Wextra ")
 #set(CMAKE_CC_FLAGS "${CMAKE_CC_FLAGS} -fPIC")
