@@ -156,7 +156,8 @@ void Controlpanel::getPlugins()
 
 			}
 		}
-	}
+    }
+    MusicControl::getInstance().addAudioPlugin("Ringtone", NULL);
 }
 
 void Controlpanel::updateClock()

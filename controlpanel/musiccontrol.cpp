@@ -1,6 +1,8 @@
 #include <msgException.hpp>
 #include "musiccontrol.h"
 
+#include "ringtoneplugin.h"
+
 #include <QtGui/QDesktopWidget>
 
 namespace Msg
@@ -427,6 +429,9 @@ namespace Msg
 
     AudioPlugin* MusicControl::getAudioPlugin(QString plugin)
     {
+        if ( plugin.compare("Ringtone") == 0 )
+            return new RingTonePlugin();
+
         return (AudioPlugin*) _audioPlugins.find(plugin).value()->factory->CreatePlugin();
     }
 

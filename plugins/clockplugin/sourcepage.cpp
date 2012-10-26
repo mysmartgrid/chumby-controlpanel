@@ -35,41 +35,41 @@ void SourcePage::initSourceList()
         if ( !Msg::MusicControl::getInstance().getAudioPlugins().isEmpty() )
         {
             _ui->sourceList->addItems(Msg::MusicControl::getInstance().getAudioPlugins());
-            //load source from wizard, if available
-            if ( !_alarm->getSource().isEmpty() )
-            {
-                QString src = _alarm->getSource();
-                int index = src.indexOf("/");
-                src.remove(index, src.length());
-                QList<QListWidgetItem*> items = _ui->sourceList->findItems(src, Qt::MatchExactly);
-                if ( items.size() != 1 )
-                    return;
+        }
+        //load source from wizard, if available
+        if ( !_alarm->getSource().isEmpty() )
+        {
+            QString src = _alarm->getSource();
+            int index = src.indexOf("/");
+            src.remove(index, src.length());
+            QList<QListWidgetItem*> items = _ui->sourceList->findItems(src, Qt::MatchExactly);
+            if ( items.size() != 1 )
+                return;
 
-                _ui->sourceList->clearSelection();
-                //items.first()->setSelected(true);
-                _ui->sourceList->setCurrentItem(items.first());
-                selectSource(items.first());
-            }
+            _ui->sourceList->clearSelection();
+            //items.first()->setSelected(true);
+            _ui->sourceList->setCurrentItem(items.first());
+            selectSource(items.first());
         }
     } else {
         Msg::AudioPlugin* plugin = getPlugin();
         if ( !plugin->getSourceList().isEmpty() )
         {
             _ui->sourceList->addItems(plugin->getSourceList());
-            //load source from wizard, if available
-            if ( !_alarm->getSource().isEmpty() )
-            {
-                QString src = _alarm->getSource();
-                int index = src.indexOf("/");
-                src.remove(0, index + 1);
-                QList<QListWidgetItem*> items = _ui->sourceList->findItems(src, Qt::MatchExactly);
-                if ( items.size() != 1 )
-                    return;
+        }
+        //load source from wizard, if available
+        if ( !_alarm->getSource().isEmpty() )
+        {
+            QString src = _alarm->getSource();
+            int index = src.indexOf("/");
+            src.remove(0, index + 1);
+            QList<QListWidgetItem*> items = _ui->sourceList->findItems(src, Qt::MatchExactly);
+            if ( items.size() != 1 )
+                return;
 
-                _ui->sourceList->clearSelection();
-                items.first()->setSelected(true);
-                selectSource(items.first());
-            }
+            _ui->sourceList->clearSelection();
+            items.first()->setSelected(true);
+            selectSource(items.first());
         }
     }
 
@@ -92,7 +92,7 @@ void SourcePage::selectSource(QListWidgetItem *item)
 
 void SourcePage::setSource()
 {
-    if ( _plugin != NULL && _plugin->isFinal(getPath()))
+    if ( _plugin != NULL && _plugin->isFinal(getPath()) )
     {
         _alarm->setSource(_source.join("/"));
         deleteLater();
