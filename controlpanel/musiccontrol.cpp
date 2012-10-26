@@ -12,8 +12,7 @@ namespace Msg
 //    volatile int MusicControl::playback_thread_running = 0;
 
     MusicControl::MusicControl()
-        :_audioPlugins(QMap< QString, DLLFactory<PluginFactory>* >()),
-          _handle(NULL),
+        :_handle(NULL),
           _sid(NULL),
           _elem(NULL),
           _min(0),
@@ -21,6 +20,7 @@ namespace Msg
           _vol(NULL),
           _capture(NULL),
           _playback(NULL),
+          _audioPlugins(QMap< QString, DLLFactory<PluginFactory>* >()),
           _thread(NULL)
     {
         qDebug() << "Initializing music control!";
@@ -106,7 +106,7 @@ namespace Msg
     long int MusicControl::getMasterVolume()
     {
         if ( !_elem )
-            return;
+            return -1;
 
         long int volume;
         snd_mixer_selem_get_playback_volume(_elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
@@ -435,8 +435,8 @@ namespace Msg
     }*/
 
     PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
-        :_capture(in),
-          _playback(out)
+        :_playback(out),
+          _capture(in)
     {
     }
 

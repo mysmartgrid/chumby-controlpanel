@@ -17,12 +17,12 @@ namespace Msg
 Controlpanel::Controlpanel(QWidget *parent)
   : QWidget(parent),
     _ui(new Ui::controlWidget),
+    _plugins(),
     _currentPlugin(NULL),
     _pluginWidget(NULL),
     _sock_iwconfig(::iw_sockets_open()),
     _mc(&MusicControl::getInstance()),
-    _alarm(&AlarmDaemon::getInstance()),
-    _plugins()
+    _alarm(&AlarmDaemon::getInstance())
 {
     _ui->setupUi(this);
 

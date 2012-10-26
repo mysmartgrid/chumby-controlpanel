@@ -151,6 +151,7 @@ bool Msg::Alarm::run()
     mc->stop();
     _tmpVol = mc->getMasterVolume();
     mc->setMasterVolume(this->getVolume());
+
     int index = _source.indexOf("/");
     QString audioPlugin = _source.left(index);
     QString pluginSource = _source;
@@ -158,6 +159,7 @@ bool Msg::Alarm::run()
     qDebug() << "Running" << audioPlugin << "with source" << pluginSource;
     if ( audioPlugin.length() == 0 || pluginSource.length() == 0 )
         return false;
+
     _plugin = mc->getAudioPlugin(audioPlugin);
     if ( ! _plugin )
         return false;
