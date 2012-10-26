@@ -74,6 +74,9 @@ include_directories(${CMAKE_SOURCE_DIR}/controlpanel)
 include_directories(${CMAKE_BINARY_DIR}/controlpanel)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${ASOUND_INCLUDE_DIR})
+include_directories(${BLUETUNE_INCLUDE_DIRS})
+include_directories(${ATOMIX_INCLUDE_DIR})
+include_directories(${NEPTUNE_INCLUDE_DIR})
 
 
 
