@@ -12,6 +12,7 @@ set(controlpanel_SRCS
   plugin.cpp
   audioplugin.cpp
   dllmanager.cpp
+  btwrapper.cpp
   #  PlaybackThread.cpp
   )
 set(controlpanel_HDRS
@@ -22,6 +23,7 @@ set(controlpanel_HDRS
   alarmwidget.h
   plugin.h
   audioplugin.h
+  btwrapper.h
   #  dllmanager.h
   #  PlaybackThread.h
   )

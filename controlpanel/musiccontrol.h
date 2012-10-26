@@ -13,6 +13,7 @@
 
 #include "audioplugin.h"
 #include "dllmanager.h"
+#include "btwrapper.h"
 
 #define INPUT_MIC   0
 #define INPUT_LINE1 1
@@ -43,17 +44,22 @@ namespace Msg
 
     public:
         PlaybackThread(snd_pcm_t* in, snd_pcm_t* out);
+        PlaybackThread(QString source);
 
     public slots:
         void stop();
 
     protected:
         void run();
+        void playAlsa(snd_pcm_uframes_t *data);
+        void playBlueTune();
 
     private:
         bool _thread_running;
         snd_pcm_t* _playback;
         snd_pcm_t* _capture;
+        QString _source;
+        BtWrapper* _wrapper;
     };
 
     class MusicControl : public QObject
@@ -76,6 +82,7 @@ namespace Msg
         void alsa_close();
         void alsa_select_input(int input);
         void play(snd_pcm_t* source);
+        void play(QString source);
         void stop();
         void stopPlaybackThread();
         static void *playback_run(void *params);
