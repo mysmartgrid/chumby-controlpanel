@@ -53,6 +53,13 @@ namespace Msg
         if(_vol ==NULL) {
 					throw msg::msgException("Cannot find volume handle.");
 				}
+
+        long int cvol = getMasterVolume();
+        if ( cvol < _min )
+            setMasterVolume(_min);
+        else if ( cvol > _max )
+            setMasterVolume(_max);
+
         QPalette p(_vol->palette());
         p.setColor(QPalette::Background, Qt::darkGray);
         _vol->setPalette(p);
