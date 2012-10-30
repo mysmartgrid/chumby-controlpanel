@@ -5,6 +5,7 @@
 namespace Msg
 {
     BtWrapper::BtWrapper()
+        : _running(false)
     {
         BLT_Result result = BLT_Decoder_Create(&_decoder);
 
@@ -43,10 +44,19 @@ namespace Msg
             qDebug() << "BlueTune decoder set input failed! (" << result << ")";
         }
 
+        _running = true;
+
         do {
             result = BLT_Decoder_PumpPacket(_decoder);
             if ( BLT_FAILED(result) && result != ATX_ERROR_EOS )
                 qDebug() << "PumpPacket failed:" << result;
-        } while (BLT_SUCCEEDED(result));
+        } while (BLT_SUCCEEDED(result) && _running);
+
+        _running = false;
+    }
+
+    void BtWrapper::stop()
+    {
+        _running = false;
     }
 }

@@ -469,6 +469,8 @@ namespace Msg
     void PlaybackThread::stop()
     {
         _thread_running = false;
+        if ( _wrapper != NULL )
+            _wrapper->stop();
     }
 
     void PlaybackThread::run() {

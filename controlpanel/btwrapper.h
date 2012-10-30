@@ -13,9 +13,11 @@ namespace Msg
         BtWrapper();
         ~BtWrapper();
         void play(QString source);
+        void stop();
 
     private:
         BLT_Decoder* _decoder;
+        volatile bool _running;
     };
 }
 
