@@ -17,7 +17,7 @@ SourcePage::SourcePage(Msg::Alarm *alarm, QWidget *parent) :
     initSourceList();
 
     connect(_ui->sourceList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectSource(QListWidgetItem*)));
-    connect(_ui->backButton, SIGNAL(clicked()), this, SLOT(deleteLater()));
+    connect(_ui->backButton, SIGNAL(clicked()), this, SLOT(back()));
     connect(_ui->setButton, SIGNAL(clicked()), this, SLOT(setSource()));
 }
 
@@ -99,6 +99,18 @@ void SourcePage::setSource()
     } else {
         initSourceList();
     }
+}
+
+void SourcePage::back()
+{
+    if ( _source.size() > 1 )
+    {
+        //we have to remove two entries as initSourceList will add one
+        _source.removeLast();
+        _source.removeLast();
+        initSourceList();
+    } else
+        deleteLater();
 }
 
 Msg::AudioPlugin* SourcePage::getPlugin()

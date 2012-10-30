@@ -21,6 +21,7 @@ public:
 
 protected slots:
     void setSource();
+    void back();
     void selectSource(QListWidgetItem *item);
 
 private:
