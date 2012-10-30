@@ -84,9 +84,13 @@ void SourcePage::selectSource(QListWidgetItem *item)
 {
     if ( item )
     {
+        if ( _plugin != NULL )
+            _plugin->stop();
         qDebug() << item->text();
         _source.last() = item->text();
         getPlugin();
+        if ( _plugin != NULL && _plugin->isFinal(getPath()))
+            _plugin->play(getPath());
     }
 }
 
