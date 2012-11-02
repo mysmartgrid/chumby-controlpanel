@@ -46,6 +46,7 @@ namespace Msg
         void setVolume(int vol);
         bool check(QDateTime current);
         bool isActive();
+        bool isSnoozed();
         void setActive(bool active);
         QString getName();
         QString getTime();

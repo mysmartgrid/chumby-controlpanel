@@ -240,6 +240,11 @@ bool Msg::Alarm::isActive()
     return _active;
 }
 
+bool Msg::Alarm::isSnoozed()
+{
+    return _timer->isActive();
+}
+
 QString Msg::Alarm::getTime()
 {
     return _time.toString("hh:mm");

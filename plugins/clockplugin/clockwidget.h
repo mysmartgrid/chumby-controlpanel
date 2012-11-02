@@ -3,6 +3,7 @@
 
 #include "clockplugin.h"
 #include "alarmform.h"
+#include "snoozedalarmspage.h"
 
 #include <QtGui/QWidget>
 
@@ -24,6 +25,7 @@ protected:
     void mousePressEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
     void leaveEvent(QEvent *);
+    void paintEvent(QPaintEvent *);
 #ifdef Q_WS_QWS
     bool qwsEvent(QWSEvent *event);
 #endif
@@ -43,6 +45,7 @@ private:
     Ui::ClockWidget *_ui;
 		Msg::ClockPlugin *_plugin;
 		AlarmForm *_alarm;
+        SnoozedAlarmsPage *_snoozed;
 
         bool _clicked;
 };
