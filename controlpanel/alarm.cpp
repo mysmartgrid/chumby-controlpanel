@@ -28,6 +28,12 @@ Msg::Alarm::Alarm(QString name, QObject *parent)
         _name = _time.toString("hh:mm");
 }
 
+Msg::Alarm::~Alarm()
+{
+    if ( _timer )
+        _timer->stop();
+}
+
 void Msg::Alarm::save()
 {
     QSettings* settings = AlarmDaemon::getInstance().getSettings();
