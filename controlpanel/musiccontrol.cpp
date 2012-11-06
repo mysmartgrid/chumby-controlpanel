@@ -29,7 +29,7 @@ namespace Msg
         const char *card = "default";
         char* cname = getenv("CHUMBY_SOUND_CARD");
         if ( !cname )
-            cname = "DAC";
+            cname = (char*) "DAC";
         const char *selem_name = cname;
 
         ::snd_mixer_open(&_handle, 0);

@@ -53,7 +53,7 @@ void ChumbyRadio::destroy()
 
 void ChumbyRadio::refreshCrad()
 {
-    int ret = crad_refresh(p_crad, CRAD_DEFAULT_DEVICE_PATH);
+    int ret = crad_refresh(p_crad, (char*) CRAD_DEFAULT_DEVICE_PATH);
 
     if ( CRAD_FAILED( ret ) )
     {
