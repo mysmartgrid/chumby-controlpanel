@@ -287,6 +287,7 @@ namespace Msg
         unsigned int rate = 44100; /* Sample rate */
         unsigned int exact_rate;   /* Sample rate returned by */
         int periods = 8;       /* Number of periods */
+        int period_size = 2048;
 
         /* Set access type. This can be either    */
         /* SND_PCM_ACCESS_RW_INTERLEAVED or       */
@@ -339,7 +340,7 @@ namespace Msg
 
         /* Set buffer size (in frames). The resulting latency is given by */
         /* latency = periodsize * periods / (rate * bytes_per_frame)     */
-        if (snd_pcm_hw_params_set_buffer_size(*pcm_handle, hwparams, 16384) < 0) {
+        if (snd_pcm_hw_params_set_buffer_size(*pcm_handle, hwparams, period_size * periods) < 0) {
             fprintf(stderr, "Error setting buffersize.\n");
             return(-1);
         }

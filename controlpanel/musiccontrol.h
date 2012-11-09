@@ -51,7 +51,7 @@ namespace Msg
 
     protected:
         void run();
-        void playAlsa(snd_pcm_uframes_t *data);
+        void playAlsa(snd_pcm_uframes_t *data, int period_size = 1024);
         void playBlueTune();
 
     private:
