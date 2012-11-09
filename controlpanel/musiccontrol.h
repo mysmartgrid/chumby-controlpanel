@@ -22,6 +22,8 @@
 
 #define VOLUME_STEP 3
 
+#define ALSA_ASIO
+
 namespace Msg
 {
     class VolumeWidget : public QWidget
@@ -42,6 +44,12 @@ namespace Msg
     {
         Q_OBJECT
 
+        struct callback_data_t {
+            snd_pcm_uframes_t* buffer;
+            snd_pcm_t* out;
+            int period_size;
+        };
+
     public:
         PlaybackThread(snd_pcm_t* in, snd_pcm_t* out);
         PlaybackThread(QString source);
@@ -52,6 +60,9 @@ namespace Msg
     protected:
         void run();
         void playAlsa(snd_pcm_uframes_t *data, int period_size = 1024);
+#ifdef ALSA_ASIO
+        static void alsaCallback(snd_async_handler_t *pcm_callback);
+#endif
         void playBlueTune();
 
     private:
@@ -60,6 +71,10 @@ namespace Msg
         snd_pcm_t* _capture;
         QString _source;
         BtWrapper* _wrapper;
+#ifdef ALSA_ASIO
+        snd_async_handler_t *_handler;
+        callback_data_t *_c_data;
+#endif
     };
 
     class MusicControl : public QObject

@@ -462,6 +462,9 @@ namespace Msg
         :_playback(out),
           _capture(in),
           _source(""),
+      #ifdef ALSA_ASIO
+          _handler(NULL),
+      #endif
           _wrapper(NULL)
     {
     }
@@ -470,12 +473,24 @@ namespace Msg
         :_playback(NULL),
           _capture(NULL),
           _source(source),
+      #ifdef ALSA_ASIO
+          _handler(NULL),
+      #endif
           _wrapper(NULL)
     {
     }
 
     void PlaybackThread::stop()
     {
+#ifdef ALSA_ASIO
+        if ( _handler != NULL )
+        {
+            snd_pcm_drop(_capture);
+            snd_async_del_handler(_handler);
+            _handler = NULL;
+            delete _c_data;
+        }
+#endif
         _thread_running = false;
         if ( _wrapper != NULL )
             _wrapper->stop();
@@ -500,55 +515,154 @@ namespace Msg
             return;
         }*/
         qDebug() << "Starting playback!";
-        snd_pcm_uframes_t data[4096]; //TODO: only allocate memory if playing alsa sources
+        snd_pcm_uframes_t *data = 0; //TODO: only allocate memory if playing alsa sources
+        int period_size;
+        if ( _capture != NULL )
+        {
+            snd_pcm_hw_params_t *hw_params;
+            snd_pcm_hw_params_alloca(&hw_params);
+            snd_pcm_hw_params_current( _capture, hw_params);
+            snd_pcm_hw_params_get_period_size( hw_params, &period_size, 0 );
+            qDebug() << period_size;
+            data = (snd_pcm_uframes_t*) malloc(period_size * sizeof(snd_pcm_uframes_t));
+#ifdef ALSA_ASIO
+            snd_pcm_sw_params_t *sw_params;
+            snd_pcm_sw_params_alloca(&sw_params);
+            snd_pcm_sw_params_current (_capture, sw_params);
+            snd_pcm_sw_params_set_avail_min(_capture, sw_params, period_size);
+            snd_pcm_sw_params(_capture, sw_params);
+            _c_data = new callback_data_t;
+            _c_data->buffer = data;
+            _c_data->out = _playback;
+            _c_data->period_size = period_size;
+            snd_async_add_pcm_handler(&_handler, _capture, alsaCallback, _c_data);
+#endif
+            snd_pcm_readi(_capture, data, period_size);
+        }
         while (_thread_running) {
             if ( !_source.isEmpty() )
                 playBlueTune();
-            else
-                playAlsa(data);
+            else {
+#ifndef ALSA_ASIO
+                playAlsa(data, period_size);
+#endif
+            }
         }
+        if ( data != NULL)
+            free(data);
     }
 
-    void PlaybackThread::playAlsa(snd_pcm_uframes_t *data)
+#ifdef ALSA_ASIO
+    void PlaybackThread::alsaCallback(snd_async_handler_t *pcm_callback)
     {
-        int bytes_read = snd_pcm_readi(_capture, data, sizeof(data)/sizeof((data)[0]));
-        // If we didn't get enough data, wait, then try again.
-        if(bytes_read == -EAGAIN) {
-            fprintf(stderr, "Read error, trying again: %s\n",
-                    snd_strerror(bytes_read));
-            return;
-        }
+        snd_pcm_t *in = snd_async_handler_get_pcm(pcm_callback);
+        callback_data_t* arg = (callback_data_t*) snd_async_handler_get_callback_private(pcm_callback);
+        snd_pcm_t *out = arg->out;
+        snd_pcm_uframes_t* buffer = arg->buffer;
+        int period_size = arg->period_size;
 
-        else if(bytes_read == -EPIPE) {
-            fprintf(stderr, "Read error: (Over/Under)run\n");
-            if(snd_pcm_prepare(_capture) < 0) {
-                _thread_running = false;
+        snd_pcm_uframes_t avail;
+        avail = snd_pcm_avail_update(in);
+        while ( avail >= period_size )
+        {
+            int bytes_read = snd_pcm_readi(in, buffer, period_size);
+            // If we didn't get enough buffer, wait, then try again.
+            if(bytes_read == -EAGAIN) {
+                fprintf(stderr, "Read error, trying again: %s\n",
+                        snd_strerror(bytes_read));
+                return;
             }
-            return;
-        }
 
-        // Or if we had a different error, bail.
-        else if(bytes_read < 0) {
-            fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
-            _thread_running = false;
-            return;
-        }
-
-        int bytes_written = snd_pcm_writei(_playback, data, bytes_read);
-
-        if(bytes_written == -EPIPE) {
-            fprintf(stderr, "Write error: (Over/Under)run\n");
-            if(snd_pcm_prepare(_playback) < 0) {
-                _thread_running = false;
+            else if(bytes_read == -EPIPE) {
+                fprintf(stderr, "Read error: (Over/Under)run\n");
+                if(snd_pcm_prepare(in) < 0) {
+                    fprintf(stderr, "Error!!!11elf!\n");
+                }
+                return;
             }
-            return;
-        }
 
-        else if(bytes_written <= 0) {
-            fprintf(stderr, "Write error (%d): %s\n",
-                    bytes_written, snd_strerror(bytes_written));
-            _thread_running = false;
-            return;
+            // Or if we had a different error, bail.
+            else if(bytes_read < 0) {
+                fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
+                return;
+            }
+
+            avail = snd_pcm_avail_update(out);
+            if ( avail >= period_size )
+            {
+                int bytes_written = snd_pcm_writei(out, buffer, period_size);
+
+                if(bytes_written == -EPIPE) {
+                    fprintf(stderr, "Write error: (Over/Under)run\n");
+                    if(snd_pcm_prepare(out) < 0) {
+                        fprintf(stderr, "Error!!!11elf!\n");
+                    }
+                    return;
+                }
+
+                else if(bytes_written <= 0) {
+                    fprintf(stderr, "Write error (%d): %s\n",
+                            bytes_written, snd_strerror(bytes_written));
+                    return;
+                }
+            }
+
+            avail = snd_pcm_avail_update(in);
+        }
+    }
+#endif
+
+    void PlaybackThread::playAlsa(snd_pcm_uframes_t *data, int period_size)
+    {
+        snd_pcm_uframes_t avail;
+        avail = snd_pcm_avail_update(_capture);
+        while ( avail >= period_size )
+        {
+            int bytes_read = snd_pcm_readi(_capture, data, period_size);
+            // If we didn't get enough data, wait, then try again.
+            if(bytes_read == -EAGAIN) {
+                fprintf(stderr, "Read error, trying again: %s\n",
+                        snd_strerror(bytes_read));
+                return;
+            }
+
+            else if(bytes_read == -EPIPE) {
+                fprintf(stderr, "Read error: (Over/Under)run\n");
+                if(snd_pcm_prepare(_capture) < 0) {
+                    _thread_running = false;
+                }
+                return;
+            }
+
+            // Or if we had a different error, bail.
+            else if(bytes_read < 0) {
+                fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
+                _thread_running = false;
+                return;
+            }
+
+            avail = snd_pcm_avail_update(_playback);
+            if ( avail >= period_size )
+            {
+                int bytes_written = snd_pcm_writei(_playback, data, period_size);
+
+                if(bytes_written == -EPIPE) {
+                    fprintf(stderr, "Write error: (Over/Under)run\n");
+                    if(snd_pcm_prepare(_playback) < 0) {
+                        _thread_running = false;
+                    }
+                    return;
+                }
+
+                else if(bytes_written <= 0) {
+                    fprintf(stderr, "Write error (%d): %s\n",
+                            bytes_written, snd_strerror(bytes_written));
+                    _thread_running = false;
+                    return;
+                }
+            }
+
+            avail = snd_pcm_avail_update(_capture);
         }
     }
 
