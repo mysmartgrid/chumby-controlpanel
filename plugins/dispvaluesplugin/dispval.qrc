@@ -2,5 +2,6 @@
     <qresource prefix="/dispval">
         <file>resources/msg.ico</file>
         <file>resources/msg.png</file>
+        <file>resources/tacho2.png</file>
     </qresource>
 </RCC>
