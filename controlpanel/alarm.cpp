@@ -212,6 +212,7 @@ void Msg::Alarm::snooze()
                 _timer->start(_snoozeTime * 60 * 1000);
                 connect(_timer, SIGNAL(timeout()), (AlarmWidget*) _widget, SIGNAL(resumed()));
                 connect(_timer, SIGNAL(timeout()), _timer, SLOT(stop()));
+                _nextSnoozeTime = QTime::currentTime().addSecs(_snoozeTime * 60);
                 dismiss();
         }
 }
@@ -275,6 +276,14 @@ int Msg::Alarm::getSnoozeTime()
     return _snoozeTime;
 }
 
+QTime Msg::Alarm::getNextFireTime()
+{
+    if ( isSnoozed() )
+        return _nextSnoozeTime;
+    else
+        return QTime();
+}
+
 void Msg::Alarm::setVolume(int vol)
 {
     _volume = vol;
@@ -283,4 +292,9 @@ void Msg::Alarm::setVolume(int vol)
 int Msg::Alarm::getVolume()
 {
     return _volume;
+}
+
+void Msg::Alarm::cancelSnooze()
+{
+    _timer->stop();
 }

@@ -55,7 +55,9 @@ namespace Msg
         Weekdays getDays();
         QString getSource();
         int getSnoozeTime();
+        QTime getNextFireTime();
         int getVolume();
+        void cancelSnooze();
 
     public slots:
         bool run();
@@ -73,6 +75,7 @@ namespace Msg
         bool _active;
         Msg::AudioPlugin* _plugin;
         QTimer* _timer;
+        QTime _nextSnoozeTime;
         QWidget* _widget; // AlarmWidget
     };
 }

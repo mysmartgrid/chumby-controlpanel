@@ -97,6 +97,7 @@ void ClockWidget::paintEvent(QPaintEvent *)
         else
             _ui->snoozeButton->setText(QString::number(snoozed.size()) + " alarms snoozed");
         _ui->snoozeButton->show();
+        _snoozed->setSnoozed(&snoozed);
     }
 }
 
