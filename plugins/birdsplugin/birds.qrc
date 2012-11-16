@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/birds">
+        <file>images/higru.png</file>
+    </qresource>
+</RCC>

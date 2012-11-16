@@ -2,6 +2,7 @@
 
 set(_plugindirs 
         chumbykbddriver
+        birdsplugin
         clockplugin
         dispvaluesplugin
         helloworldplugin
