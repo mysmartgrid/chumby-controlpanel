@@ -516,7 +516,7 @@ namespace Msg
         }*/
         qDebug() << "Starting playback!";
         snd_pcm_uframes_t *data = 0; //TODO: only allocate memory if playing alsa sources
-        int period_size;
+        snd_pcm_uframes_t period_size;
         if ( _capture != NULL )
         {
             snd_pcm_hw_params_t *hw_params;
