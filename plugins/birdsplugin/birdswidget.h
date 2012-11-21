@@ -15,6 +15,9 @@ class BirdsWidget : public QWidget
 public:
     explicit BirdsWidget(QWidget *parent = 0);
     ~BirdsWidget();
+
+protected:
+    void paintEvent(QPaintEvent *);
     
 private:
     Ui::BirdsWidget *_ui;
