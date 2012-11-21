@@ -1,6 +1,8 @@
 #include "birdswidget.h"
 #include "ui_birdswidget.h"
 
+#include <QDebug>
+
 BirdsWidget::BirdsWidget(QWidget *parent) :
     QWidget(parent),
     _ui(new Ui::BirdsWidget),
@@ -9,7 +11,11 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     _ui->setupUi(this);
 
     _ui->view->setScene(_scene);
-    _ui->view->setBackgroundBrush(QPixmap(":/birds/images/higru.png"));
+    QPixmap* image = new QPixmap(":/birds/images/higru.png");
+    _scene->addPixmap(*image);
+    _ui->view->fitInView(image->rect());
+
+    qDebug() << _scene->sceneRect().size();
     _ui->view->show();
 }
 
