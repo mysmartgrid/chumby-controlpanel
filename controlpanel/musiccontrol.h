@@ -11,9 +11,13 @@
 
 #include <alsa/asoundlib.h>
 
+#include "config.h"
+
 #include "audioplugin.h"
 #include "dllmanager.h"
-#include "btwrapper.h"
+#ifdef WITH_BLUETUNE
+    #include "btwrapper.h"
+#endif
 
 #define INPUT_MIC   0
 #define INPUT_LINE1 1
@@ -52,7 +56,9 @@ namespace Msg
 
     public:
         PlaybackThread(snd_pcm_t* in, snd_pcm_t* out);
+#ifdef WITH_BLUETUNE
         PlaybackThread(QString source);
+#endif
 
     public slots:
         void stop();
@@ -63,14 +69,18 @@ namespace Msg
 #ifdef ALSA_ASIO
         static void alsaCallback(snd_async_handler_t *pcm_callback);
 #endif
+#ifdef WITH_BLUETUNE
         void playBlueTune();
+#endif
 
     private:
         bool _thread_running;
         snd_pcm_t* _playback;
         snd_pcm_t* _capture;
         QString _source;
+#ifdef WITH_BLUETUNE
         BtWrapper* _wrapper;
+#endif
 #ifdef ALSA_ASIO
         snd_async_handler_t *_handler;
         callback_data_t *_c_data;

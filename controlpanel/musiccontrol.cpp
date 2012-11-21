@@ -1,7 +1,9 @@
 #include <msgException.hpp>
 #include "musiccontrol.h"
 
+#ifdef WITH_BLUETUNE
 #include "ringtoneplugin.h"
+#endif // WITH_BLUETUNE
 
 #include <QtGui/QDesktopWidget>
 
@@ -205,6 +207,7 @@ namespace Msg
 //        pthread_create(&MusicControl::playback_thread, NULL, &playback_run, NULL);
     }
 
+#ifdef WITH_BLUETUNE
     void MusicControl::play(QString source)
     {
         qDebug() << "Playing" << source;
@@ -215,6 +218,7 @@ namespace Msg
         qDebug() << "Calling pthread";
         _thread->start();
     }
+#endif
 
     void MusicControl::stop() {
         qDebug() << "stopping...";
@@ -437,10 +441,15 @@ namespace Msg
 
     AudioPlugin* MusicControl::getAudioPlugin(QString plugin)
     {
+#ifdef WITH_BLUETUNE
         if ( plugin.compare("Ringtone") == 0 )
             return new RingTonePlugin();
+#endif // WITH_BLUETUNE
 
-        return (AudioPlugin*) _audioPlugins.find(plugin).value()->factory->CreatePlugin();
+        if ( _audioPlugins.find(plugin) != _audioPlugins.end() )
+            return (AudioPlugin*) _audioPlugins.find(plugin).value()->factory->CreatePlugin();
+
+        return NULL;
     }
 
     /*QList<QString> MusicControl::getAudioSources()
@@ -459,16 +468,19 @@ namespace Msg
     }*/
 
     PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
-        :_playback(out),
-          _capture(in),
-          _source(""),
+        :_playback(out)
+        ,_capture(in)
+        ,_source("")
       #ifdef ALSA_ASIO
-          _handler(NULL),
+        ,_handler(NULL)
       #endif
-          _wrapper(NULL)
+    #ifdef WITH_BLUETUNE
+        ,_wrapper(NULL)
+    #endif
     {
     }
 
+#ifdef WITH_BLUETUNE
     PlaybackThread::PlaybackThread(QString source)
         :_playback(NULL),
           _capture(NULL),
@@ -479,6 +491,7 @@ namespace Msg
           _wrapper(NULL)
     {
     }
+#endif
 
     void PlaybackThread::stop()
     {
@@ -492,8 +505,10 @@ namespace Msg
         }
 #endif
         _thread_running = false;
+#ifdef WITH_BLUETUNE
         if ( _wrapper != NULL )
             _wrapper->stop();
+#endif
     }
 
     void PlaybackThread::run() {
@@ -540,13 +555,17 @@ namespace Msg
             snd_pcm_readi(_capture, data, period_size);
         }
         while (_thread_running) {
+#ifdef WITH_BLUETUNE
             if ( !_source.isEmpty() )
                 playBlueTune();
             else {
+#endif
 #ifndef ALSA_ASIO
                 playAlsa(data, period_size);
 #endif
+#ifdef WITH_BLUETUNE
             }
+#endif
         }
         if ( data != NULL)
             free(data);
@@ -666,12 +685,14 @@ namespace Msg
         }
     }
 
+#ifdef WITH_BLUETUNE
     void PlaybackThread::playBlueTune()
     {
         if ( _wrapper == NULL )
             _wrapper = new BtWrapper();
         _wrapper->play(_source);
     }
+#endif
 
     VolumeWidget::VolumeWidget()
         :QWidget(NULL, Qt::ToolTip),

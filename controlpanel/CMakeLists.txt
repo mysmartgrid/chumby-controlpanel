@@ -2,6 +2,8 @@
 
 # export QT_QWS_FONTDIR=/mnt/usb/lib/fonts
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/generated/config.h)
+
 set(controlpanel_SRCS
   alarm.cpp
   alarmdaemon.cpp
@@ -12,10 +14,14 @@ set(controlpanel_SRCS
   plugin.cpp
   audioplugin.cpp
   dllmanager.cpp
-  btwrapper.cpp
-  ringtoneplugin.cpp
   #  PlaybackThread.cpp
   )
+IF ( BLUETUNE_FOUND )
+set(controlpanel_SRCS ${controlpanel_SRCS}
+  btwrapper.cpp
+  ringtoneplugin.cpp)
+ENDIF ( BLUETUNE_FOUND )
+
 set(controlpanel_HDRS
   alarm.h
   alarmdaemon.h
@@ -24,11 +30,14 @@ set(controlpanel_HDRS
   alarmwidget.h
   plugin.h
   audioplugin.h
-  btwrapper.h
-  ringtoneplugin.h
   #  dllmanager.h
   #  PlaybackThread.h
   )
+IF ( BLUETUNE_FOUND )
+set(controlpanel_HDRS ${controlpanel_HDRS}
+  btwrapper.h
+  ringtoneplugin.h)
+ENDIF ( BLUETUNE_FOUND )
 
 set(controlpanel_RCS controlpanel.qrc)
 
@@ -59,10 +68,14 @@ qt4_wrap_cpp( controlpanel_MOC_SRCS
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR}/generated)
 include_directories(${ASOUND_INCLUDE_DIR})
-include_directories(${BLUETUNE_INCLUDE_DIRS})
-include_directories(${ATOMIX_INCLUDE_DIR})
-include_directories(${NEPTUNE_INCLUDE_DIR})
+
+IF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+  include_directories(${BLUETUNE_INCLUDE_DIRS})
+  include_directories(${ATOMIX_INCLUDE_DIR})
+  include_directories(${NEPTUNE_INCLUDE_DIR})
+ENDIF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
 
 add_executable(chumby-controlpanel  ${controlpanel_SRCS}
   ${controlpanel_MOC_SRCS}
@@ -73,15 +86,18 @@ target_link_libraries(chumby-controlpanel ${QT_QTGUI_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTNETWORK_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTCORE_LIBRARY})
 target_link_libraries(chumby-controlpanel ${ASOUND_LIBRARY})
-target_link_libraries(chumby-controlpanel ${BLUETUNE_LIBRARY})
-target_link_libraries(chumby-controlpanel ${ATOMIX_LIBRARY})
-target_link_libraries(chumby-controlpanel ${NEPTUNE_LIBRARY})
 target_link_libraries(chumby-controlpanel iw)
 target_link_libraries(chumby-controlpanel dl)
 target_link_libraries(chumby-controlpanel rt)
 IF ( Q_WS_QWS )
 	target_link_libraries(chumby-controlpanel ts)
 ENDIF ( Q_WS_QWS )
+
+IF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+  target_link_libraries(chumby-controlpanel ${BLUETUNE_LIBRARY})
+  target_link_libraries(chumby-controlpanel ${ATOMIX_LIBRARY})
+  target_link_libraries(chumby-controlpanel ${NEPTUNE_LIBRARY})
+ENDIF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
 
 set_target_properties(chumby-controlpanel PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(chumby-controlpanel PROPERTIES BUILD_WITH_INSTALL_RPATH true)

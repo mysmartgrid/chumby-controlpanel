@@ -157,7 +157,9 @@ void Controlpanel::getPlugins()
 			}
 		}
     }
+#ifdef WITH_BLUETUNE
     MusicControl::getInstance().addAudioPlugin("Ringtone", NULL);
+#endif
 }
 
 void Controlpanel::updateClock()
