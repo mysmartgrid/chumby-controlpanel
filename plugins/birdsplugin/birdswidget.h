@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QGraphicsScene>
 
+#include <QTimer>
+
 namespace Ui {
 class BirdsWidget;
 }
@@ -18,10 +20,16 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
+    void normalAnimation(unsigned int counter);
+
+protected slots:
+    void animate();
     
 private:
     Ui::BirdsWidget *_ui;
     QGraphicsScene *_scene;
+    QTimer* _timer;
+    unsigned int _animationCounter;
 };
 
 #endif // BIRDSWIDGET_H
