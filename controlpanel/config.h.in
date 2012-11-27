@@ -1,12 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#cmakedefine ATOMIX_FOUND @ATOMIX_FOUND@
-#cmakedefine NEPTUNE_FOUND @NEPTUNE_FOUND@
-#cmakedefine BLUETUNE_FOUND @BLUETUNE_FOUND@
-
-#if defined(ATOMIX_FOUND) && defined(NEPTUNE_FOUND) && defined(BLUETUNE_FOUND)
-    #define WITH_BLUETUNE 1
-#endif
+#cmakedefine WITH_BLUETUNE @WITH_BLUETUNE@
 
 #endif // CONFIG_H

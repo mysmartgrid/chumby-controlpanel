@@ -93,6 +93,9 @@ FIND_LIBRARY(ATOMIX_LIBRARY NAMES ${ATOMIX_LIBRARY_NAMES}
 # if the include and the program are found then we have it
 IF(ATOMIX_INCLUDE_DIR AND ATOMIX_LIBRARY)
   SET(ATOMIX_FOUND "YES")
+  message(STATUS "FindAtomix check - found")
+ELSE(ATOMIX_INCLUDE_DIR AND ATOMIX_LIBRARY)
+  message(STATUS "FindAtomix check - not found")
 ENDIF(ATOMIX_INCLUDE_DIR AND ATOMIX_LIBRARY)
 
 if( NOT WIN32)

@@ -27,11 +27,11 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${ASOUND_INCLUDE_DIR})
 
-IF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+IF ( WITH_BLUETUNE )
   include_directories(${BLUETUNE_INCLUDE_DIRS})
   include_directories(${ATOMIX_INCLUDE_DIR})
   include_directories(${NEPTUNE_INCLUDE_DIR})
-ENDIF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+ENDIF ( WITH_BLUETUNE )
 
 qt4_add_resources(radioplugin_RC_SRCS radioplugin.qrc)
 qt4_wrap_cpp( radioplugin_MOC_SRCS
