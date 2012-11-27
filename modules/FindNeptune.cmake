@@ -93,6 +93,9 @@ FIND_LIBRARY(NEPTUNE_LIBRARY NAMES ${NEPTUNE_LIBRARY_NAMES}
 # if the include and the program are found then we have it
 IF(NEPTUNE_INCLUDE_DIR AND NEPTUNE_LIBRARY)
   SET(NEPTUNE_FOUND "YES")
+  message(STATUS "FindNeptune check - found")
+ELSE(NEPTUNE_INCLUDE_DIR AND NEPTUNE_LIBRARY)
+  message(STATUS "FindNeptune check - not found")
 ENDIF(NEPTUNE_INCLUDE_DIR AND NEPTUNE_LIBRARY)
 
 if( NOT WIN32)

@@ -16,11 +16,11 @@ set(controlpanel_SRCS
   dllmanager.cpp
   #  PlaybackThread.cpp
   )
-IF ( BLUETUNE_FOUND )
+IF ( WITH_BLUETUNE )
 set(controlpanel_SRCS ${controlpanel_SRCS}
   btwrapper.cpp
   ringtoneplugin.cpp)
-ENDIF ( BLUETUNE_FOUND )
+ENDIF ( WITH_BLUETUNE )
 
 set(controlpanel_HDRS
   alarm.h
@@ -33,11 +33,11 @@ set(controlpanel_HDRS
   #  dllmanager.h
   #  PlaybackThread.h
   )
-IF ( BLUETUNE_FOUND )
+IF ( WITH_BLUETUNE )
 set(controlpanel_HDRS ${controlpanel_HDRS}
   btwrapper.h
   ringtoneplugin.h)
-ENDIF ( BLUETUNE_FOUND )
+ENDIF ( WITH_BLUETUNE )
 
 set(controlpanel_RCS controlpanel.qrc)
 
@@ -71,11 +71,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/generated)
 include_directories(${ASOUND_INCLUDE_DIR})
 
-IF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+IF ( WITH_BLUETUNE )
   include_directories(${BLUETUNE_INCLUDE_DIRS})
   include_directories(${ATOMIX_INCLUDE_DIR})
   include_directories(${NEPTUNE_INCLUDE_DIR})
-ENDIF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+ENDIF ( WITH_BLUETUNE )
 
 add_executable(chumby-controlpanel  ${controlpanel_SRCS}
   ${controlpanel_MOC_SRCS}
@@ -93,11 +93,11 @@ IF ( Q_WS_QWS )
 	target_link_libraries(chumby-controlpanel ts)
 ENDIF ( Q_WS_QWS )
 
-IF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+IF ( WITH_BLUETUNE )
   target_link_libraries(chumby-controlpanel ${BLUETUNE_LIBRARY})
   target_link_libraries(chumby-controlpanel ${ATOMIX_LIBRARY})
   target_link_libraries(chumby-controlpanel ${NEPTUNE_LIBRARY})
-ENDIF ( BLUETUNE_FOUND AND ATOMIX_FOUND AND NEPTUNE_FOUND )
+ENDIF ( WITH_BLUETUNE )
 
 set_target_properties(chumby-controlpanel PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
 set_target_properties(chumby-controlpanel PROPERTIES BUILD_WITH_INSTALL_RPATH true)
