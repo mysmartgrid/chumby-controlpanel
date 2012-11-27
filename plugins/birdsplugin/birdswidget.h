@@ -20,7 +20,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
-    void normalAnimation(unsigned int counter);
+    void normalAnimation(unsigned int counter, int value);
 
 protected slots:
     void animate();

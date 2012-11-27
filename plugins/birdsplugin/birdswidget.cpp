@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+#include <QGraphicsPixmapItem>
+
 #include <qmath.h>
 #include <QTime>
 
@@ -36,14 +38,21 @@ void BirdsWidget::animate()
 {
     _scene->clear();
 
-    normalAnimation(_animationCounter++);
+    normalAnimation(_animationCounter, 33);
+
+    _animationCounter = (++_animationCounter) % 10000;
 
     _ui->view->setScene(_scene);
 }
 
-void BirdsWidget::normalAnimation(unsigned int counter)
+void BirdsWidget::normalAnimation(unsigned int counter, int value)
 {
     _scene->addPixmap(QPixmap(":/birds/images/higru.png"));
+
+    QGraphicsPixmapItem* clouds = _scene->addPixmap(QPixmap(":/birds/images/normalclouds.png"));
+    clouds->setPos(_scene->sceneRect().x() + (counter/2 % _scene->sceneRect().toRect().width()), _scene->sceneRect().y());
+    QGraphicsPixmapItem* clouds2 = _scene->addPixmap(QPixmap(":/birds/images/normalclouds.png"));
+    clouds2->setPos(_scene->sceneRect().x() + (counter/2 % _scene->sceneRect().toRect().width()) - _scene->sceneRect().width(), _scene->sceneRect().y());
 
     QPen cordPen;
     cordPen.setWidth(3);
@@ -60,10 +69,20 @@ void BirdsWidget::normalAnimation(unsigned int counter)
     _scene->addPath(p2, cordPen);
 
     // swing
-    QPointF swingKnot1(p1.pointAtPercent(0.8));
+    QPointF swingKnot1(p1.pointAtPercent(0.7));
     QPointF swingKnot2(p1.pointAtPercent(0.9));
-    _scene->addLine(swingKnot1.x(), swingKnot1.y(), swingKnot1.x(), swingKnot1.y()+50);
-    _scene->addLine(swingKnot2.x(), swingKnot2.y(), swingKnot2.x(), swingKnot2.y()+50);
+    //_scene->addLine(swingKnot1.x(), swingKnot1.y(), swingKnot1.x(), swingKnot1.y()+50);
+    //_scene->addLine(swingKnot2.x(), swingKnot2.y(), swingKnot2.x(), swingKnot2.y()+50);
+    QGraphicsPixmapItem* swing = _scene->addPixmap(QPixmap(":/birds/images/swing.png"));
+    swing->translate(0, ceil((swingKnot1.y() - swingKnot2.y())/2));
+
+    QFont cFont("Arial", 25, QFont::Bold, false);
+    QGraphicsTextItem* consumptionShadow = _scene->addText("0 Watt", cFont);
+    consumptionShadow->setPos(ceil(swingKnot1.x()+2), ceil(swingKnot1.y() + 40+2));
+    consumptionShadow->setDefaultTextColor(Qt::green);
+    QGraphicsTextItem* consumption = _scene->addText("0 Watt", cFont);
+    consumption->setPos(ceil(swingKnot1.x()), ceil(swingKnot1.y() + 40));
+    consumption->setDefaultTextColor(Qt::white);
 
     _scene->addPixmap(QPixmap(":/birds/images/pillars.png"));
 }
