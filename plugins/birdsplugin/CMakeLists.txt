@@ -3,10 +3,13 @@
 set(birds_SRCS
   birds.cpp
   birdswidget.cpp
+  normalanimation.cpp
   )
 set(birds_HDRS
   birds.h
   birdswidget.h
+  birdsanimation.h
+  normalanimation.h
   )
 
 set(birds_UIS birdswidget.ui)

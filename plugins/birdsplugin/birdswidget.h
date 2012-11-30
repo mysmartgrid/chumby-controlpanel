@@ -6,6 +6,8 @@
 
 #include <QTimer>
 
+#include "birdsanimation.h"
+
 namespace Ui {
 class BirdsWidget;
 }
@@ -29,7 +31,7 @@ private:
     Ui::BirdsWidget *_ui;
     QGraphicsScene *_scene;
     QTimer* _timer;
-    unsigned int _animationCounter;
+    BirdsAnimation* _animation;
 };
 
 #endif // BIRDSWIDGET_H
