@@ -27,7 +27,7 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     animate();
 
     _timer->setInterval(50);
-    connect(_timer, SIGNAL(timeout()), this, SLOT(animate()));
+    connect(_timer, SIGNAL(timeout()), _animation, SLOT(step()));
     _timer->start();
 }
 
@@ -51,9 +51,6 @@ void BirdsWidget::normalAnimation(unsigned int counter, int value)
     clouds->setPos(_scene->sceneRect().x() + (counter/2 % _scene->sceneRect().toRect().width()), _scene->sceneRect().y());
     QGraphicsPixmapItem* clouds2 = _scene->addPixmap(QPixmap(":/birds/images/normalclouds.png"));
     clouds2->setPos(_scene->sceneRect().x() + (counter/2 % _scene->sceneRect().toRect().width()) - _scene->sceneRect().width(), _scene->sceneRect().y());
-
-    QGraphicsItemGroup *swingGroup = new QGraphicsItemGroup();
-    _scene->addItem(swingGroup);
 
     /*
     // swing

@@ -3,16 +3,22 @@
 
 #include <QGraphicsScene>
 
-class BirdsAnimation
+class BirdsAnimation : public QObject
 {
+    Q_OBJECT
+
 public:
     BirdsAnimation(QGraphicsScene* scene)
-        : _scene(scene)
+        : QObject()
+        , _scene(scene)
         , _counter(0)
     {
     }
 
     virtual void reset() = 0;
+
+protected slots:
+    virtual void step() = 0;
 
 protected:
     QGraphicsScene* _scene;
