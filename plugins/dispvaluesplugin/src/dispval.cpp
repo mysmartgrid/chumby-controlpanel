@@ -252,6 +252,23 @@ Msg::Display::Display() : QDialog()
 	map2 = new QMap<uint, uint>();
 	map3 = new QMap<uint, uint>();
 
+    QSettings settings ( "/mnt/usb/flukso.conf", QSettings::IniFormat );
+    if ( settings.contains("dispsen"))
+    {
+        switch ( settings.value("dispsen").toInt())
+        {
+        case 2:
+            dispmap = &map2;
+            break;
+        case 3:
+            dispmap = &map3;
+            break;
+        case 1:
+        default:
+            dispmap = &map1;
+            break;
+        }
+    }
 
 	connect ( tshow, SIGNAL ( timeout() ), this, SLOT ( showCurrentVal_alt() ) );
 	connect ( tfetch, SIGNAL ( timeout() ), this, SLOT ( getAllSensors_new() ) );
@@ -676,24 +693,24 @@ void Msg::Display::showCurrentVal_alt()
 	//qDebug() << "lastval: " << displayPg->lastval;
 	//qDebug() << "mapend:" << ( map->constEnd() - 1 ).key();
 
-	if ( ! ( displayPg->lastval == ( map1->constEnd() - 1 ).key() ) ) {
-		displayPg->lastval = ( map1->constEnd() - 1 ).key();
+    if ( ! ( displayPg->lastval == ( (*dispmap)->constEnd() - 1 ).key() ) ) {
+        displayPg->lastval = ( (*dispmap)->constEnd() - 1 ).key();
 		displayPg->valueiter = 0;
 	} else {
 		displayPg->valueiter = displayPg->valueiter + valinterval;
 		//qDebug() << "valiter: " << displayPg->valueiter;
 	}
 
-	uint showts = ( map1->constEnd() - 1 - ( int ) fetchinterval + ( int ) displayPg->valueiter ).key();
+    uint showts = ( (*dispmap)->constEnd() - 1 - ( int ) fetchinterval + ( int ) displayPg->valueiter ).key();
 
 	//output data for calculated timestamp...
 	QDateTime dtime = QDateTime::fromMSecsSinceEpoch ( quint64 ( showts ) * 1000 );
 	displayPg->digitalClk->display (  dtime.toString ( "hh:mm:ss" ) );
-	displayPg->sensorval->display (  QString::number ( map1->value ( showts ) ) );
+    displayPg->sensorval->display (  QString::number ( (*dispmap)->value ( showts ) ) );
 
-	visPg->tacho->setValue ( map1->value ( showts ) );
+    visPg->tacho->setValue ( (*dispmap)->value ( showts ) );
 	//qDebug() << "show:" << show;
-	//qDebug() << "mapvals: "  <<  map1->value ( show ) << "\n";
+    //qDebug() << "mapvals: "  <<  (*dispmap)->value ( show ) << "\n";
 }
 
 
@@ -701,12 +718,12 @@ void Msg::Display::showAvg() //TODO: make dependant on which sensor data is disp
 {
 	uint avg1 = 0;
 	uint avg2 = 0;
-	int size = map1->size();
+    int size = (*dispmap)->size();
 	int a1end = 0;
 	int a2end = 0;
 
 
-	if ( map1->isEmpty() ) {
+    if ( (*dispmap)->isEmpty() ) {
 		return;
 	}
 
@@ -715,14 +732,14 @@ void Msg::Display::showAvg() //TODO: make dependant on which sensor data is disp
 	( size < 60 ) ? a1end = size : a1end = 60; //1min
 	( size < 900 ) ? a2end = size : a2end = 900; // 10min = 600
 
-	for ( i = ( map1->constEnd() - 1 ); i != ( map1->constEnd() - 1 - a1end ); --i ) {
+    for ( i = ( (*dispmap)->constEnd() - 1 ); i != ( (*dispmap)->constEnd() - 1 - a1end ); --i ) {
 		avg1 += i.value(); //TODO: hier absichern falls values nicht geliefert wurden...
 	}
 	avg1 = avg1 / a1end;
 	displayPg->avgval1->display ( ( int ) avg1 );
 	//qDebug() << "avg1: " << avg1;
 
-	for ( i = ( map1->constEnd() - 1 ); i != ( map1->constEnd() - 1 - a2end ); --i ) {
+    for ( i = ( (*dispmap)->constEnd() - 1 ); i != ( (*dispmap)->constEnd() - 1 - a2end ); --i ) {
 		avg2 += i.value();
 
 	}
