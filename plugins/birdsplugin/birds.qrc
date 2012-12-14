@@ -4,5 +4,6 @@
         <file>images/pillars.png</file>
         <file>images/normalclouds.png</file>
         <file>images/swing.png</file>
+        <file>images/birds.png</file>
     </qresource>
 </RCC>

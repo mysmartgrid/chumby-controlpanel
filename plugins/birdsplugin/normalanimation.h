@@ -20,6 +20,7 @@ private:
     QGraphicsPathItem *_cord1, *_cord2;
     QGraphicsTextItem *_consumption;
     QGraphicsItemGroup *_swingGroup;
+    QGraphicsItemGroup *_birds;
 };
 
 #endif // NORMALANIMATION_H

@@ -30,6 +30,8 @@ void NormalAnimation::reset()
     QPainterPath p1(QPointF(17, 140));
     p1.cubicTo(160, 170 + (qSin(_counter/10)*2), 210, 160 + (qSin((_counter+5)/10)*1), 323, 151);
     _cord1 = _scene->addPath(p1, cordPen);
+    //force front cord to be in front of pillars
+    _cord1->setZValue(10);
 
     // rear cord
     QPainterPath p2(QPointF(72, 110));
@@ -42,11 +44,14 @@ void NormalAnimation::reset()
     // swing
     QPointF swingKnot1(p1.pointAtPercent(0.7));
     QPointF swingKnot2(p1.pointAtPercent(0.9));
-    //_scene->addLine(swingKnot1.x(), swingKnot1.y(), swingKnot1.x(), swingKnot1.y()+50);
-    //_scene->addLine(swingKnot2.x(), swingKnot2.y(), swingKnot2.x(), swingKnot2.y()+50);
     QGraphicsPixmapItem* swing = _scene->addPixmap(QPixmap(":/birds/images/swing.png"));
     _swingGroup->addToGroup(swing);
-    //swing->translate(0, ceil((swingKnot1.y() - swingKnot2.y())/2));
+
+    _birds = new QGraphicsItemGroup();
+    _birds->addToGroup(_scene->addPixmap(QPixmap(":/birds/images/birds.png")));
+    _birds->translate(0, p1.pointAtPercent(0.5).y() - 155);
+    _birds->setZValue(11);
+    _scene->addItem(_birds);
 
     QFont cFont("Arial", 25, QFont::Bold, false);
     _consumption = _scene->addText("0 W", cFont);
@@ -68,8 +73,6 @@ void NormalAnimation::step()
     //setValue(qrand()%100);
 
     _counter++;
-    _scene->removeItem(_cord1);
-    _scene->removeItem(_cord2);
 
     _clouds->translate(1, 0);
     if ( _clouds->scenePos().x() > _scene->sceneRect().x() + _scene->sceneRect().width() )
@@ -89,19 +92,22 @@ void NormalAnimation::step()
     cordPen.setCapStyle(Qt::RoundCap);
 
     QPointF oldKnot1(_cord1->path().pointAtPercent(0.7));
+    QPointF oldBirdPos(_cord1->path().pointAtPercent(0.5));
     // front cord
     QPainterPath p1(QPointF(17, 140));
     p1.cubicTo(160, 170 + (qSin(_counter/10)*2), 210, 160 + (qSin((_counter+5)/10)*1), 323, 151);
-    _cord1 = _scene->addPath(p1, cordPen);
+    _cord1->setPath(p1);
 
     // rear cord
     QPainterPath p2(QPointF(72, 110));
     p2.quadTo(200, 140 + (qSin((_counter+qrand()%5)/10)), 378, 120);
-    _cord2 = _scene->addPath(p2, cordPen);
+    _cord2->setPath(p2);
 
     QPointF newKnot1(_cord1->path().pointAtPercent(0.7));
+    QPointF newBirdPos(_cord1->path().pointAtPercent(0.5));
 
     _swingGroup->translate(0, newKnot1.y() - oldKnot1.y());
+    _birds->translate(0, newBirdPos.y() - oldBirdPos.y());
 }
 
 void NormalAnimation::setValue(int value)
