@@ -10,11 +10,13 @@ class NormalAnimation : public BirdsAnimation
 public:
     NormalAnimation(QGraphicsScene* scene);
     virtual void reset();
+    virtual void setValue(int value);
 
 protected slots:
     virtual void step();
 
 private:
+    QGraphicsPixmapItem *_clouds, *_clouds2;
     QGraphicsPathItem *_cord1, *_cord2;
     QGraphicsTextItem *_consumption;
     QGraphicsItemGroup *_swingGroup;
