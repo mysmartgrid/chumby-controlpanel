@@ -17,6 +17,7 @@ namespace Msg
 Controlpanel::Controlpanel(QWidget *parent)
   : QWidget(parent),
     _ui(new Ui::controlWidget),
+    _plugins(),
     _currentPlugin(NULL),
     _pluginWidget(NULL),
     _sock_iwconfig(::iw_sockets_open()),
@@ -25,7 +26,6 @@ Controlpanel::Controlpanel(QWidget *parent)
 {
     _ui->setupUi(this);
 
-    _plugins = QMap< QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >();
     grabKeyboard();
     getPlugins();
 	QTimer* timer = new QTimer( this );
@@ -48,6 +48,10 @@ Controlpanel::Controlpanel(QWidget *parent)
 Controlpanel::~Controlpanel()
 {
 	this->releaseKeyboard();
+    for ( QMap<QString, QPair<QIcon*, DLLFactory<PluginFactory>*> >::iterator i = _plugins.begin(); i != _plugins.end(); i++ )
+    {
+        delete i.value().second;
+    }
 }
 
 void Controlpanel::startPlugin()
@@ -62,7 +66,7 @@ void Controlpanel::startPlugin()
     if ( _currentPlugin != NULL && _currentPlugin->getName().compare(key.toStdString()) != 0 )
 	{
         qDebug() << QString::fromStdString(_currentPlugin->getName()) << " != " << key;
-        delete _pluginWidget;
+        //delete _pluginWidget; // the plugin should take care of cleaning up it's components
         delete _currentPlugin;
         _currentPlugin = NULL;
         _pluginWidget = NULL;
@@ -74,8 +78,9 @@ void Controlpanel::startPlugin()
         _pluginWidget = NULL;
         qDebug() << "Plugin version:" << _currentPlugin->getVersion();
 	}
-	showWidget();
+    showWidget();
     qDebug() << QString::fromStdString(_currentPlugin->getName()) << " == " << key;
+    loadingWidget->deleteLater();
 }
 
 void Controlpanel::showWidget()
@@ -151,7 +156,8 @@ void Controlpanel::getPlugins()
 
 			}
 		}
-	}
+    }
+    MusicControl::getInstance().addAudioPlugin("Ringtone", NULL);
 }
 
 void Controlpanel::updateClock()

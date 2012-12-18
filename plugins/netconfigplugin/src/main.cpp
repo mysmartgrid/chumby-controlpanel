@@ -39,9 +39,9 @@ namespace Msg
 
             virtual QWidget* getWidget()
             {
-                        Wizard* dlg = new Wizard();
-                        connect ( dlg, SIGNAL( closeDisplay() ), this, SIGNAL( stopWidget() ) );
-                        return dlg;
+                        _widget = new Wizard();
+                        connect ( _widget, SIGNAL( closeDisplay() ), this, SIGNAL( stopWidget() ) );
+                        return _widget;
             }
     };
 

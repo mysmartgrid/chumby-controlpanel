@@ -3,6 +3,9 @@
 
 #include "../../controlpanel/plugin.h"
 
+#include <QtCore/QSettings>
+#include <QtCore/QDir>
+
 #include <QtGui/QLabel>
 
 #include <QCloseEvent>
@@ -11,49 +14,52 @@ namespace Msg
 {
     class ClockPlugin : public Plugin
     {
-	Q_OBJECT
-	
-        public:
-						~ClockPlugin();
-			
-            virtual QIcon* getIcon() {
-                return new QIcon(":/icon/resources/plugin.png");
-            }
+        Q_OBJECT
 
-            virtual std::string getName();
+    public:
+        explicit ClockPlugin();
+        ~ClockPlugin();
 
-            virtual pluginType getType()
-            {
-                return GENERIC_PLUGIN;
-            }
+        virtual QIcon* getIcon() {
+            return new QIcon(":/icons/resources/clock.png");
+        }
 
-            virtual void init() {
-            }
+        virtual std::string getName();
 
-            virtual QWidget* getWidget();
-			
-						bool isDimmed();
-	
-	public slots:
-	    void dim();
-	    void brighten();
+        virtual pluginType getType()
+        {
+            return GENERIC_PLUGIN;
+        }
 
-        private:
-            int getMaxBrightness();
-            int getBrightness();
-            void setBrightness(int brightness);
+        virtual void init() {
+        }
 
-						bool _dimmed;
-            int maxBrightness;
-            double bright;
-            double dark;
-						
-						static QString backlight_file;
+        virtual QWidget* getWidget();
+
+        bool isDimmed();
+
+    public slots:
+        void dim();
+        void brighten();
+        void sleep();
+
+    private:
+        int getMaxBrightness();
+        int getBrightness();
+        void setBrightness(int brightness);
+
+        QDir *_bldir;
+        QSettings *_settings;
+        bool _dimmed;
+        int _maxBrightness;
+        double _bright;
+        double _dark;
+        QTimer *_sleep;
     };
 
     class ClockPluginFactory : public PluginFactory
     {
-        public:
+    public:
         virtual Plugin* CreatePlugin();
     };
 }

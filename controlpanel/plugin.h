@@ -28,10 +28,12 @@ namespace Msg
      public:
             Plugin();
 
-            virtual ~Plugin() = 0;
+            virtual ~Plugin();
 
             virtual QIcon* getIcon() {
-                return new QIcon(":/icon/resources/plugin.png");
+                if ( _icon == NULL )
+                    _icon = new QIcon(":/icon/resources/plugin.png");
+                return _icon;
             }
 
             virtual std::string getName() = 0;
@@ -53,6 +55,10 @@ namespace Msg
 
     signals:
             void stopWidget();
+
+    protected:
+            QWidget* _widget;
+            QIcon* _icon;
     };
 
 

@@ -91,7 +91,7 @@ void AlarmDetails::updateAlarm()
     rep.chop(2);
     _ui->dayButton->setText(rep);
     _ui->ringtoneButton->setText(_alarm->getSource());
-    _ui->snoozeButton->setText(QString::number(_alarm->getSnoozeTime()).rightJustified(2, '0'));
+    _ui->snoozeButton->setText(QString::number(_alarm->getSnoozeTime()) + " Min.");
     _ui->volumeButton->setText(QString::number(_alarm->getVolume()));
     _ui->nameLabel->setText(_alarm->getName());
 

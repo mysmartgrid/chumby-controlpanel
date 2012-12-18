@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>resources/vol-down.png</file>
+        <file>resources/vol-up.png</file>
+        <file>resources/clock.png</file>
+        <file>resources/days.png</file>
+        <file>resources/ringtone.png</file>
+        <file>resources/snooze.png</file>
+        <file>resources/off.png</file>
+        <file>resources/on.png</file>
+    </qresource>
+</RCC>

@@ -1,6 +1,8 @@
 #include <msgException.hpp>
 #include "musiccontrol.h"
 
+#include "ringtoneplugin.h"
+
 #include <QtGui/QDesktopWidget>
 
 namespace Msg
@@ -12,8 +14,7 @@ namespace Msg
 //    volatile int MusicControl::playback_thread_running = 0;
 
     MusicControl::MusicControl()
-        :_audioPlugins(QMap< QString, DLLFactory<PluginFactory>* >()),
-          _handle(NULL),
+        :_handle(NULL),
           _sid(NULL),
           _elem(NULL),
           _min(0),
@@ -21,13 +22,14 @@ namespace Msg
           _vol(NULL),
           _capture(NULL),
           _playback(NULL),
+          _audioPlugins(QMap< QString, DLLFactory<PluginFactory>* >()),
           _thread(NULL)
     {
         qDebug() << "Initializing music control!";
         const char *card = "default";
         char* cname = getenv("CHUMBY_SOUND_CARD");
         if ( !cname )
-            cname = "DAC";
+            cname = (char*) "DAC";
         const char *selem_name = cname;
 
         ::snd_mixer_open(&_handle, 0);
@@ -47,10 +49,17 @@ namespace Msg
         if ( _min < 128 )
             _min = 128;
 
-        _vol = new VolumeWidget(_min, _max);
+        _vol = new VolumeWidget();
         if(_vol ==NULL) {
 					throw msg::msgException("Cannot find volume handle.");
 				}
+
+        long int cvol = getMasterVolume();
+        if ( cvol < _min )
+            setMasterVolume(_min);
+        else if ( cvol > _max )
+            setMasterVolume(_max);
+
         QPalette p(_vol->palette());
         p.setColor(QPalette::Background, Qt::darkGray);
         _vol->setPalette(p);
@@ -91,19 +100,32 @@ namespace Msg
 
         setMasterMute(1);
 
-        snd_mixer_selem_set_playback_volume_all(_elem, volume * _max / 100);
+        // map volume back to hardware value range
+        double vol = ( _max - _min ) * volume / 100 + _min;
+        volume = vol;
+        if ( vol - volume > 0.5 )
+            volume++;
 
-        _vol->setVolume(getMasterVolume());
-        _vol->showWidget();
+        snd_mixer_selem_set_playback_volume_all(_elem, volume);
+
+        /*_vol->setVolume(getMasterVolume());
+        _vol->showWidget();*/
     }
 
     long int MusicControl::getMasterVolume()
     {
         if ( !_elem )
-            return;
+            return -1;
 
         long int volume;
         snd_mixer_selem_get_playback_volume(_elem, SND_MIXER_SCHN_FRONT_LEFT, &volume);
+
+        // map the volume to a value range from 0 to 100
+        double vol = volume;
+        vol = ( vol - _min) * 100 / ( _max - _min );
+        volume = vol;
+        if ( vol - volume > 0.5 )
+            volume++;
 
         return volume;
     }
@@ -113,26 +135,11 @@ namespace Msg
         if ( !_elem )
             return;
 
-        setMasterMute(1);
-
         long int volume = getMasterVolume();
-        qDebug() << _min << " <= " << volume << " <= " << _max;
-                if ( volume < _min )
-				{
-                    volume = _min;
-                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
-                    snd_mixer_selem_set_playback_switch_all(_elem, 1);
-				}
-        if ( volume <= _max - 3 )
-        {
-            volume += 3;
-            snd_mixer_selem_set_playback_volume_all(_elem, volume);
-        }
-				else
-				{
-                    volume = _max;
-          snd_mixer_selem_set_playback_volume_all(_elem, volume);
-				}
+
+        if ( (volume += VOLUME_STEP) > 100)
+            volume = 100;
+        setMasterVolume(volume);
 
         _vol->setVolume(volume);
         _vol->showWidget();
@@ -143,24 +150,15 @@ namespace Msg
         if ( !_elem )
             return;
 
-        setMasterMute(1);
         long int volume = getMasterVolume();
-        qDebug() << _min << " <= " << volume << " <= " << _max;
-        if ( volume >= _min + 3 )
-        {
-            volume -= 3;
-            snd_mixer_selem_set_playback_volume_all(_elem, volume);
-        }
-				else
-				{
-					volume = 0;
-                    snd_mixer_selem_set_playback_volume_all(_elem, volume);
-                    snd_mixer_selem_set_playback_switch_all(_elem, 0);
-				}
+        if ( ( volume -= VOLUME_STEP ) < 0 )
+            volume = 0;
+        setMasterVolume(volume);
 
         _vol->setVolume(volume);
         _vol->showWidget();
     }
+
 
     //set mute flag ( 0: muted, 1: not muted )
     void MusicControl::setMasterMute(int value)
@@ -169,6 +167,16 @@ namespace Msg
             return;
 
         snd_mixer_selem_set_playback_switch_all(_elem, value);
+    }
+
+    long MusicControl::getMinMasterVolume()
+    {
+        return _min;
+    }
+
+    long MusicControl::getMaxMasterVolume()
+    {
+        return _max;
     }
 
     void MusicControl::play(snd_pcm_t *source) {
@@ -197,7 +205,27 @@ namespace Msg
 //        pthread_create(&MusicControl::playback_thread, NULL, &playback_run, NULL);
     }
 
+    void MusicControl::play(QString source)
+    {
+        qDebug() << "Playing" << source;
+        if ( _thread == NULL )
+            _thread = new PlaybackThread(source);
+
+        setMasterMute(1);
+        qDebug() << "Calling pthread";
+        _thread->start();
+    }
+
     void MusicControl::stop() {
+        qDebug() << "stopping...";
+        emit stopPlugins();
+
+        stopPlaybackThread();
+        qDebug() << "mc stop finished";
+    }
+
+    void MusicControl::stopPlaybackThread()
+    {
         if ( !_thread )
         {
             qDebug() << "MusicControl: Nothing to stop here!";
@@ -259,6 +287,7 @@ namespace Msg
         unsigned int rate = 44100; /* Sample rate */
         unsigned int exact_rate;   /* Sample rate returned by */
         int periods = 8;       /* Number of periods */
+        int period_size = 2048;
 
         /* Set access type. This can be either    */
         /* SND_PCM_ACCESS_RW_INTERLEAVED or       */
@@ -311,7 +340,7 @@ namespace Msg
 
         /* Set buffer size (in frames). The resulting latency is given by */
         /* latency = periodsize * periods / (rate * bytes_per_frame)     */
-        if (snd_pcm_hw_params_set_buffer_size(*pcm_handle, hwparams, 16384) < 0) {
+        if (snd_pcm_hw_params_set_buffer_size(*pcm_handle, hwparams, period_size * periods) < 0) {
             fprintf(stderr, "Error setting buffersize.\n");
             return(-1);
         }
@@ -408,6 +437,9 @@ namespace Msg
 
     AudioPlugin* MusicControl::getAudioPlugin(QString plugin)
     {
+        if ( plugin.compare("Ringtone") == 0 )
+            return new RingTonePlugin();
+
         return (AudioPlugin*) _audioPlugins.find(plugin).value()->factory->CreatePlugin();
     }
 
@@ -427,20 +459,52 @@ namespace Msg
     }*/
 
     PlaybackThread::PlaybackThread(snd_pcm_t *in, snd_pcm_t *out)
-        :_capture(in),
-          _playback(out)
+        :_playback(out),
+          _capture(in),
+          _source(""),
+      #ifdef ALSA_ASIO
+          _handler(NULL),
+      #endif
+          _wrapper(NULL)
+    {
+    }
+
+    PlaybackThread::PlaybackThread(QString source)
+        :_playback(NULL),
+          _capture(NULL),
+          _source(source),
+      #ifdef ALSA_ASIO
+          _handler(NULL),
+      #endif
+          _wrapper(NULL)
     {
     }
 
     void PlaybackThread::stop()
     {
+#ifdef ALSA_ASIO
+        if ( _handler != NULL )
+        {
+            snd_pcm_drop(_capture);
+            snd_async_del_handler(_handler);
+            _handler = NULL;
+            delete _c_data;
+        }
+#endif
         _thread_running = false;
+        if ( _wrapper != NULL )
+            _wrapper->stop();
     }
 
     void PlaybackThread::run() {
         _thread_running = true;
         qDebug() << "I'm a playback thread!";
-        if ( _playback == NULL )
+        if ( _playback == NULL && _capture == NULL && _source.isEmpty() )
+        {
+            qDebug() << "ERROR/pthread: no valid params given";
+            return;
+        }
+        /*if ( _playback == NULL )
         {
             qDebug() << "ERROR/pthread: playback null";
             return;
@@ -449,55 +513,167 @@ namespace Msg
         {
             qDebug() << "ERROR/pthread: capture null";
             return;
-        }
+        }*/
         qDebug() << "Starting playback!";
-        snd_pcm_uframes_t data[4096];
+        snd_pcm_uframes_t *data = 0; //TODO: only allocate memory if playing alsa sources
+        snd_pcm_uframes_t period_size;
+        if ( _capture != NULL )
+        {
+            snd_pcm_hw_params_t *hw_params;
+            snd_pcm_hw_params_alloca(&hw_params);
+            snd_pcm_hw_params_current( _capture, hw_params);
+            snd_pcm_hw_params_get_period_size( hw_params, &period_size, 0 );
+            qDebug() << period_size;
+            data = (snd_pcm_uframes_t*) malloc(period_size * sizeof(snd_pcm_uframes_t));
+#ifdef ALSA_ASIO
+            snd_pcm_sw_params_t *sw_params;
+            snd_pcm_sw_params_alloca(&sw_params);
+            snd_pcm_sw_params_current (_capture, sw_params);
+            snd_pcm_sw_params_set_avail_min(_capture, sw_params, period_size);
+            snd_pcm_sw_params(_capture, sw_params);
+            _c_data = new callback_data_t;
+            _c_data->buffer = data;
+            _c_data->out = _playback;
+            _c_data->period_size = period_size;
+            snd_async_add_pcm_handler(&_handler, _capture, alsaCallback, _c_data);
+#endif
+            snd_pcm_readi(_capture, data, period_size);
+        }
         while (_thread_running) {
-            int bytes_read = snd_pcm_readi(_capture, data, sizeof(data)/sizeof(data[0]));
+            if ( !_source.isEmpty() )
+                playBlueTune();
+            else {
+#ifndef ALSA_ASIO
+                playAlsa(data, period_size);
+#endif
+            }
+        }
+        if ( data != NULL)
+            free(data);
+    }
+
+#ifdef ALSA_ASIO
+    void PlaybackThread::alsaCallback(snd_async_handler_t *pcm_callback)
+    {
+        snd_pcm_t *in = snd_async_handler_get_pcm(pcm_callback);
+        callback_data_t* arg = (callback_data_t*) snd_async_handler_get_callback_private(pcm_callback);
+        snd_pcm_t *out = arg->out;
+        snd_pcm_uframes_t* buffer = arg->buffer;
+        int period_size = arg->period_size;
+
+        snd_pcm_uframes_t avail;
+        avail = snd_pcm_avail_update(in);
+        while ( avail >= period_size )
+        {
+            int bytes_read = snd_pcm_readi(in, buffer, period_size);
+            // If we didn't get enough buffer, wait, then try again.
+            if(bytes_read == -EAGAIN) {
+                fprintf(stderr, "Read error, trying again: %s\n",
+                        snd_strerror(bytes_read));
+                return;
+            }
+
+            else if(bytes_read == -EPIPE) {
+                fprintf(stderr, "Read error: (Over/Under)run\n");
+                if(snd_pcm_prepare(in) < 0) {
+                    fprintf(stderr, "Error!!!11elf!\n");
+                }
+                return;
+            }
+
+            // Or if we had a different error, bail.
+            else if(bytes_read < 0) {
+                fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
+                return;
+            }
+
+            avail = snd_pcm_avail_update(out);
+            if ( avail >= period_size )
+            {
+                int bytes_written = snd_pcm_writei(out, buffer, period_size);
+
+                if(bytes_written == -EPIPE) {
+                    fprintf(stderr, "Write error: (Over/Under)run\n");
+                    if(snd_pcm_prepare(out) < 0) {
+                        fprintf(stderr, "Error!!!11elf!\n");
+                    }
+                    return;
+                }
+
+                else if(bytes_written <= 0) {
+                    fprintf(stderr, "Write error (%d): %s\n",
+                            bytes_written, snd_strerror(bytes_written));
+                    return;
+                }
+            }
+
+            avail = snd_pcm_avail_update(in);
+        }
+    }
+#endif
+
+    void PlaybackThread::playAlsa(snd_pcm_uframes_t *data, int period_size)
+    {
+        snd_pcm_uframes_t avail;
+        avail = snd_pcm_avail_update(_capture);
+        while ( avail >= period_size )
+        {
+            int bytes_read = snd_pcm_readi(_capture, data, period_size);
             // If we didn't get enough data, wait, then try again.
             if(bytes_read == -EAGAIN) {
                 fprintf(stderr, "Read error, trying again: %s\n",
                         snd_strerror(bytes_read));
-                continue;
+                return;
             }
 
             else if(bytes_read == -EPIPE) {
                 fprintf(stderr, "Read error: (Over/Under)run\n");
                 if(snd_pcm_prepare(_capture) < 0) {
                     _thread_running = false;
-                    break;
                 }
-                continue;
+                return;
             }
 
             // Or if we had a different error, bail.
             else if(bytes_read < 0) {
                 fprintf(stderr, "Read error: %s\n", snd_strerror(bytes_read));
                 _thread_running = false;
-                break;
+                return;
             }
 
-            int bytes_written = snd_pcm_writei(_playback, data, bytes_read);
+            avail = snd_pcm_avail_update(_playback);
+            if ( avail >= period_size )
+            {
+                int bytes_written = snd_pcm_writei(_playback, data, period_size);
 
-            if(bytes_written == -EPIPE) {
-                fprintf(stderr, "Write error: (Over/Under)run\n");
-                if(snd_pcm_prepare(_playback) < 0) {
-                    _thread_running = false;
-                    break;
+                if(bytes_written == -EPIPE) {
+                    fprintf(stderr, "Write error: (Over/Under)run\n");
+                    if(snd_pcm_prepare(_playback) < 0) {
+                        _thread_running = false;
+                    }
+                    return;
                 }
-                continue;
+
+                else if(bytes_written <= 0) {
+                    fprintf(stderr, "Write error (%d): %s\n",
+                            bytes_written, snd_strerror(bytes_written));
+                    _thread_running = false;
+                    return;
+                }
             }
 
-            else if(bytes_written <= 0) {
-                fprintf(stderr, "Write error (%d): %s\n",
-                        bytes_written, snd_strerror(bytes_written));
-                _thread_running = false;
-                break;
-            }
+            avail = snd_pcm_avail_update(_capture);
         }
     }
 
-    VolumeWidget::VolumeWidget(int min = 0, int max = 100)
+    void PlaybackThread::playBlueTune()
+    {
+        if ( _wrapper == NULL )
+            _wrapper = new BtWrapper();
+        _wrapper->play(_source);
+    }
+
+    VolumeWidget::VolumeWidget()
         :QWidget(NULL, Qt::ToolTip),
           _layout(new QHBoxLayout(this)),
           _bar(new QProgressBar()),
@@ -507,8 +683,8 @@ namespace Msg
         low->setPixmap(QIcon(":/icon/resources/vol-down.png").pixmap(15));
         _layout->addWidget(low);
         qDebug() << "Building Progressbar";
-        _bar->setMaximum(max);
-        _bar->setMinimum(min);
+        _bar->setMaximum(100);
+        _bar->setMinimum(0);
         _layout->addWidget(_bar);
         QLabel* high = new QLabel();
         high->setPixmap(QIcon(":/icon/resources/vol-up.png").pixmap(15));

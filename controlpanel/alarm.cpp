@@ -9,8 +9,8 @@ Msg::Alarm::Alarm(QString name, QObject *parent)
     : QObject(parent),
       _name(name),
       _time(QTime::currentTime()),
-      _source(""), //TODO: default ringtone
-      _volume(Msg::MusicControl::getInstance().getMasterVolume()),
+      _source("Ringtone/Beep"),
+      _volume(75),
       _snoozeTime(5),
       _active(true),
       _plugin(NULL),
@@ -28,6 +28,12 @@ Msg::Alarm::Alarm(QString name, QObject *parent)
         _name = _time.toString("hh:mm");
 }
 
+Msg::Alarm::~Alarm()
+{
+    if ( _timer )
+        _timer->stop();
+}
+
 void Msg::Alarm::save()
 {
     QSettings* settings = AlarmDaemon::getInstance().getSettings();
@@ -43,6 +49,7 @@ void Msg::Alarm::save()
     settings->setValue("snooze", _snoozeTime);
     settings->setValue("source", getSource());
     settings->setValue("volume", _volume);
+    settings->setValue("active", _active);
     settings->endGroup();
 }
 
@@ -146,6 +153,11 @@ bool Msg::Alarm::check(QDateTime current)
 
 bool Msg::Alarm::run()
 {
+    Msg::MusicControl* mc = &Msg::MusicControl::getInstance();
+    mc->stop();
+    _tmpVol = mc->getMasterVolume();
+    mc->setMasterVolume(this->getVolume());
+
     int index = _source.indexOf("/");
     QString audioPlugin = _source.left(index);
     QString pluginSource = _source;
@@ -153,7 +165,8 @@ bool Msg::Alarm::run()
     qDebug() << "Running" << audioPlugin << "with source" << pluginSource;
     if ( audioPlugin.length() == 0 || pluginSource.length() == 0 )
         return false;
-    _plugin = Msg::MusicControl::getInstance().getAudioPlugin(audioPlugin);
+
+    _plugin = mc->getAudioPlugin(audioPlugin);
     if ( ! _plugin )
         return false;
 
@@ -199,6 +212,7 @@ void Msg::Alarm::snooze()
                 _timer->start(_snoozeTime * 60 * 1000);
                 connect(_timer, SIGNAL(timeout()), (AlarmWidget*) _widget, SIGNAL(resumed()));
                 connect(_timer, SIGNAL(timeout()), _timer, SLOT(stop()));
+                _nextSnoozeTime = QTime::currentTime().addSecs(_snoozeTime * 60);
                 dismiss();
         }
 }
@@ -208,6 +222,7 @@ void Msg::Alarm::dismiss()
     qDebug() << "dismiss";
     AlarmDaemon::getInstance().setAlarmActive(false);
     _plugin->stop();
+    Msg::MusicControl::getInstance().setMasterVolume(_tmpVol);
     _widget->hide();
 }
 
@@ -224,6 +239,11 @@ void Msg::Alarm::setName(QString name)
 bool Msg::Alarm::isActive()
 {
     return _active;
+}
+
+bool Msg::Alarm::isSnoozed()
+{
+    return _timer->isActive();
 }
 
 QString Msg::Alarm::getTime()
@@ -256,6 +276,14 @@ int Msg::Alarm::getSnoozeTime()
     return _snoozeTime;
 }
 
+QTime Msg::Alarm::getNextFireTime()
+{
+    if ( isSnoozed() )
+        return _nextSnoozeTime;
+    else
+        return QTime();
+}
+
 void Msg::Alarm::setVolume(int vol)
 {
     _volume = vol;
@@ -264,4 +292,9 @@ void Msg::Alarm::setVolume(int vol)
 int Msg::Alarm::getVolume()
 {
     return _volume;
+}
+
+void Msg::Alarm::cancelSnooze()
+{
+    _timer->stop();
 }

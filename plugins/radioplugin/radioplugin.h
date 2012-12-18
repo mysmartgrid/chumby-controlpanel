@@ -50,6 +50,7 @@ namespace Msg
         QSettings* settings;
         QTimer* timer;
         bool rds;
+        bool playing;
     };
 
     class LongPressButton : public QPushButton

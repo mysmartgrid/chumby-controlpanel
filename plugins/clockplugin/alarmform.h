@@ -4,6 +4,8 @@
 #include <QtGui/QListWidgetItem>
 #include <QtGui/QWidget>
 
+#include "alarm.h"
+
 namespace Ui {
 class AlarmForm;
 }
@@ -17,8 +19,9 @@ public:
     ~AlarmForm();
 
 protected slots:
-    //void editAlarm(QListWidgetItem *previous, QListWidgetItem *current);
+    void editAlarm(Msg::Alarm *alarm = NULL);
     void alarmDetails();
+    void alarmChanged(QListWidgetItem* item);
     void refresh();
 
 private:

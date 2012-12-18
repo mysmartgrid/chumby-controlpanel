@@ -27,6 +27,7 @@ namespace Msg
         Q_OBJECT
     public:
         Alarm(QString name = "", QObject* parent = 0);
+        ~Alarm();
         void save();
         void remove();
         bool setTime(unsigned int hour, unsigned int minute);
@@ -45,6 +46,7 @@ namespace Msg
         void setVolume(int vol);
         bool check(QDateTime current);
         bool isActive();
+        bool isSnoozed();
         void setActive(bool active);
         QString getName();
         QString getTime();
@@ -53,7 +55,9 @@ namespace Msg
         Weekdays getDays();
         QString getSource();
         int getSnoozeTime();
+        QTime getNextFireTime();
         int getVolume();
+        void cancelSnooze();
 
     public slots:
         bool run();
@@ -66,10 +70,12 @@ namespace Msg
         Weekdays _weekdays; // bit field encoding repetitions
         QString _source;
         int _volume;
+        int _tmpVol;
         int _snoozeTime;
         bool _active;
         Msg::AudioPlugin* _plugin;
         QTimer* _timer;
+        QTime _nextSnoozeTime;
         QWidget* _widget; // AlarmWidget
     };
 }

@@ -9,9 +9,10 @@ std::string Msg::HelloWorld::getName()
 
 QWidget* Msg::HelloWorld::getWidget()
 {
-    QWidget* widget = new QWidget();
+    if ( _widget == NULL )
+        _widget = new QWidget();
 
-    return widget;
+    return _widget;
 }
 
 Msg::Plugin* Msg::HelloWorldFactory::CreatePlugin()

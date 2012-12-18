@@ -13,13 +13,10 @@ namespace Msg
             DispValuesPlugin()
             {
                     std::cout << "DispValuesPlugin created" << std::endl;
-                    dlg = NULL;
             }
 
             virtual ~DispValuesPlugin()
             {
-                    /*if ( dlg )
-                        delete dlg;*/
                     std::cout << "DispValuesPlugin destroyed" << std::endl;
             }
 
@@ -31,20 +28,18 @@ namespace Msg
 
             virtual QWidget* getWidget()
             {
-                if ( dlg == NULL )
+                if ( _widget == NULL )
                 {
                     qDebug() << "Creating new Display";
-                    dlg = new Display();
+                    _widget = new Display();
                     //connect ( dlg, SIGNAL( closeDisplay() ), this, SIGNAL( stopWidget() ) );
                 }
-                return dlg;
+                return _widget;
             }
 
             virtual QIcon* getIcon() {
                 return new QIcon(":/dispval/resources/msg.png");
             }
-    private:
-            Display* dlg;
     };
 
     //

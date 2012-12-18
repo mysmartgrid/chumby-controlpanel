@@ -31,7 +31,9 @@ int main(int argc, char *argv[])
 #endif
 
     //QFont font("Arial", 14);
-    //QApplication::setFont(font);
+    QFont font = QApplication::font();
+    font.setPointSize(16);
+    QApplication::setFont(font);
 
     Msg::Controlpanel w;
     w.showFullScreen();

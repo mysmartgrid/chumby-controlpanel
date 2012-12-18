@@ -12,6 +12,8 @@ set(controlpanel_SRCS
   plugin.cpp
   audioplugin.cpp
   dllmanager.cpp
+  btwrapper.cpp
+  ringtoneplugin.cpp
   #  PlaybackThread.cpp
   )
 set(controlpanel_HDRS
@@ -22,6 +24,8 @@ set(controlpanel_HDRS
   alarmwidget.h
   plugin.h
   audioplugin.h
+  btwrapper.h
+  ringtoneplugin.h
   #  dllmanager.h
   #  PlaybackThread.h
   )
@@ -56,6 +60,9 @@ qt4_wrap_cpp( controlpanel_MOC_SRCS
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${ASOUND_INCLUDE_DIR})
+include_directories(${BLUETUNE_INCLUDE_DIRS})
+include_directories(${ATOMIX_INCLUDE_DIR})
+include_directories(${NEPTUNE_INCLUDE_DIR})
 
 add_executable(chumby-controlpanel  ${controlpanel_SRCS}
   ${controlpanel_MOC_SRCS}
@@ -66,6 +73,9 @@ target_link_libraries(chumby-controlpanel ${QT_QTGUI_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTNETWORK_LIBRARY})
 target_link_libraries(chumby-controlpanel ${QT_QTCORE_LIBRARY})
 target_link_libraries(chumby-controlpanel ${ASOUND_LIBRARY})
+target_link_libraries(chumby-controlpanel ${BLUETUNE_LIBRARY})
+target_link_libraries(chumby-controlpanel ${ATOMIX_LIBRARY})
+target_link_libraries(chumby-controlpanel ${NEPTUNE_LIBRARY})
 target_link_libraries(chumby-controlpanel iw)
 target_link_libraries(chumby-controlpanel dl)
 target_link_libraries(chumby-controlpanel rt)
