@@ -42,6 +42,11 @@ if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
 endif(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
 
 set(CMAKE_TOOLCHAIN_FILE ${CTEST_SOURCE_DIRECTORY}/modules/Toolchain-arm.cmake)
+set(ASOUND_HOME /opt/arm-2008q3/)
+set(LIBTS_HOME /opt/arm-2008q3/)
+set(ATOMIX_HOME /opt/arm-2008q3/)
+set(NEPTUNE_HOME /opt/arm-2008q3/)
+set(BLUETUNE_HOME /opt/arm-2008q3/)
 
 ctest_start(${_ctest_type})
 ctest_update(SOURCE ${CTEST_SOURCE_DIRECTORY})
