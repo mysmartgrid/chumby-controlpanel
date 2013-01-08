@@ -16,10 +16,10 @@ public:
     }
 
     virtual void reset() = 0;
-    virtual void setValue(int value) = 0;
 
 protected slots:
     virtual void step() = 0;
+    virtual void setValue(int value) = 0;
 
 protected:
     QGraphicsScene* _scene;
