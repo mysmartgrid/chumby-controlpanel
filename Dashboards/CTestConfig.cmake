@@ -20,6 +20,12 @@ set(KDE_CTEST_DASHBOARD_DIR "/tmp/msgrid")
 
 set(CTEST_PACKAGE_SITE "packages.mysmartgrid.de")
 
+set(ENV{ASOUND_HOME} "/opt/arm-2008q3/")
+set(ENV{LIBTS_HOME} "/opt/arm-2008q3/")
+set(ENV{ATOMIX_HOME} "/opt/arm-2008q3/")
+set(ENV{NEPTUNE_HOME} "/opt/arm-2008q3/")
+set(ENV{BLUETUNE_HOME} "/opt/arm-2008q3/")
+
 #SET (CTEST_TRIGGER_SITE "http:///cgi-bin/Submit-CMake-TestingResults.pl")
 #SET (VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck --leak-check=full --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50")
 #SET (CTEST_EXPERIMENTAL_COVERAGE_EXCLUDE ".*test_.*")
