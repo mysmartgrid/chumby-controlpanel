@@ -39,6 +39,7 @@ add_library(birds MODULE ${birds_SRCS}
   )
 
 target_link_libraries(birds qjson)
+target_link_libraries(birds ${QT_QTNETWORK_LIBRARY})
 
 #set_target_properties(birds PROPERTIES SOVERSION "1.0")
 set_target_properties(birds PROPERTIES INSTALL_RPATH "/mnt/usb/lib")
