@@ -6,6 +6,8 @@
 
 #include <QTimer>
 
+#include <QSignalMapper>
+
 class Flukso : public QObject
 {
 	Q_OBJECT
@@ -21,8 +23,9 @@ public:
 	~Flukso();
 
 public slots:
-    void result(QNetworkReply* reply);
-    void sslHandler(QNetworkReply * reply, const QList<QSslError> & errors);
+    void result(QString sensor);
+    void error(QString sensor);
+    void sslHandler(const QList<QSslError> &errors);
     void getRemote();
     
 signals:
@@ -31,6 +34,7 @@ signals:
 private:
     void readSettings();
     QNetworkAccessManager *_nam;
+    QSignalMapper *_resultMapper, *_errorMapper;
     QTimer *_timer;
     QMap<QString, Sensor> *_sensors;
 };

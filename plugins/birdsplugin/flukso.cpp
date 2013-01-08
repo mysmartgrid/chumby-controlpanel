@@ -14,6 +14,8 @@
 Flukso::Flukso(QObject *parent)
 	: QObject(parent)
 	, _nam(new QNetworkAccessManager)
+    , _resultMapper(new QSignalMapper)
+    , _errorMapper(new QSignalMapper)
 	, _timer(new QTimer)
     , _sensors(new QMap<QString, Sensor>)
 {
@@ -24,8 +26,8 @@ Flukso::Flukso(QObject *parent)
     _timer->setSingleShot(true);
     _timer->start();
 
-    connect(_nam, SIGNAL(finished(QNetworkReply*)), this, SLOT(result(QNetworkReply*)));
-    connect(_nam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(sslHandler(QNetworkReply*,QList<QSslError>)));
+    connect(_resultMapper, SIGNAL(mapped(QString)), this, SLOT(result(QString)));
+    connect(_errorMapper, SIGNAL(mapped(QString)), this, SLOT(error(QString)));
 }
 
 Flukso::~Flukso()
@@ -42,20 +44,26 @@ void Flukso::getRemote()
             QNetworkRequest req(QUrl(QString("https://api.mysmartgrid.de:8443/sensor/%1?interval=hour&unit=watt").arg(s.id)));
             req.setRawHeader("X-Token", s.token.toAscii());
             req.setRawHeader("X-Version", "1.0");
-            _nam->get(req);
+            QNetworkReply *r = _nam->get(req);
+            _resultMapper->setMapping(r, it.key());
+            _errorMapper->setMapping(r, it.key());
+            connect(r, SIGNAL(finished()), _resultMapper, SLOT(map()));
+            connect(r, SIGNAL(error(QNetworkReply::NetworkError)), _errorMapper, SLOT(map()));
+            connect(r, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslHandler(QList<QSslError>)));
         }
     }
 }
 
-void Flukso::result(QNetworkReply* reply)
+void Flukso::result(QString sensor)
 {
+    QNetworkReply *reply = _resultMapper->mapping(sensor);
     if ( !reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).isValid() )
     {
         reply->deleteLater();
         return;
     }
 
-    qDebug() << "result:" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString() << "(" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() << ")";
+    qDebug() << "result (" << sensor << "):" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString() << "(" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() << ")";
     switch ( reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() )
     {
     case 200:
@@ -83,8 +91,14 @@ void Flukso::result(QNetworkReply* reply)
     _timer->start();
 }
 
-void Flukso::sslHandler(QNetworkReply *reply, const QList<QSslError> &errors)
+void Flukso::error(QString sensor)
 {
+    qDebug() << "An error occured while fetching" << sensor << ":" << ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString();
+}
+
+void Flukso::sslHandler(const QList<QSslError> &errors)
+{
+    QNetworkReply *reply = sender();
     foreach( QSslError error, errors)
     {
         qDebug() << error;
