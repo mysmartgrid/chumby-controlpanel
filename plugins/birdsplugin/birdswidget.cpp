@@ -16,6 +16,7 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     , _scene(new QGraphicsScene(0, 0, 400, 300))
     , _timer(new QTimer)
   , _animation(new NormalAnimation(_scene))
+  , _flukso(new Flukso())
 {
     _ui->setupUi(this);
     qsrand(QTime::currentTime().msec());
@@ -29,6 +30,8 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     _timer->setInterval(50);
     connect(_timer, SIGNAL(timeout()), _animation, SLOT(step()));
     _timer->start();
+
+    connect(_flukso, SIGNAL(valueChanged(int)), _animation, SLOT(setValue(int)));
 }
 
 BirdsWidget::~BirdsWidget()
@@ -43,6 +46,7 @@ void BirdsWidget::animate()
     _ui->view->setScene(_scene);
 }
 
+#if 0
 void BirdsWidget::normalAnimation(unsigned int counter, int value)
 {
     _scene->addPixmap(QPixmap(":/birds/images/higru.png"));
@@ -79,6 +83,7 @@ void BirdsWidget::normalAnimation(unsigned int counter, int value)
     _scene->addPixmap(QPixmap(":/birds/images/pillars.png"));
     */
 }
+#endif
 
 void BirdsWidget::paintEvent(QPaintEvent *)
 {

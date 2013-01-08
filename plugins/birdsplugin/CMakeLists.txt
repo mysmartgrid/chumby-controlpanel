@@ -3,12 +3,14 @@
 set(birds_SRCS
   birds.cpp
   birdswidget.cpp
+  flukso.cpp
   normalanimation.cpp
   )
 set(birds_HDRS
   birds.h
   birdswidget.h
   birdsanimation.h
+  flukso.h
   normalanimation.h
   )
 
@@ -35,6 +37,8 @@ add_library(birds MODULE ${birds_SRCS}
   ${birdsplugin_MOC_SRCS} ${birdsplugin_RC_SRCS}
   ${birdsplugin_UI_HDRS}
   )
+
+target_link_libraries(birds qjson)
 
 #set_target_properties(birds PROPERTIES SOVERSION "1.0")
 set_target_properties(birds PROPERTIES INSTALL_RPATH "/mnt/usb/lib")

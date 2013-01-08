@@ -10,10 +10,10 @@ class NormalAnimation : public BirdsAnimation
 public:
     NormalAnimation(QGraphicsScene* scene);
     virtual void reset();
-    virtual void setValue(int value);
 
 protected slots:
     virtual void step();
+    virtual void setValue(int value);
 
 private:
     QGraphicsPixmapItem *_clouds, *_clouds2;

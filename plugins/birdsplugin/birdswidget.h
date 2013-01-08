@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "birdsanimation.h"
+#include "flukso.h"
 
 namespace Ui {
 class BirdsWidget;
@@ -22,7 +23,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
-    void normalAnimation(unsigned int counter, int value);
+    //void normalAnimation(unsigned int counter, int value);
 
 protected slots:
     void animate();
@@ -30,8 +31,9 @@ protected slots:
 private:
     Ui::BirdsWidget *_ui;
     QGraphicsScene *_scene;
-    QTimer* _timer;
-    BirdsAnimation* _animation;
+    QTimer *_timer;
+    BirdsAnimation *_animation;
+    Flukso *_flukso;
 };
 
 #endif // BIRDSWIDGET_H
