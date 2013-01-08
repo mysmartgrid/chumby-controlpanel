@@ -10,6 +10,12 @@ class Flukso : public QObject
 {
 	Q_OBJECT
 
+    struct Sensor {
+        QString id;
+        QString token;
+        bool enabled;
+    };
+
 public:
 	explicit Flukso(QObject *parent = 0);
 	~Flukso();
@@ -23,8 +29,10 @@ signals:
     void valueChanged(int);
 
 private:
-    QNetworkAccessManager* _nam;
-    QTimer* _timer;
+    void readSettings();
+    QNetworkAccessManager *_nam;
+    QTimer *_timer;
+    QMap<QString, Sensor> *_sensors;
 };
 
 #endif // FLUKSO_H

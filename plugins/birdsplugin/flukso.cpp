@@ -1,10 +1,13 @@
 #include "flukso.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QUrl>
+#include <QtCore/QSettings>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QSslError>
-#include <QUrl>
+
+#include <QStringList>
 
 #include <qjson/parser.h>
 
@@ -12,7 +15,10 @@ Flukso::Flukso(QObject *parent)
 	: QObject(parent)
 	, _nam(new QNetworkAccessManager)
 	, _timer(new QTimer)
+    , _sensors(new QMap<QString, Sensor>)
 {
+    readSettings();
+
     _timer->setInterval(1000);
     connect(_timer, SIGNAL(timeout()), this, SLOT(getRemote()));
     _timer->setSingleShot(true);
@@ -28,10 +34,17 @@ Flukso::~Flukso()
 
 void Flukso::getRemote()
 {
-    QNetworkRequest req(QUrl("https://api.mysmartgrid.de:8443/sensor/4850219fefb8d4aa0c8b4e5da38916d8?interval=hour&unit=watt"));
-    req.setRawHeader("X-Token", "359c91d87359cac7a887c25abcbeb8c3");
-    req.setRawHeader("X-Version", "1.0");
-    _nam->get(req);
+    for(QMap<QString, Sensor>::Iterator it = _sensors->begin(); it != _sensors->end(); it++)
+    {
+        Sensor s = it.value();
+        if ( s.enabled )
+        {
+            QNetworkRequest req(QUrl(QString("https://api.mysmartgrid.de:8443/sensor/%1?interval=hour&unit=watt").arg(s.id)));
+            req.setRawHeader("X-Token", s.token.toAscii());
+            req.setRawHeader("X-Version", "1.0");
+            _nam->get(req);
+        }
+    }
 }
 
 void Flukso::result(QNetworkReply* reply)
@@ -77,4 +90,25 @@ void Flukso::sslHandler(QNetworkReply *reply, const QList<QSslError> &errors)
         qDebug() << error;
     }
     reply->ignoreSslErrors();
+}
+
+void Flukso::readSettings()
+{
+    QSettings settings("/mnt/usb/flukso.conf", QSettings::NativeFormat);
+    settings.setIniCodec("UTF-8");
+
+    // Reading general setting
+
+    // Reading sensors
+    settings.beginGroup("sensors");
+    foreach(QString sensor, settings.childGroups())
+    {
+        settings.beginGroup(sensor);
+        Sensor s;
+        s.id = settings.value("id").toString();
+        s.token = settings.value("token").toString();
+        s.enabled = settings.value("enabled").toBool();
+        _sensors->insert(sensor, s);
+        settings.endGroup();
+    }
 }
