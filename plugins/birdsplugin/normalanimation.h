@@ -11,11 +11,12 @@ public:
     NormalAnimation(QGraphicsScene* scene);
     virtual void reset();
 
-protected slots:
+public slots:
     virtual void step();
     virtual void setValue(QString sensor, int value);
 
 private:
+    int _sensorValue;
     QGraphicsPixmapItem *_clouds, *_clouds2;
     QGraphicsPathItem *_cord1, *_cord2;
     QGraphicsTextItem *_consumption;

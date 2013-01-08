@@ -8,6 +8,8 @@
 
 NormalAnimation::NormalAnimation(QGraphicsScene *scene)
     : BirdsAnimation(scene)
+    , _sensorValue(-1)
+    , _consumption(NULL)
 {
 }
 
@@ -53,14 +55,6 @@ void NormalAnimation::reset()
     _birds->setZValue(11);
     _scene->addItem(_birds);
 
-    QFont cFont("Arial", 25, QFont::Bold, false);
-    _consumption = _scene->addText("0 W", cFont);
-    qreal w = _consumption->textWidth();
-    _swingGroup->addToGroup(_consumption);
-    _consumption->translate(230, 200);
-    _consumption->setDefaultTextColor(Qt::white);
-    //TODO: calculate maximum width and set alignment to right
-
     _swingGroup->translate(0, swingKnot1.y() - swingKnot2.y());
 
     qDebug() << "Resetting _clouds to" << _scene->sceneRect().x() - _scene->sceneRect().width();
@@ -103,6 +97,18 @@ void NormalAnimation::step()
     QPointF newKnot1(_cord1->path().pointAtPercent(0.7));
     QPointF newBirdPos(_cord1->path().pointAtPercent(0.5));
 
+    if ( _consumption == NULL )
+    {
+        QFont cFont("Arial", 35, QFont::Bold, false);
+        _consumption = _scene->addText(QString::number(_sensorValue) + " W", cFont);
+        _consumption->setDefaultTextColor(Qt::white);
+    } else
+        _consumption->setPlainText(QString::number(_sensorValue) + " W");
+
+    QSizeF textsize = _consumption->boundingRect().size();
+    QPointF swingpos = _swingGroup->scenePos();
+    _consumption->setPos(325 - textsize.width() + swingpos.x(), 240 - textsize.height() + swingpos.y());
+
     _swingGroup->translate(0, newKnot1.y() - oldKnot1.y());
     _birds->translate(0, newBirdPos.y() - oldBirdPos.y());
 }
@@ -110,6 +116,9 @@ void NormalAnimation::step()
 void NormalAnimation::setValue(QString sensor, int value)
 {
     //TODO: retrieve displayed sensor from config
-    if ( sensor.compare("1") == 0 )
-        _consumption->setPlainText(QString::number(value) + " W");
+    qDebug() << "setValue(" << sensor << "," << value << ")";
+    if ( sensor.compare("1") == 0 || sensor.isEmpty() )
+    {
+        _sensorValue = value;
+    }
 }
