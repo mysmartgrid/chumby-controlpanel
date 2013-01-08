@@ -80,11 +80,15 @@ void Flukso::result(QString sensor)
             if ( l.at(1).toULongLong() > 0 )
                 lvalue = l.at(1).toInt();
         }
+        //lvalue = qrand()%3000; //activate for random debug values
         if ( lvalue >= 0 )
             emit valueChanged(sensor, lvalue);
+        else
+            qDebug() << "no valid data found. lvalue:" << lvalue;
     }
         break;
     case 302:
+        //TODO: construct new request from old one and change the url
         _nam->get(QNetworkRequest(reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl()));
         break;
     }
