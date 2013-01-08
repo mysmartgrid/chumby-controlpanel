@@ -13,7 +13,7 @@ public:
 
 protected slots:
     virtual void step();
-    virtual void setValue(int value);
+    virtual void setValue(QString sensor, int value);
 
 private:
     QGraphicsPixmapItem *_clouds, *_clouds2;

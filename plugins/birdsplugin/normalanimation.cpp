@@ -69,9 +69,6 @@ void NormalAnimation::reset()
 
 void NormalAnimation::step()
 {
-    //TODO
-    //setValue(qrand()%100);
-
     _counter++;
 
     _clouds->translate(1, 0);
@@ -110,7 +107,9 @@ void NormalAnimation::step()
     _birds->translate(0, newBirdPos.y() - oldBirdPos.y());
 }
 
-void NormalAnimation::setValue(int value)
+void NormalAnimation::setValue(QString sensor, int value)
 {
-    _consumption->setPlainText(QString::number(value) + " W");
+    //TODO: retrieve displayed sensor from config
+    if ( sensor.compare("1") == 0 )
+        _consumption->setPlainText(QString::number(value) + " W");
 }

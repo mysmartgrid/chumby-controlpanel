@@ -29,7 +29,7 @@ public slots:
     void getRemote();
     
 signals:
-    void valueChanged(int);
+    void valueChanged(QString, int);
 
 private:
     void readSettings();

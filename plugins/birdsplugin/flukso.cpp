@@ -41,6 +41,7 @@ void Flukso::getRemote()
         Sensor s = it.value();
         if ( s.enabled )
         {
+            //TODO: support for local flukso api
             QNetworkRequest req(QUrl(QString("https://api.mysmartgrid.de:8443/sensor/%1?interval=hour&unit=watt").arg(s.id)));
             req.setRawHeader("X-Token", s.token.toAscii());
             req.setRawHeader("X-Version", "1.0");
@@ -80,7 +81,7 @@ void Flukso::result(QString sensor)
                 lvalue = l.at(1).toInt();
         }
         if ( lvalue >= 0 )
-            emit valueChanged(lvalue);
+            emit valueChanged(sensor, lvalue);
     }
         break;
     case 302:
@@ -112,6 +113,7 @@ void Flukso::readSettings()
     settings.setIniCodec("UTF-8");
 
     // Reading general setting
+    //TODO: read general settings like ip and port of the local flukso api
 
     // Reading sensors
     settings.beginGroup("sensors");

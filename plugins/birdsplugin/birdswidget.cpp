@@ -31,7 +31,7 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     connect(_timer, SIGNAL(timeout()), _animation, SLOT(step()));
     _timer->start();
 
-    connect(_flukso, SIGNAL(valueChanged(int)), _animation, SLOT(setValue(int)));
+    connect(_flukso, SIGNAL(valueChanged(QString, int)), _animation, SLOT(setValue(QString, int)));
 }
 
 BirdsWidget::~BirdsWidget()
