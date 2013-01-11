@@ -37,6 +37,8 @@ private:
     QSignalMapper *_resultMapper, *_errorMapper;
     QTimer *_timer;
     QMap<QString, Sensor> *_sensors;
+    QString _address, _port, _interval;
+    bool _local;
 };
 
 #endif // FLUKSO_H

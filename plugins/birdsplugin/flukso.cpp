@@ -18,6 +18,10 @@ Flukso::Flukso(QObject *parent)
     , _errorMapper(new QSignalMapper)
 	, _timer(new QTimer)
     , _sensors(new QMap<QString, Sensor>)
+    , _address("api.mysmartgrid.de")
+    , _port("8443")
+    , _interval("hour")
+    , _local(false)
 {
     readSettings();
 
@@ -42,8 +46,15 @@ void Flukso::getRemote()
         if ( s.enabled )
         {
             //TODO: support for local flukso api
-            QNetworkRequest req(QUrl(QString("https://api.mysmartgrid.de:8443/sensor/%1?interval=hour&unit=watt").arg(s.id)));
-            req.setRawHeader("X-Token", s.token.toAscii());
+            QString protocol;
+            if ( _local )
+                protocol = "http";
+            else
+                protocol = "https";
+
+            QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt"));
+            if ( !_local )
+                req.setRawHeader("X-Token", s.token.toAscii());
             req.setRawHeader("X-Version", "1.0");
             QNetworkReply *r = _nam->get(req);
             _resultMapper->setMapping(r, it.key());
@@ -103,7 +114,7 @@ void Flukso::error(QString sensor)
 
 void Flukso::sslHandler(const QList<QSslError> &errors)
 {
-    QNetworkReply *reply = sender();
+    QNetworkReply *reply = (QNetworkReply*) sender();
     foreach( QSslError error, errors)
     {
         qDebug() << error;
@@ -113,11 +124,31 @@ void Flukso::sslHandler(const QList<QSslError> &errors)
 
 void Flukso::readSettings()
 {
-    QSettings settings("/mnt/usb/flukso.conf", QSettings::NativeFormat);
+    QString configdir = getenv("CHUMBY_CONFIG_DIR");
+    if ( configdir.isEmpty() )
+        configdir = "/mnt/usb";
+    QSettings settings(configdir + "/flukso.conf", QSettings::NativeFormat);
     settings.setIniCodec("UTF-8");
 
     // Reading general setting
-    //TODO: read general settings like ip and port of the local flukso api
+    if ( settings.contains("local") && settings.value("local").toBool() )
+    {
+        _local = true;
+        _address = "192.168.1.1";
+        _port = "8080";
+        _interval = "minute";
+    }
+
+    if ( settings.contains("ip") )
+        _address = settings.value("ip").toString();
+
+    if ( settings.contains("port") )
+        _port = settings.value("port").toString();
+
+    if ( settings.contains("interval") )
+        _interval = settings.value("interval").toString();
+
+    qDebug() << "General:" << _local << "," << _address << "," << _port << "," << _interval;
 
     // Reading sensors
     settings.beginGroup("sensors");
