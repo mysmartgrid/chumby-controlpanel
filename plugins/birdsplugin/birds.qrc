@@ -5,5 +5,14 @@
         <file>images/normalclouds.png</file>
         <file>images/swing.png</file>
         <file>images/birds.png</file>
+        <file>images/bodyl.png</file>
+        <file>images/bodys.png</file>
+        <file>images/hairs.png</file>
+        <file>images/taill.png</file>
+        <file>images/tails.png</file>
+        <file>images/wingll.png</file>
+        <file>images/winglr.png</file>
+        <file>images/wingsl.png</file>
+        <file>images/wingsr.png</file>
     </qresource>
 </RCC>

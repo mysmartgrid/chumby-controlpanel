@@ -7,6 +7,16 @@ class NormalAnimation : public BirdsAnimation
 {
     Q_OBJECT
 
+    struct SmallBird {
+        QGraphicsPixmapItem *body, *leftWing, *rightWing, *tail, *hair;
+        QGraphicsItemGroup *group;
+    };
+
+    struct LargeBird {
+        QGraphicsPixmapItem *body, *leftWing, *rightWing, *tail;
+        QGraphicsItemGroup *group;
+    };
+
 public:
     NormalAnimation(QGraphicsScene* scene);
     virtual void reset();
@@ -22,6 +32,8 @@ private:
     QGraphicsTextItem *_consumption;
     QGraphicsItemGroup *_swingGroup;
     QGraphicsItemGroup *_birds;
+    LargeBird *_largebird;
+    SmallBird *_smallbird;
 };
 
 #endif // NORMALANIMATION_H

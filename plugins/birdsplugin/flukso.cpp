@@ -75,19 +75,25 @@ void Flukso::result(QString sensor)
         return;
     }
 
+#ifdef FLUKSO_DEBUG
     qDebug() << "result (" << sensor << "):" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString() << "(" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() << ")";
+#endif
     switch ( reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() )
     {
     case 200:
     {
         QJson::Parser parser;
         QVariantList values = parser.parse(reply->readAll()).toList();
+#ifdef FLUKSO_DEBUG
         qDebug() << "Success:" << values;
+#endif
         int lvalue = -1;
         foreach( QVariant pair, values)
         {
             QVariantList l = pair.toList();
+#ifdef FLUKSO_DEBUG
             qDebug() << l.first().toULongLong() << l.at(1).toULongLong();
+#endif
             if ( l.at(1).toULongLong() > 0 )
                 lvalue = l.at(1).toInt();
         }

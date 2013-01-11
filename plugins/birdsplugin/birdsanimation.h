@@ -17,7 +17,7 @@ public:
 
     virtual void reset() = 0;
 
-protected slots:
+public slots:
     virtual void step() = 0;
     virtual void setValue(QString sensor, int value) = 0;
 

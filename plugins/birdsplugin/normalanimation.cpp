@@ -50,14 +50,44 @@ void NormalAnimation::reset()
     _swingGroup->addToGroup(swing);
 
     _birds = new QGraphicsItemGroup();
-    _birds->addToGroup(_scene->addPixmap(QPixmap(":/birds/images/birds.png")));
+    //TODO: build birds out of smaller images for animation
+
+    //_birds->addToGroup(_scene->addPixmap(QPixmap(":/birds/images/birds.png")));
+
+    _largebird = new LargeBird;
+    _largebird->group = new QGraphicsItemGroup();
+
+    _largebird->body = _scene->addPixmap(QPixmap(":/birds/images/bodyl.png"));
+    _largebird->body->scale(0.3, 0.3);
+    _largebird->group->addToGroup(_largebird->body);
+    _largebird->tail = _scene->addPixmap(QPixmap(":/birds/images/taill.png"));
+    _largebird->tail->translate(60, 60);
+    _largebird->tail->scale(0.3, 0.3);
+    _largebird->group->addToGroup(_largebird->tail);
+
+    _largebird->group->translate(115, 40);
+
+    _smallbird = new SmallBird;
+    _smallbird->group = new QGraphicsItemGroup();
+
+    _smallbird->body = _scene->addPixmap(QPixmap(":/birds/images/bodys.png"));
+    _smallbird->body->scale(0.3, 0.3);
+    _smallbird->group->addToGroup(_smallbird->body);
+
+    _smallbird->group->translate(190, 92);
+
+    _birds->addToGroup(_largebird->group);
+    _birds->addToGroup(_smallbird->group);
+
     _birds->translate(0, p1.pointAtPercent(0.5).y() - 155);
     _birds->setZValue(11);
     _scene->addItem(_birds);
 
     _swingGroup->translate(0, swingKnot1.y() - swingKnot2.y());
 
+#ifdef BIRDS_DEBUG
     qDebug() << "Resetting _clouds to" << _scene->sceneRect().x() - _scene->sceneRect().width();
+#endif
     _scene->addPixmap(QPixmap(":/birds/images/pillars.png"));
 }
 
@@ -68,13 +98,17 @@ void NormalAnimation::step()
     _clouds->translate(1, 0);
     if ( _clouds->scenePos().x() > _scene->sceneRect().x() + _scene->sceneRect().width() )
     {
+#ifdef BIRDS_DEBUG
         qDebug() << "Resetting _clouds to" << _scene->sceneRect().x() - _scene->sceneRect().width();
+#endif
         _clouds->translate(-2 * _scene->sceneRect().width(), 0);
     }
     _clouds2->translate(1, 0);
     if ( _clouds2->scenePos().x() > _scene->sceneRect().x() + _scene->sceneRect().width() )
     {
+#ifdef BIRDS_DEBUG
         qDebug() << "Resetting _clouds2 to" << _scene->sceneRect().x() - _scene->sceneRect().width();
+#endif
         _clouds2->translate(-2 * _scene->sceneRect().width(), 0);
     }
 
@@ -101,7 +135,7 @@ void NormalAnimation::step()
     {
         QFont cFont("Arial", 35, QFont::Bold, false);
         _consumption = _scene->addText(QString::number(_sensorValue) + " W", cFont);
-        _consumption->setDefaultTextColor(Qt::white);
+        _consumption->setDefaultTextColor(QColor("#006633"));
     } else
         _consumption->setPlainText(QString::number(_sensorValue) + " W");
 
@@ -116,7 +150,9 @@ void NormalAnimation::step()
 void NormalAnimation::setValue(QString sensor, int value)
 {
     //TODO: retrieve displayed sensor from config
+#ifdef BIRDS_DEBUG
     qDebug() << "setValue(" << sensor << "," << value << ")";
+#endif
     if ( sensor.compare("1") == 0 || sensor.isEmpty() )
     {
         _sensorValue = value;
