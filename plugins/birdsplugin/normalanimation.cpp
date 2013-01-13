@@ -57,22 +57,46 @@ void NormalAnimation::reset()
     _largebird = new LargeBird;
     _largebird->group = new QGraphicsItemGroup();
 
-    _largebird->body = _scene->addPixmap(QPixmap(":/birds/images/bodyl.png"));
-    _largebird->body->scale(0.3, 0.3);
-    _largebird->group->addToGroup(_largebird->body);
     _largebird->tail = _scene->addPixmap(QPixmap(":/birds/images/taill.png"));
     _largebird->tail->translate(60, 60);
     _largebird->tail->scale(0.3, 0.3);
     _largebird->group->addToGroup(_largebird->tail);
+    _largebird->body = _scene->addPixmap(QPixmap(":/birds/images/bodyl.png"));
+    _largebird->body->scale(0.3, 0.3);
+    _largebird->group->addToGroup(_largebird->body);
+    _largebird->leftWing = _scene->addPixmap(QPixmap(":/birds/images/wingll.png"));
+    _largebird->leftWing->translate(-8, 58);
+    _largebird->leftWing->scale(0.3, 0.3);
+    _largebird->group->addToGroup(_largebird->leftWing);
+    _largebird->rightWing = _scene->addPixmap(QPixmap(":/birds/images/winglr.png"));
+    _largebird->rightWing->translate(43, 58);
+    _largebird->rightWing->scale(0.3, 0.3);
+    _largebird->group->addToGroup(_largebird->rightWing);
 
     _largebird->group->translate(115, 40);
 
     _smallbird = new SmallBird;
     _smallbird->group = new QGraphicsItemGroup();
 
+    _smallbird->tail = _scene->addPixmap(QPixmap(":/birds/images/tails.png"));
+    _smallbird->tail->translate(35, 25);
+    _smallbird->tail->scale(0.3, 0.3);
+    _smallbird->group->addToGroup(_smallbird->tail);
     _smallbird->body = _scene->addPixmap(QPixmap(":/birds/images/bodys.png"));
     _smallbird->body->scale(0.3, 0.3);
     _smallbird->group->addToGroup(_smallbird->body);
+    _smallbird->hair = _scene->addPixmap(QPixmap(":/birds/images/hairs.png"));
+    _smallbird->hair->translate(5, -7);
+    _smallbird->hair->scale(0.3, 0.3);
+    _smallbird->group->addToGroup(_smallbird->hair);
+    _smallbird->leftWing = _scene->addPixmap(QPixmap(":/birds/images/wingsl.png"));
+    _smallbird->leftWing->translate(-8, 32);
+    _smallbird->leftWing->scale(0.3, 0.3);
+    _smallbird->group->addToGroup(_smallbird->leftWing);
+    _smallbird->rightWing = _scene->addPixmap(QPixmap(":/birds/images/wingsr.png"));
+    _smallbird->rightWing->translate(30, 32);
+    _smallbird->rightWing->scale(0.3, 0.3);
+    _smallbird->group->addToGroup(_smallbird->rightWing);
 
     _smallbird->group->translate(190, 92);
 
