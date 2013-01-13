@@ -52,7 +52,7 @@ void Flukso::getRemote()
             else
                 protocol = "https";
 
-            QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt"));
+            QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt&version=1.0"));
             if ( !_local )
                 req.setRawHeader("X-Token", s.token.toAscii());
             req.setRawHeader("X-Version", "1.0");
