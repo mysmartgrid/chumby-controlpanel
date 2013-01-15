@@ -99,6 +99,7 @@ void SourcePage::setSource()
     if ( _plugin != NULL && _plugin->isFinal(getPath()) )
     {
         _alarm->setSource(_source.join("/"));
+        _plugin->stop();
         deleteLater();
     } else {
         initSourceList();
