@@ -19,12 +19,13 @@ public:
 
 private slots:
     void setVolume();
-    void playTestTone(int);
+    void playTestTone(int value);
     
 private:
     Ui::VolumePage *_ui;
     Msg::Alarm *_alarm;
     int _sysVolume;
+    int _sysMute;
 };
 
 #endif // VOLUMEPAGE_H
