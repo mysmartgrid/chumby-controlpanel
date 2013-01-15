@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ts.conf.in ${CMAKE_CURRENT_BINARY_DIR
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/flukso.conf.in ${CMAKE_CURRENT_BINARY_DIR}/flukso.conf )
 
 
-install(PROGRAMS debugchumby DESTINATION .)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/debugchumby DESTINATION .)
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/start_network DESTINATION .)
 install(FILES    ${CMAKE_CURRENT_BINARY_DIR}/env.sh DESTINATION .)
 install(FILES    ${CMAKE_CURRENT_BINARY_DIR}/flukso.conf DESTINATION .)
