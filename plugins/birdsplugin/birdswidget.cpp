@@ -13,7 +13,7 @@
 BirdsWidget::BirdsWidget(QWidget *parent) :
     QWidget(parent)
     , _ui(new Ui::BirdsWidget)
-    , _scene(new QGraphicsScene(0, 0, 400, 300))
+    , _scene(new QGraphicsScene(0, 0, 320, 240))
     , _timer(new QTimer)
   , _animation(new NormalAnimation(_scene))
   , _flukso(new Flukso())

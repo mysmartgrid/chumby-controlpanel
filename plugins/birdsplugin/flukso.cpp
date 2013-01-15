@@ -11,6 +11,8 @@
 
 #include <qjson/parser.h>
 
+//#define FLUKSO_DEBUG
+
 Flukso::Flukso(QObject *parent)
 	: QObject(parent)
 	, _nam(new QNetworkAccessManager)

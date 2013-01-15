@@ -14,5 +14,8 @@
         <file>images/winglr.png</file>
         <file>images/wingsl.png</file>
         <file>images/wingsr.png</file>
+        <file>images/pillars_new.png</file>
+        <file>images/higru_new.png</file>
+        <file>images/pillars_new2.png</file>
     </qresource>
 </RCC>
