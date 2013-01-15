@@ -14,8 +14,13 @@
         <file>images/winglr.png</file>
         <file>images/wingsl.png</file>
         <file>images/wingsr.png</file>
-        <file>images/pillars_new.png</file>
-        <file>images/higru_new.png</file>
-        <file>images/pillars_new2.png</file>
+        <file>images/eyebrows.png</file>
+        <file>images/footll.png</file>
+        <file>images/footlr.png</file>
+        <file>images/footsl.png</file>
+        <file>images/footsr.png</file>
+        <file>images/beakl.png</file>
+        <file>images/beaks.png</file>
+        <file>images/eye.png</file>
     </qresource>
 </RCC>

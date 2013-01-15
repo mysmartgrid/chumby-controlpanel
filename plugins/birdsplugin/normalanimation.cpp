@@ -17,7 +17,7 @@ void NormalAnimation::reset()
 {
     _scene->clear();
 
-    _scene->addPixmap(QPixmap(":/birds/images/higru_new.png"));
+    _scene->addPixmap(QPixmap(":/birds/images/higru.png"));
 
     _clouds = _scene->addPixmap(QPixmap(":/birds/images/normalclouds.png"));
     _clouds->setPos(_scene->sceneRect().x(), _scene->sceneRect().y());
@@ -25,19 +25,19 @@ void NormalAnimation::reset()
     _clouds2->setPos(_scene->sceneRect().x() - _scene->sceneRect().width(), _scene->sceneRect().y());
 
     QPen cordPen;
-    cordPen.setWidth(3);
+    cordPen.setWidth(2);
     cordPen.setCapStyle(Qt::RoundCap);
 
     // front cord
-    QPainterPath p1(QPointF(20, 78));
-    p1.cubicTo(90, 90 + (qSin(_counter/10)*2), 130, 95 + (qSin((_counter+5)/10)*1), 262, 85);
+    QPainterPath p1(QPointF(15, 115));
+    p1.cubicTo(90, 128 + (qSin(_counter/10)*2), 130, 135 + (qSin((_counter+5)/10)*1), 257, 125);
     _cord1 = _scene->addPath(p1, cordPen);
     //force front cord to be in front of pillars
     _cord1->setZValue(10);
 
     // rear cord
-    QPainterPath p2(QPointF(63, 53));
-    p2.quadTo(170, 68 + (qSin((_counter+qrand()%5)/10)), 300, 60);
+    QPainterPath p2(QPointF(58, 90));
+    p2.quadTo(170, 102 + (qSin((_counter+qrand()%5)/10)), 300, 95);
     _cord2 = _scene->addPath(p2, cordPen);
 
     _swingGroup = new QGraphicsItemGroup();
@@ -48,7 +48,7 @@ void NormalAnimation::reset()
     QPointF swingKnot2(p1.pointAtPercent(0.9));
     QGraphicsPixmapItem* swing = _scene->addPixmap(QPixmap(":/birds/images/swing.png"));
     swing->scale(0.8, 0.8);
-    swing->translate(0, -45);
+    //swing->translate(0, -45);
     _swingGroup->addToGroup(swing);
 
     _birds = new QGraphicsItemGroup();
@@ -76,6 +76,30 @@ void NormalAnimation::reset()
     _largebird->rightWing->translate(35, 47);
     _largebird->rightWing->scale(0.23, 0.23);
     _largebird->group->addToGroup(_largebird->rightWing);
+    _largebird->leftFoot = _scene->addPixmap(QPixmap(":/birds/images/footll"));
+    _largebird->leftFoot->translate(20, 77);
+    _largebird->group->addToGroup(_largebird->leftFoot);
+    _largebird->rightFoot = _scene->addPixmap(QPixmap(":/birds/images/footlr"));
+    _largebird->rightFoot->translate(30, 77);
+    _largebird->group->addToGroup(_largebird->rightFoot);
+    _largebird->leftEye = _scene->addPixmap(QPixmap(":/birds/images/eye.png"));
+    _largebird->leftEye->translate(2, 17);
+    _largebird->leftEye->scale(0.4, 0.4);
+    _largebird->group->addToGroup(_largebird->leftEye);
+    _largebird->rightEye = _scene->addPixmap(QPixmap(":/birds/images/eye.png"));
+    _largebird->rightEye->translate(20, 17);
+    _largebird->rightEye->scale(0.4, 0.4);
+    _largebird->group->addToGroup(_largebird->rightEye);
+    _largebird->leftIris = _scene->addEllipse(6, 22, 5, 5, QPen(Qt::black), Qt::SolidPattern);
+    _largebird->group->addToGroup(_largebird->leftIris);
+    _largebird->rightIris = _scene->addEllipse(24, 22, 5, 5, QPen(Qt::black), Qt::SolidPattern);
+    _largebird->group->addToGroup(_largebird->rightIris);
+    _largebird->eyebrows = _scene->addPixmap(QPixmap(":/birds/images/eyebrows.png"));
+    _largebird->eyebrows->translate(0, 15);
+    _largebird->group->addToGroup(_largebird->eyebrows);
+    _largebird->beak = _scene->addPixmap(QPixmap(":/birds/images/beakl.png"));
+    _largebird->beak->translate(-3, 28);
+    _largebird->group->addToGroup(_largebird->beak);
 
     _largebird->group->translate(92, 65);
 
@@ -101,6 +125,19 @@ void NormalAnimation::reset()
     _smallbird->rightWing->translate(22, 23);
     _smallbird->rightWing->scale(0.23, 0.23);
     _smallbird->group->addToGroup(_smallbird->rightWing);
+    _smallbird->leftFoot = _scene->addPixmap(QPixmap(":/birds/images/footsl"));
+    _smallbird->leftFoot->translate(10, 40);
+    _smallbird->group->addToGroup(_smallbird->leftFoot);
+    _smallbird->rightFoot = _scene->addPixmap(QPixmap(":/birds/images/footsr"));
+    _smallbird->rightFoot->translate(15, 40);
+    _smallbird->group->addToGroup(_smallbird->rightFoot);
+    _smallbird->leftEye = _scene->addEllipse(5, 8, 3, 3, QPen(Qt::white, 1), QBrush(Qt::black, Qt::SolidPattern));
+    _smallbird->group->addToGroup(_smallbird->leftEye);
+    _smallbird->rightEye = _scene->addEllipse(13, 8, 3, 3, QPen(Qt::white, 1), QBrush(Qt::black, Qt::SolidPattern));
+    _smallbird->group->addToGroup(_smallbird->rightEye);
+    _smallbird->beak = _scene->addPixmap(QPixmap(":/birds/images/beaks.png"));
+    _smallbird->beak->translate(5, 11);
+    _smallbird->group->addToGroup(_smallbird->beak);
 
     _smallbird->group->translate(152, 106);
 
@@ -116,7 +153,7 @@ void NormalAnimation::reset()
 #ifdef BIRDS_DEBUG
     qDebug() << "Resetting _clouds to" << _scene->sceneRect().x() - _scene->sceneRect().width();
 #endif
-    _scene->addPixmap(QPixmap(":/birds/images/pillars_new2.png"));
+    _scene->addPixmap(QPixmap(":/birds/images/pillars.png"));
 }
 
 void NormalAnimation::step()
@@ -147,13 +184,13 @@ void NormalAnimation::step()
     QPointF oldKnot1(_cord1->path().pointAtPercent(0.7));
     QPointF oldBirdPos(_cord1->path().pointAtPercent(0.5));
     // front cord
-    QPainterPath p1(QPointF(20, 78));
-    p1.cubicTo(90, 90 + (qSin(_counter/10)*2), 130, 95 + (qSin((_counter+5)/10)*1), 262, 85);
+    QPainterPath p1(QPointF(15, 115));
+    p1.cubicTo(90, 128 + (qSin(_counter/10)*2), 130, 135 + (qSin((_counter+5)/10)*1), 257, 125);
     _cord1->setPath(p1);
 
     // rear cord
-    QPainterPath p2(QPointF(63, 53));
-    p2.quadTo(170, 68 + (qSin((_counter+qrand()%5)/10)), 300, 60);
+    QPainterPath p2(QPointF(58, 90));
+    p2.quadTo(170, 102 + (qSin((_counter+qrand()%5)/10)), 300, 95);
     _cord2->setPath(p2);
 
     QPointF newKnot1(_cord1->path().pointAtPercent(0.7));
@@ -169,7 +206,7 @@ void NormalAnimation::step()
 
     QSizeF textsize = _consumption->boundingRect().size();
     QPointF swingpos = _swingGroup->scenePos();
-    _consumption->setPos(260 - textsize.width() + swingpos.x(), 163 - textsize.height() + swingpos.y());
+    _consumption->setPos(260 - textsize.width() + swingpos.x(), 195 - textsize.height() + swingpos.y());
 
     _swingGroup->translate(0, newKnot1.y() - oldKnot1.y());
     _birds->translate(0, newBirdPos.y() - oldBirdPos.y());

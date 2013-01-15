@@ -8,12 +8,25 @@ class NormalAnimation : public BirdsAnimation
     Q_OBJECT
 
     struct SmallBird {
-        QGraphicsPixmapItem *body, *leftWing, *rightWing, *tail, *hair;
+        QGraphicsPixmapItem *body;
+        QGraphicsPixmapItem *leftWing, *rightWing;
+        QGraphicsPixmapItem *tail;
+        QGraphicsPixmapItem *leftFoot, *rightFoot;
+        QGraphicsPixmapItem *hair;
+        QGraphicsEllipseItem *leftEye, *rightEye;
+        QGraphicsPixmapItem *beak;
         QGraphicsItemGroup *group;
     };
 
     struct LargeBird {
-        QGraphicsPixmapItem *body, *leftWing, *rightWing, *tail;
+        QGraphicsPixmapItem *body;
+        QGraphicsPixmapItem *leftWing, *rightWing;
+        QGraphicsPixmapItem *tail;
+        QGraphicsPixmapItem *leftFoot, *rightFoot;
+        QGraphicsPixmapItem *eyebrows;
+        QGraphicsPixmapItem *leftEye, *rightEye;
+        QGraphicsEllipseItem *leftIris, *rightIris;
+        QGraphicsPixmapItem *beak;
         QGraphicsItemGroup *group;
     };
 
