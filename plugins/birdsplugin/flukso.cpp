@@ -5,7 +5,9 @@
 #include <QtCore/QSettings>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
+#ifndef QT_NO_OPENSSL
 #include <QtNetwork/QSslError>
+#endif
 
 #include <QStringList>
 
@@ -49,10 +51,14 @@ void Flukso::getRemote()
         {
             //TODO: support for local flukso api
             QString protocol;
+#ifndef QT_NO_OPENSSL
             if ( _local )
                 protocol = "http";
             else
                 protocol = "https";
+#else
+            protocol = "http";
+#endif
 
             QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt&version=1.0"));
             if ( !_local )
@@ -63,7 +69,9 @@ void Flukso::getRemote()
             _errorMapper->setMapping(r, it.key());
             connect(r, SIGNAL(finished()), _resultMapper, SLOT(map()));
             connect(r, SIGNAL(error(QNetworkReply::NetworkError)), _errorMapper, SLOT(map()));
+#ifndef QT_NO_OPENSSL
             connect(r, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslHandler(QList<QSslError>)));
+#endif
         }
     }
 }
@@ -120,6 +128,7 @@ void Flukso::error(QString sensor)
     qDebug() << "An error occured while fetching" << sensor << ":" << ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString();
 }
 
+#ifndef QT_NO_OPENSSL
 void Flukso::sslHandler(const QList<QSslError> &errors)
 {
     QNetworkReply *reply = (QNetworkReply*) sender();
@@ -129,6 +138,7 @@ void Flukso::sslHandler(const QList<QSslError> &errors)
     }
     reply->ignoreSslErrors();
 }
+#endif
 
 void Flukso::readSettings()
 {
@@ -139,7 +149,9 @@ void Flukso::readSettings()
     settings.setIniCodec("UTF-8");
 
     // Reading general setting
+#ifndef QT_NO_OPENSSL
     if ( settings.contains("local") && settings.value("local").toBool() )
+#endif
     {
         _local = true;
         _address = "192.168.1.1";

@@ -25,7 +25,9 @@ public:
 public slots:
     void result(QString sensor);
     void error(QString sensor);
+#ifndef QT_NO_OPENSSL
     void sslHandler(const QList<QSslError> &errors);
+#endif
     void getRemote();
     
 signals:
