@@ -171,6 +171,19 @@ namespace Msg
         snd_mixer_selem_set_playback_switch_all(_elem, value);
     }
 
+    int MusicControl::getMasterMute()
+    {
+        if ( !_elem )
+            return 1;
+
+        int value, ret;
+        ret = snd_mixer_selem_get_playback_switch(_elem, SND_MIXER_SCHN_FRONT_LEFT, &value);
+        if ( ret == 0 )
+            return value;
+
+        return 1;
+    }
+
     long MusicControl::getMinMasterVolume()
     {
         return _min;

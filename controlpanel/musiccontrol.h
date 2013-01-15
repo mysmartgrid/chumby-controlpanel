@@ -98,6 +98,7 @@ namespace Msg
         void setMasterVolume(long int volume);
         long int getMasterVolume();
         void setMasterMute(int value);
+        int getMasterMute();
         void increaseMasterVolume();
         void lowerMasterVolume();
         long getMinMasterVolume();
