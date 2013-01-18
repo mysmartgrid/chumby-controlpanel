@@ -65,7 +65,7 @@ namespace Msg
 
     protected:
         void run();
-        void playAlsa(snd_pcm_uframes_t *data, int period_size = 1024);
+        void playAlsa(snd_pcm_uframes_t *data, unsigned int period_size = 1024);
 #ifdef ALSA_ASIO
         static void alsaCallback(snd_async_handler_t *pcm_callback);
 #endif
@@ -122,7 +122,7 @@ namespace Msg
 
     private:
         MusicControl();
-        MusicControl(const MusicControl&) {}
+        //MusicControl(const MusicControl&) {} //not needed as the copy constructor of QObject is already private
         ~MusicControl();
         static MusicControl* _instance;
 
