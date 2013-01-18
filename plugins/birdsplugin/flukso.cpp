@@ -78,7 +78,7 @@ void Flukso::getRemote()
 
 void Flukso::result(QString sensor)
 {
-    QNetworkReply *reply = _resultMapper->mapping(sensor);
+    QNetworkReply *reply = (QNetworkReply*) _resultMapper->mapping(sensor);
     if ( !reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).isValid() )
     {
         reply->deleteLater();
