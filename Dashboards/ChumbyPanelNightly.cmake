@@ -42,9 +42,9 @@ if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
 endif(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}/.git/HEAD")
 
 set(CMAKE_TOOLCHAIN_FILE ${CTEST_SOURCE_DIRECTORY}/modules/Toolchain-arm.cmake)
-set(ATOMIX_HOME "${TOOLCHAIN_PREFIX}/usr")
-set(BLUETUNE_HOME "${TOOLCHAIN_PREFIX}/usr")
-set(NEPTUNE_HOME "${TOOLCHAIN_PREFIX}/usr")
+set(ATOMIX_HOME "/opt/arm-2008q3/usr")
+set(BLUETUNE_HOME "/opt/arm-2008q3/usr")
+set(NEPTUNE_HOME "/opt/arm-2008q3/usr")
 
 ctest_start(${_ctest_type})
 ctest_update(SOURCE ${CTEST_SOURCE_DIRECTORY})
