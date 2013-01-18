@@ -51,16 +51,20 @@ void Flukso::getRemote()
         {
             //TODO: support for local flukso api
             QString protocol;
+            QString version;
 #ifndef QT_NO_OPENSSL
-            if ( _local )
+            if ( _local ) {
                 protocol = "http";
-            else
+                version = "&version=1.0";
+            } else {
                 protocol = "https";
+                version = "";
+            }
 #else
             protocol = "http";
 #endif
 
-            QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt&version=1.0"));
+            QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt"+version));
             if ( !_local )
                 req.setRawHeader("X-Token", s.token.toAscii());
             req.setRawHeader("X-Version", "1.0");
