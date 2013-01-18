@@ -1,4 +1,4 @@
-#include "../../controlpanel/audioplugin.h"
+#include "controlpanel/audioplugin.h"
 
 namespace Msg
 {
