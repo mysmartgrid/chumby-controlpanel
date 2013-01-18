@@ -42,7 +42,7 @@ namespace Msg
 
     private:
         ChumbyRadio();
-        ChumbyRadio(const ChumbyRadio&) {}
+        //ChumbyRadio(const ChumbyRadio&) {} //not needed as the copy constructor of QObject is already private
         ~ChumbyRadio();
         static ChumbyRadio* instance;
         void refreshCrad();
