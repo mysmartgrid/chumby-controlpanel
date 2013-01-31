@@ -21,6 +21,7 @@ class Flukso : public QObject
 public:
 	explicit Flukso(QObject *parent = 0);
 	~Flukso();
+    QString displaySensor();
 
 public slots:
     void result(QString sensor);
@@ -40,7 +41,7 @@ private:
     QSignalMapper *_resultMapper, *_errorMapper;
     QTimer *_timer;
     QMap<QString, Sensor> *_sensors;
-    QString _address, _port, _interval;
+    QString _address, _port, _interval, _display;
     bool _local;
 };
 

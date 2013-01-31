@@ -15,8 +15,8 @@ BirdsWidget::BirdsWidget(QWidget *parent) :
     , _ui(new Ui::BirdsWidget)
     , _scene(new QGraphicsScene(0, 0, 320, 240))
     , _timer(new QTimer)
-  , _animation(new NormalAnimation(_scene))
   , _flukso(new Flukso())
+  , _animation(new NormalAnimation(_scene, _flukso->displaySensor()))
 {
     _ui->setupUi(this);
     qsrand(QTime::currentTime().msec());

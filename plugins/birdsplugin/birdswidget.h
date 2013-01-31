@@ -32,8 +32,8 @@ private:
     Ui::BirdsWidget *_ui;
     QGraphicsScene *_scene;
     QTimer *_timer;
-    BirdsAnimation *_animation;
     Flukso *_flukso;
+    BirdsAnimation *_animation;
 };
 
 #endif // BIRDSWIDGET_H

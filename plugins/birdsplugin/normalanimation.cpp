@@ -6,11 +6,12 @@
 #include <QGraphicsItemGroup>
 #include <QTextCursor>
 
-//#define BIRDS_DEBUG
+#define BIRDS_DEBUG
 
-NormalAnimation::NormalAnimation(QGraphicsScene *scene)
+NormalAnimation::NormalAnimation(QGraphicsScene *scene, QString display)
     : BirdsAnimation(scene)
     , _sensorValue(-1)
+    , _display(display)
     , _errorCounter(-1)
     , _consumption(NULL)
 {
@@ -238,7 +239,7 @@ void NormalAnimation::setValue(QString sensor, int value)
 #ifdef BIRDS_DEBUG
     qDebug() << "setValue(" << sensor << "," << value << ")";
 #endif
-    if ( sensor.compare("1") == 0 || sensor.isEmpty() )
+    if ( sensor.compare(_display) == 0 || sensor.isEmpty() )
     {
         _sensorValue = value;
         if ( _errorCounter > 1 )

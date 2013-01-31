@@ -153,6 +153,11 @@ void Flukso::sslHandler(const QList<QSslError> &errors)
 }
 #endif
 
+QString Flukso::displaySensor()
+{
+    return _display;
+}
+
 void Flukso::readSettings()
 {
     QString configdir = getenv("CHUMBY_CONFIG_DIR");
@@ -181,7 +186,12 @@ void Flukso::readSettings()
     if ( settings.contains("interval") )
         _interval = settings.value("interval").toString();
 
+    if ( settings.contains("display") )
+        _display = settings.value("display").toString();
+
+#ifdef FLUKSO_DEBUG
     qDebug() << "General:" << _local << "," << _address << "," << _port << "," << _interval;
+#endif FLUKSO_DEBUG
 
     // Reading sensors
     settings.beginGroup("sensors");
@@ -223,6 +233,9 @@ void Flukso::readSettings()
             _sensors->insert("3", s);
         }
     }
+
+    if ( _display.isEmpty() )
+        _display = _sensors->keys().first();
 
 #ifdef FLUKSO_DEBUG
     qDebug() << "Displayed sensor:" << _display;

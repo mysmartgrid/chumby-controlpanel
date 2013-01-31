@@ -31,7 +31,7 @@ class NormalAnimation : public BirdsAnimation
     };
 
 public:
-    NormalAnimation(QGraphicsScene* scene);
+    NormalAnimation(QGraphicsScene* scene, QString display);
     virtual void reset();
 
 public slots:
@@ -41,7 +41,7 @@ public slots:
 
 private:
     int _sensorValue;
-    QString _errorString;
+    QString _errorString, _display;
     int _errorCounter;
     QGraphicsPixmapItem *_clouds, *_clouds2;
     QGraphicsPathItem *_cord1, *_cord2;
