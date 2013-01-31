@@ -20,6 +20,7 @@ public:
 public slots:
     virtual void step() = 0;
     virtual void setValue(QString sensor, int value) = 0;
+    virtual void setError(QString error) = 0;
 
 protected:
     QGraphicsScene* _scene;

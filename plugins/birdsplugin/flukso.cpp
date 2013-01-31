@@ -122,14 +122,23 @@ void Flukso::result(QString sensor)
         //TODO: construct new request from old one and change the url
         _nam->get(QNetworkRequest(reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl()));
         break;
+    default:
+    {
+        emit errorOccured("Unknown return code: " + reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString() + "(" + reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() + ")");
+    }
     }
     reply->deleteLater();
-    _timer->start();
+    _timer->start(1000);
 }
 
 void Flukso::error(QString sensor)
 {
+#ifdef FLUKSO_DEBUG
     qDebug() << "An error occured while fetching" << sensor << ":" << ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString();
+#endif FLUKSO_DEBUG
+    emit errorOccured("Error while fetching data: " + ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString());
+
+    _timer->start(5000);
 }
 
 #ifndef QT_NO_OPENSSL

@@ -37,12 +37,15 @@ public:
 public slots:
     virtual void step();
     virtual void setValue(QString sensor, int value);
+    virtual void setError(QString error);
 
 private:
     int _sensorValue;
+    QString _errorString;
+    int _errorCounter;
     QGraphicsPixmapItem *_clouds, *_clouds2;
     QGraphicsPathItem *_cord1, *_cord2;
-    QGraphicsTextItem *_consumption;
+    QGraphicsTextItem *_consumption, *_errorText;
     QGraphicsItemGroup *_swingGroup;
     QGraphicsItemGroup *_birds;
     LargeBird *_largebird;

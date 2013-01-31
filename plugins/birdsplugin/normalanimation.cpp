@@ -6,9 +6,12 @@
 #include <QGraphicsItemGroup>
 #include <QTextCursor>
 
+//#define BIRDS_DEBUG
+
 NormalAnimation::NormalAnimation(QGraphicsScene *scene)
     : BirdsAnimation(scene)
     , _sensorValue(-1)
+    , _errorCounter(-1)
     , _consumption(NULL)
 {
 }
@@ -212,6 +215,21 @@ void NormalAnimation::step()
 
     _swingGroup->translate(0, newKnot1.y() - oldKnot1.y());
     _birds->translate(0, newBirdPos.y() - oldBirdPos.y());
+
+    if ( _errorCounter == 0 ) {
+        QFont cFont("Arial", 25, QFont::Bold, false);
+        _errorText = _scene->addText(_errorString, cFont);
+        _errorText->setDefaultTextColor(QColor("#006633"));
+        _errorText->setPos(_scene->width(), 0);
+        _errorCounter = _scene->width() + _errorText->boundingRect().width();
+    } else if ( _errorCounter > 1 ) {
+        _errorText->translate(-1, 0);
+        _errorCounter--;
+    } else if ( _errorCounter == 1 ){
+        _errorText->hide();
+        delete _errorText;
+        _errorCounter = -1;
+    }
 }
 
 void NormalAnimation::setValue(QString sensor, int value)
@@ -223,5 +241,24 @@ void NormalAnimation::setValue(QString sensor, int value)
     if ( sensor.compare("1") == 0 || sensor.isEmpty() )
     {
         _sensorValue = value;
+        if ( _errorCounter > 1 )
+        {
+            _errorText->hide();
+            delete _errorText;
+            _errorCounter = -1;
+        }
+    }
+}
+
+void NormalAnimation::setError(QString error)
+{
+#ifdef BIRDS_DEBUG
+    qDebug() << "setError(" << error << ")";
+#endif
+
+    if ( _errorCounter < 0 )
+    {
+        _errorString = error;
+        _errorCounter = 0;
     }
 }

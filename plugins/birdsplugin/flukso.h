@@ -32,6 +32,7 @@ public slots:
     
 signals:
     void valueChanged(QString, int);
+    void errorOccured(QString);
 
 private:
     void readSettings();
