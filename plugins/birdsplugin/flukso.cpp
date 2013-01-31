@@ -163,7 +163,7 @@ void Flukso::readSettings()
 
     // Reading general setting
 #ifndef QT_NO_OPENSSL
-    if ( settings.contains("local") && settings.value("local").toBool() )
+    if ( !settings.contains("local") || settings.value("local").toBool() )
 #endif
     {
         _local = true;
@@ -195,4 +195,41 @@ void Flukso::readSettings()
         _sensors->insert(sensor, s);
         settings.endGroup();
     }
+    settings.endGroup();
+
+    if ( _sensors->empty() ) //legacy parser for old config style
+    {
+        if ( settings.contains("sensor1") )
+        {
+            Sensor s;
+            s.id = settings.value("sensor1").toString();
+            s.enabled = settings.value("sen1ena").toBool();
+            _sensors->insert("1", s);
+        }
+
+        if ( settings.contains("sensor2") )
+        {
+            Sensor s;
+            s.id = settings.value("sensor2").toString();
+            s.enabled = settings.value("sen2ena").toBool();
+            _sensors->insert("2", s);
+        }
+
+        if ( settings.contains("sensor3") )
+        {
+            Sensor s;
+            s.id = settings.value("sensor3").toString();
+            s.enabled = settings.value("sen3ena").toBool();
+            _sensors->insert("3", s);
+        }
+    }
+
+#ifdef FLUKSO_DEBUG
+    qDebug() << "Displayed sensor:" << _display;
+    foreach(QString key, _sensors->keys())
+    {
+        Sensor s = _sensors->value(key);
+        qDebug() << "Sensor configured:" << key << "(" << s.id << "," << s.token << "," << s.enabled << ")";
+    }
+#endif
 }
