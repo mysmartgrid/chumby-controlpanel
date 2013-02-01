@@ -33,10 +33,16 @@ include(Tools)
 
 # search for alsa sound
 find_package(ASound)
+IF(NOT ASOUND_FOUND)
+  message(WARNING "libasound not found! Audio features will not work with this build!")
+ENDIF(NOT ASOUND_FOUND)
 
 # search for iwlib
 # search for libts
 find_package(LibTS)
+IF(NOT LIBTS_FOUND)
+  message(WARNING "LibTS not found! Touchscreen features will not work with this build!")
+ENDIF(NOT LIBTS_FOUND)
 
 find_package(Atomix)
 find_package(BlueTune)

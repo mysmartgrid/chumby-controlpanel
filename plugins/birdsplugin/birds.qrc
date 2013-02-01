@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/birds">
+        <file>images/higru.png</file>
+        <file>images/pillars.png</file>
+        <file>images/normalclouds.png</file>
+        <file>images/swing.png</file>
+        <file>images/birds.png</file>
+        <file>images/bodyl.png</file>
+        <file>images/bodys.png</file>
+        <file>images/hairs.png</file>
+        <file>images/taill.png</file>
+        <file>images/tails.png</file>
+        <file>images/wingll.png</file>
+        <file>images/winglr.png</file>
+        <file>images/wingsl.png</file>
+        <file>images/wingsr.png</file>
+        <file>images/eyebrows.png</file>
+        <file>images/beakl.png</file>
+        <file>images/beaks.png</file>
+        <file>images/eye.png</file>
+        <file>images/footl.png</file>
+        <file>images/foots.png</file>
+    </qresource>
+</RCC>

@@ -484,24 +484,24 @@ namespace Msg
         :_playback(out)
         ,_capture(in)
         ,_source("")
+      #ifdef WITH_BLUETUNE
+        ,_wrapper(NULL)
+      #endif
       #ifdef ALSA_ASIO
         ,_handler(NULL)
       #endif
-    #ifdef WITH_BLUETUNE
-        ,_wrapper(NULL)
-    #endif
     {
     }
 
 #ifdef WITH_BLUETUNE
     PlaybackThread::PlaybackThread(QString source)
-        :_playback(NULL),
-          _capture(NULL),
-          _source(source),
+        :_playback(NULL)
+        ,_capture(NULL)
+        ,_source(source)
+        ,_wrapper(NULL)
       #ifdef ALSA_ASIO
-          _handler(NULL),
+        ,_handler(NULL)
       #endif
-          _wrapper(NULL)
     {
     }
 #endif
@@ -591,7 +591,7 @@ namespace Msg
         callback_data_t* arg = (callback_data_t*) snd_async_handler_get_callback_private(pcm_callback);
         snd_pcm_t *out = arg->out;
         snd_pcm_uframes_t* buffer = arg->buffer;
-        int period_size = arg->period_size;
+        unsigned int period_size = arg->period_size;
 
         snd_pcm_uframes_t avail;
         avail = snd_pcm_avail_update(in);
@@ -644,7 +644,7 @@ namespace Msg
     }
 #endif
 
-    void PlaybackThread::playAlsa(snd_pcm_uframes_t *data, int period_size)
+    void PlaybackThread::playAlsa(snd_pcm_uframes_t *data, unsigned int period_size)
     {
         snd_pcm_uframes_t avail;
         avail = snd_pcm_avail_update(_capture);
