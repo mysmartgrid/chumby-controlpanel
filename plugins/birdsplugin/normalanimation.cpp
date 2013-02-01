@@ -6,7 +6,7 @@
 #include <QGraphicsItemGroup>
 #include <QTextCursor>
 
-#define BIRDS_DEBUG
+//#define BIRDS_DEBUG
 
 NormalAnimation::NormalAnimation(QGraphicsScene *scene, QString display)
     : BirdsAnimation(scene)

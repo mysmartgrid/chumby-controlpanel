@@ -7,7 +7,7 @@
 #include <QtNetwork/QNetworkRequest>
 #ifndef QT_NO_OPENSSL
 #include <QtNetwork/QSslError>
-#endif
+#endif // QT_NO_OPENSSL
 
 #include <QStringList>
 
@@ -62,7 +62,7 @@ void Flukso::getRemote()
             }
 #else
             protocol = "http";
-#endif
+#endif // QT_NO_OPENSSL
 
             QNetworkRequest req(QUrl(protocol+"://"+_address+":"+_port+"/sensor/"+s.id+"?interval="+_interval+"&unit=watt"+version));
             if ( !_local )
@@ -75,7 +75,7 @@ void Flukso::getRemote()
             connect(r, SIGNAL(error(QNetworkReply::NetworkError)), _errorMapper, SLOT(map()));
 #ifndef QT_NO_OPENSSL
             connect(r, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(sslHandler(QList<QSslError>)));
-#endif
+#endif // QT_NO_OPENSSL
         }
     }
 }
@@ -91,7 +91,7 @@ void Flukso::result(QString sensor)
 
 #ifdef FLUKSO_DEBUG
     qDebug() << "result (" << sensor << "):" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString() << "(" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() << ")";
-#endif
+#endif // FLUKSO_DEBUG
     switch ( reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() )
     {
     case 200:
@@ -100,14 +100,14 @@ void Flukso::result(QString sensor)
         QVariantList values = parser.parse(reply->readAll()).toList();
 #ifdef FLUKSO_DEBUG
         qDebug() << "Success:" << values;
-#endif
+#endif // FLUKSO_DEBUG
         int lvalue = -1;
         foreach( QVariant pair, values)
         {
             QVariantList l = pair.toList();
 #ifdef FLUKSO_DEBUG
             qDebug() << l.first().toULongLong() << l.at(1).toULongLong();
-#endif
+#endif // FLUKSO_DEBUG
             if ( l.at(1).toULongLong() > 0 )
                 lvalue = l.at(1).toInt();
         }
@@ -135,7 +135,7 @@ void Flukso::error(QString sensor)
 {
 #ifdef FLUKSO_DEBUG
     qDebug() << "An error occured while fetching" << sensor << ":" << ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString();
-#endif FLUKSO_DEBUG
+#endif // FLUKSO_DEBUG
     emit errorOccured("Error while fetching data: " + ((QNetworkReply*) _errorMapper->mapping(sensor))->errorString());
 
     _timer->start(5000);
@@ -151,7 +151,7 @@ void Flukso::sslHandler(const QList<QSslError> &errors)
     }
     reply->ignoreSslErrors();
 }
-#endif
+#endif // QT_NO_OPENSSL
 
 QString Flukso::displaySensor()
 {
@@ -169,7 +169,7 @@ void Flukso::readSettings()
     // Reading general setting
 #ifndef QT_NO_OPENSSL
     if ( !settings.contains("local") || settings.value("local").toBool() )
-#endif
+#endif // QT_NO_OPENSSL
     {
         _local = true;
         _address = "192.168.1.1";
@@ -191,7 +191,7 @@ void Flukso::readSettings()
 
 #ifdef FLUKSO_DEBUG
     qDebug() << "General:" << _local << "," << _address << "," << _port << "," << _interval;
-#endif FLUKSO_DEBUG
+#endif //FLUKSO_DEBUG
 
     // Reading sensors
     settings.beginGroup("sensors");
@@ -244,5 +244,5 @@ void Flukso::readSettings()
         Sensor s = _sensors->value(key);
         qDebug() << "Sensor configured:" << key << "(" << s.id << "," << s.token << "," << s.enabled << ")";
     }
-#endif
+#endif // FLUKSO_DEBUG
 }
